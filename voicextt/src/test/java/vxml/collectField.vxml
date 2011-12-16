@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+	<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" 
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	  xsi:schemaLocation="http://www.w3.org/2001/vxml 
+	   http://www.w3.org/TR/voicexml20/vxml.xsd">
+
+	<form>
+	  <var name="y" expr="'xValue'"/>
+	  <var name="forbidon" expr="'xValue'"/>
+	  <field name="one">
+		  <prompt>this is prompt 1 in field</prompt>
+		  <audio>this is audio 1 in field</audio>
+		  <value expr="'this is expr 1 in field'"/>
+		  <filled>
+		  	 <prompt>you say <value expr="one"/></prompt>
+		  </filled>
+	  </field>
+	 
+	  <field name="couleur">
+	  </field>
+	 
+	  <transfer>
+	  </transfer>
+	 
+	  <subdialog>
+	  </subdialog>
+	</form>
+	</vxml>
+	

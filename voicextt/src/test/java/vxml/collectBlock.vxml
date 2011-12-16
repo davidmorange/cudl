@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+	<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" 
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	  xsi:schemaLocation="http://www.w3.org/2001/vxml 
+	   http://www.w3.org/TR/voicexml20/vxml.xsd">
+
+	<form>
+	  <var name="y" expr="'xValue'"/>
+	  <var name="forbidon" expr="'xValue'"/>
+	  <block name="one">
+	  		<var name="x" expr="'xValue'"/>
+	  		<assign name="y" expr="'yValue'"/>
+	  		<if cond="x == undefined">
+	  			<prompt>blabla</prompt>
+	  			<elseif cond="y == undefined"/>
+		  		<prompt>toto</prompt>
+		  		<else/>
+		  		<clear namelist="forbidon"/>
+	  		</if>
+	  		<if cond="forbidon == undefined">
+		  		<prompt>this is prompt is block</prompt>
+		  	</if>
+		  	<goto nextitem="un_autre"/>
+	  </block>
+	  
+	  
+	  <block>
+	  	<var name="z" expr="'bidule machin'"/>
+	  </block>
+	  
+	  <block name="un_autre">
+	  	<var name="z" expr="'zValue'"/>
+	  </block>
+	  
+	  
+	  <field name="couleur">
+	  </field>
+	 
+	  <transfer>
+	  </transfer>
+	 
+	  <subdialog>
+	  </subdialog>
+	</form>
+	</vxml>
+	

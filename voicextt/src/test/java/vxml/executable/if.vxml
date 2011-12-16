@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" 
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	  xsi:schemaLocation="http://www.w3.org/2001/vxml 
+	   http://www.w3.org/TR/voicexml20/vxml.xsd">
+	<form>  
+		<block>
+			<if cond="true"> 	   
+	   			<var name="vrai" expr="true"/>
+	   		</if>
+	  	 	<if cond="false"> 	 
+	  	 		<var name="fauxx" expr="false"/>
+	  	 		<else/>  
+	   			<var name="faux" expr="false"/>
+	  	 	</if>
+	  	 	
+	  	 	<if cond="false"> 	 
+	  	 		<elseif cond="true"/> 
+	   			<var name="fausse" expr="false"/>
+	   			<if cond="false">
+	   				<var name="blabla" expr="'vraie'"/>
+	   				<else/>
+	   				<if cond="true">
+	   					<var name="chaine" expr="'vraie'"/>
+	   					<var name="lol" expr="'lola'"/>
+	   				</if>
+	   			</if>
+	  	 	</if>
+	  	 	
+	  	 	<if cond="false"> 	 
+	  	 		<elseif cond="false"/> 
+	   			<var name="fausse1" expr="false"/>
+	   			<if cond="false">
+	   				<var name="blabla1" expr="'vraie'"/>
+	   				<else/>
+	   				<if cond="true">
+	   					<var name="chaine1" expr="'vraie'"/>
+	   					<var name="lol1" expr="'lola'"/>
+	   				</if>
+	   			</if>
+	  	 	</if>
+	  </block>
+	</form>
+	</vxml>

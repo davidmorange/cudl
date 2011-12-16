@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" 
+	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	  xsi:schemaLocation="http://www.w3.org/2001/vxml 
+	   http://www.w3.org/TR/voicexml20/vxml.xsd">
+	<form>   	   
+	   <var name="variable1"/>
+	   <var name="variable2" expr="'toto'"/>
+	   <block name="toto">
+	   		<prompt>simple prompt in block</prompt>
+	   </block>
+	   <!--<block name="tata">
+	   		<prompt>simple prompt in block</prompt>
+	   </block>-->
+	</form>
+</vxml>
+	
