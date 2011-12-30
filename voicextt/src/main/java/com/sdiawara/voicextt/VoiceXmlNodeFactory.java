@@ -15,7 +15,7 @@ public class VoiceXmlNodeFactory {
 			Constructor<?> constructor = Class.forName(className).getConstructor(new Class[] { Node.class });
 			return (VoiceXmlNode) constructor.newInstance(node);
 		} catch (ClassNotFoundException e) {
-			throw new UnsupportedOperationException( capitalize(nodeName) + ".java not found");
+			throw new UnsupportedOperationException(capitalize(nodeName) + ".java not found");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

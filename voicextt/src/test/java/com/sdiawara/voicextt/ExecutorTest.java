@@ -2,9 +2,12 @@ package com.sdiawara.voicextt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -15,6 +18,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mozilla.javascript.Undefined;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -29,6 +33,7 @@ import com.sdiawara.voicextt.node.Clear;
 import com.sdiawara.voicextt.node.Filled;
 import com.sdiawara.voicextt.node.Goto;
 import com.sdiawara.voicextt.node.If;
+import com.sdiawara.voicextt.node.Log;
 import com.sdiawara.voicextt.node.Prompt;
 import com.sdiawara.voicextt.node.Submit;
 import com.sdiawara.voicextt.node.Var;
@@ -201,4 +206,25 @@ public class ExecutorTest {
 
 		executor.execute(new Submit(document.getElementsByTagName("submit").item(0)));
 	}
+
+	@Test
+	public void testLogExecutor() throws IOException, SAXException, ParserConfigurationException,
+			XPathExpressionException, VoiceXTTException {
+
+		Document document = documentAcces.get(url + "log.vxml", null);
+
+		NodeList childs = document.getElementsByTagName("log");
+		for (int i = 0; i < childs.getLength(); i++) {
+			executor.execute(new Log(childs.item(i)));
+		}
+		
+		List<String> logs = voiceXTTOutPut.getLogs();
+		List<String> labeledLogs = voiceXTTOutPut.getLogs("mylabel");
+		assertEquals("simple log", logs.get(0));
+		assertEquals("[mylabel] simple log with label", logs.get(1));
+		assertEquals("my_expr simple log with expr", logs.get(2));
+		assertEquals("[mylabel] simple log with label", labeledLogs.get(0));
+	}
 }
+
+

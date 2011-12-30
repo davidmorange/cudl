@@ -23,6 +23,7 @@ import com.sdiawara.voicextt.node.Exit;
 import com.sdiawara.voicextt.node.Filled;
 import com.sdiawara.voicextt.node.Goto;
 import com.sdiawara.voicextt.node.If;
+import com.sdiawara.voicextt.node.Log;
 import com.sdiawara.voicextt.node.Prompt;
 import com.sdiawara.voicextt.node.Return;
 import com.sdiawara.voicextt.node.Submit;
@@ -46,8 +47,7 @@ public class Executor {
 
 	public void execute(VoiceXmlNode child) throws VoiceXTTException {
 		try {
-			Executor.class.getMethod("execute", child.getClass()).invoke(this,
-					child);
+			Executor.class.getMethod("execute", child.getClass()).invoke(this, child);
 		} catch (IllegalArgumentException e) {
 		} catch (SecurityException e) {
 		} catch (IllegalAccessException e) {
@@ -55,10 +55,8 @@ public class Executor {
 			if (e.getCause() instanceof VoiceXTTException)
 				throw (VoiceXTTException) e.getCause();
 		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(
-					"No implementation for Executor.execute("
-							+ child.getClass().getSimpleName() + " "
-							+ child.getNodeName() + ")");
+			throw new RuntimeException("No implementation for Executor.execute("
+					+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
 		}
 	}
 
@@ -70,6 +68,23 @@ public class Executor {
 		throw new RuntimeException("implement Exit executor");
 	}
 
+	public void execute(Log log) throws VoiceXTTException {
+		String debug = "";
+		String label = log.getLabel();
+		String expr = log.getExpr();
+
+		if (label != null) {
+			debug += "[" + label + "]";
+		}
+
+		if (expr != null) {
+			debug += scripting.eval(expr);
+		}
+
+		debug += " " + log.getTextContent();
+		voiceXTTOutPut.addLog(debug.trim());
+	}
+
 	public void execute(Return return1) throws VoiceXTTException {
 		throw new RuntimeException("implement Return executor");
 	}
@@ -79,7 +94,7 @@ public class Executor {
 	}
 
 	public void execute(Submit submit) throws VoiceXTTException {
-		throw new SubmitException();
+		throw new SubmitException(submit);
 	}
 
 	public void execute(Audio audio) {
@@ -174,8 +189,8 @@ public class Executor {
 			boolean el_se = voiceXmlNode instanceof Else;
 			boolean elseif = voiceXmlNode instanceof Elseif;
 			if (el_se
-					|| (elseif && Boolean.parseBoolean(scripting.eval(
-							voiceXmlNode.getAttribute("cond")).toString()))) {
+					|| (elseif && Boolean.parseBoolean(scripting.eval(voiceXmlNode.getAttribute("cond"))
+							.toString()))) {
 				nbElseOrElseif++;
 				if (nbElseOrElseif == 2)
 					break;

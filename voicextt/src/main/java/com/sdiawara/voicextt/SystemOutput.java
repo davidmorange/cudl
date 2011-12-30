@@ -1,6 +1,8 @@
 package com.sdiawara.voicextt;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 public class SystemOutput {
@@ -15,7 +17,22 @@ public class SystemOutput {
 		textsToSpeech.add(value);
 	}
 
-	public void addLog(String expr) {
+	public void addLog(String log) {
+		logs.add(log);
+	}
+
+	public List<String> getLogs(String... labels) {
+		if (labels.length == 0)
+			return logs;
+
+		List<String> labeledLog = new ArrayList<String>();
+		for (String log : logs) {
+			for (String label : labels) {
+				if (log.contains("[" + label + "]")) {
+					labeledLog.add(log);
+				}
+			}
+		}
+		return labeledLog;
 	}
 }
-

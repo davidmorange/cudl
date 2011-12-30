@@ -44,7 +44,6 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 		this.outPut = outPut;
 		this.scripting = scripting;
 		this.userInput = userInput;
-		System.err.println(outPut);
 		this.executor = new Executor(scripting, this.outPut);
 		this.promptQueue = new LinkedList<VoiceXmlNode>();
 	}
@@ -163,7 +162,7 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 		try {
 			((FormItem) selectedFormItem).accept(this);
 		} catch (GotoException e) {
-				setNextItem(e.getGoto().getNextItem());
+			setNextItem(e.getGoto().getNextItem());
 		} catch (VoiceXTTException e) {
 			e.printStackTrace();
 		}
