@@ -1,14 +1,15 @@
 package com.sdiawara.voicextt.exception;
 
-public class GotoException extends VoiceXTTException {
-	private static final long serialVersionUID = 564001111649829928L;
-	private final String nextItem;
+import com.sdiawara.voicextt.node.Goto;
 
-	public GotoException(String nextItem) {
-		this.nextItem = nextItem;
+public class GotoException extends VoiceXTTException {
+	private final Goto goto1;
+
+	public GotoException(Goto goto1) {
+		this.goto1 = goto1;
 	}
 
-	public String getNextItem() {
-		return nextItem;
+	public Goto getGoto() {
+		return goto1;
 	}
 }

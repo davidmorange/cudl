@@ -162,10 +162,10 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 		// Execute the form item.
 		try {
 			((FormItem) selectedFormItem).accept(this);
+		} catch (GotoException e) {
+				setNextItem(e.getGoto().getNextItem());
 		} catch (VoiceXTTException e) {
-			if (e instanceof GotoException) {
-				setNextItem(((GotoException) e).getNextItem());
-			}
+			e.printStackTrace();
 		}
 	}
 

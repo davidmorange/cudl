@@ -44,9 +44,10 @@ public class Executor {
 		logger.addAppender(newAppender);
 	}
 
-	public void execute(VoiceXmlNode child) throws VoiceXTTException  {
+	public void execute(VoiceXmlNode child) throws VoiceXTTException {
 		try {
-			Executor.class.getMethod("execute", child.getClass()).invoke(this, child);
+			Executor.class.getMethod("execute", child.getClass()).invoke(this,
+					child);
 		} catch (IllegalArgumentException e) {
 		} catch (SecurityException e) {
 		} catch (IllegalAccessException e) {
@@ -54,13 +55,15 @@ public class Executor {
 			if (e.getCause() instanceof VoiceXTTException)
 				throw (VoiceXTTException) e.getCause();
 		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("No implementation for Executor.execute(" + child.getClass().getSimpleName()
-					+ " " + child.getNodeName() + ")");
+			throw new RuntimeException(
+					"No implementation for Executor.execute("
+							+ child.getClass().getSimpleName() + " "
+							+ child.getNodeName() + ")");
 		}
 	}
 
 	public void execute(Goto goto1) throws VoiceXTTException {
-		throw new GotoException(goto1.getNextItem());
+		throw new GotoException(goto1);
 	}
 
 	public void execute(Exit Exit) throws VoiceXTTException {
@@ -170,7 +173,9 @@ public class Executor {
 		for (VoiceXmlNode voiceXmlNode : if1.getChilds()) {
 			boolean el_se = voiceXmlNode instanceof Else;
 			boolean elseif = voiceXmlNode instanceof Elseif;
-			if (el_se || (elseif && Boolean.parseBoolean(scripting.eval(voiceXmlNode.getAttribute("cond")).toString()))) {
+			if (el_se
+					|| (elseif && Boolean.parseBoolean(scripting.eval(
+							voiceXmlNode.getAttribute("cond")).toString()))) {
 				nbElseOrElseif++;
 				if (nbElseOrElseif == 2)
 					break;
