@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import javax.management.RuntimeErrorException;
+
 import org.mozilla.javascript.Undefined;
 
 import com.sdiawara.voicextt.exception.GotoException;
@@ -139,7 +141,7 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 		this.nextItem = nextItem;
 	}
 
-	public void collect() {
+	public void collect() throws VoiceXTTException {
 		// Queue up prompts for the form item.
 		if (!lastIterationReprompt || !dialogChanged) {
 			if (selectedFormItem instanceof InputFormItem) {
@@ -160,9 +162,15 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 
 		// Execute the form item.
 		try {
+			setNextItem(null);
 			((FormItem) selectedFormItem).accept(this);
 		} catch (GotoException e) {
-			setNextItem(e.getGoto().getNextItem());
+			String nextItem = e.getGoto().getNextItem();
+			String expritem = e.getGoto().getExpritem();
+			if (nextItem == null && expritem == null) {
+				throw e;
+			}
+			setNextItem(nextItem == null ? scripting.eval(expritem).toString() : nextItem);
 		} catch (VoiceXTTException e) {
 			e.printStackTrace();
 		}
@@ -208,7 +216,16 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 
 	public void run() {
 		initialize();
-		selectedFormItem = select();
-		collect();
+		while (true) {
+			selectedFormItem = select();
+			if (selectedFormItem == null) {
+				return;
+			}
+			try {
+				collect();
+			} catch (VoiceXTTException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 }

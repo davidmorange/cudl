@@ -7,11 +7,27 @@
 	   <var name="variable1"/>
 	   <var name="variable2" expr="'toto'"/>
 	   <block name="toto">
-	   		<prompt>simple prompt in block</prompt>
+	   		<prompt>simple prompt in block 0</prompt>
 	   </block>
-	   <!--<block name="tata">
-	   		<prompt>simple prompt in block</prompt>
-	   </block>-->
+	   <block name="tata">
+	   		<prompt>simple prompt in block 1</prompt>
+	   		<goto nextitem="titi"/>
+	   </block>
+	   
+	   <block name="titi" expr="'lol'">
+	   		<prompt>simple prompt in block 2</prompt>
+	   		<goto expritem="'ta'+'t'+'i'"/>
+	   </block>
+	   
+	   <block name="tati" expr="'lol'">
+	   		<prompt>simple prompt in block 3</prompt>
+	   		<!--<goto next="#test"/> -->
+	   </block>
+	</form>
+	<form id="test">
+		<block>
+	   		<prompt>simple prompt in block 4</prompt>
+	   </block>   	   
 	</form>
 </vxml>
 	

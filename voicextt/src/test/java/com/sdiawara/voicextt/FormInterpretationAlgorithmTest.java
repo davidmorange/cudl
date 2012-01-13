@@ -13,6 +13,7 @@ import org.mozilla.javascript.Undefined;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import com.sdiawara.voicextt.exception.VoiceXTTException;
 import com.sdiawara.voicextt.node.Form;
 import com.sdiawara.voicextt.node.VoiceXmlNode;
 import com.sdiawara.voicextt.script.Scripting;
@@ -66,10 +67,13 @@ public class FormInterpretationAlgorithmTest {
 		assertEquals("one", fia.select().getAttribute("name"));
 		fia.setNextItem("two");
 		assertEquals("two", fia.select().getAttribute("name"));
+		fia.setNextItem(null);
+		scripting.set("one", "'test'");
+		assertEquals("couleur", fia.select().getAttribute("name"));
 	}
 
 	@Test
-	public void blockVisitor() throws ParserConfigurationException, IOException, SAXException {
+	public void blockVisitor() throws ParserConfigurationException, IOException, SAXException, VoiceXTTException {
 		FormInterpretationAlgorithm fia = createFia("collectBlock.vxml");
 		fia.initialize();
 		fia.setSelectedFormItem(fia.select());
