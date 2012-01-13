@@ -21,12 +21,18 @@
 	   
 	   <block name="tati" expr="'lol'">
 	   		<prompt>simple prompt in block 3</prompt>
-	   		<!--<goto next="#test"/> -->
+	   		<goto next="#test"/>
 	   </block>
 	</form>
 	<form id="test">
-		<block>
+		<block name="toto">
 	   		<prompt>simple prompt in block 4</prompt>
+	   		<goto expr="'#test1'"/>
+	   </block>   	   
+	</form>
+	<form id="test1">
+		<block name="toto2">
+	   		<prompt>simple prompt in block 5</prompt>
 	   </block>   	   
 	</form>
 </vxml>

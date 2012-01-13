@@ -13,6 +13,7 @@ import com.sdiawara.voicextt.exception.VoiceXTTException;
 import com.sdiawara.voicextt.node.Audio;
 import com.sdiawara.voicextt.node.Block;
 import com.sdiawara.voicextt.node.Field;
+import com.sdiawara.voicextt.node.Goto;
 import com.sdiawara.voicextt.node.Initial;
 import com.sdiawara.voicextt.node.Prompt;
 import com.sdiawara.voicextt.node.Record;
@@ -25,7 +26,7 @@ import com.sdiawara.voicextt.node.VoiceXmlNode;
 import com.sdiawara.voicextt.script.Scripting;
 
 public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
-	private final VoiceXmlNode currentDialog;
+	private VoiceXmlNode currentDialog;
 	private final Scripting scripting;
 	private String nextItem;
 	private boolean lastIterationReprompt;
@@ -40,8 +41,7 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 		this(dialog, scripting, null, null);
 	}
 
-	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut,
-			UserInput userInput) {
+	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut, UserInput userInput) {
 		this.currentDialog = dialog;
 		this.outPut = outPut;
 		this.scripting = scripting;
@@ -224,8 +224,26 @@ public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
 			try {
 				collect();
 			} catch (VoiceXTTException e) {
-				throw new RuntimeException(e);
+				String next = ((GotoException) e).getGoto().getNext();
+				String expr = ((GotoException) e).getGoto().getExpr();
+				if (next == null && expr == null) {
+					throw new RuntimeException("Semantic error");
+				}
+				next = ((next == null) ? ((String) scripting.eval(expr)).replace("#", "") : next.replace("#", ""));
+				this.currentDialog = searchDialog(next);
+				initialize();
 			}
 		}
+	}
+
+	private VoiceXmlNode searchDialog(String next) {
+		VoiceXmlNode vxml = currentDialog.getParent();
+		List<VoiceXmlNode> maybeDialog = vxml.getChilds();
+		for (VoiceXmlNode voiceXmlNode : maybeDialog) {
+			if (next.equals(voiceXmlNode.getAttribute("id"))) {
+				return voiceXmlNode;
+			}
+		}
+		return null;
 	}
 }
