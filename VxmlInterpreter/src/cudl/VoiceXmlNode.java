@@ -48,10 +48,12 @@ abstract class VoiceXmlNode {
 		return attValue.getNodeValue();
 	}
 
-	protected boolean checkCond(Node node, InterpreterContext context) throws IOException {
+	protected boolean checkCond(Node node, InterpreterContext context)
+			throws IOException {
 		String cond = getNodeAttributeValue(node, "cond");
 		return cond == null
-				|| Boolean.valueOf(context.getDeclaration().evaluateScript(cond, InterpreterVariableDeclaration.ANONYME_SCOPE)
+				|| Boolean.valueOf(context.getDeclaration().evaluateScript(
+						cond, InterpreterVariableDeclaration.ANONYME_SCOPE)
 						+ "");
 	}
 
@@ -82,7 +84,8 @@ abstract class VoiceXmlNode {
 		}
 	}
 
-	abstract Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	abstract Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException;
 }
 
@@ -130,7 +133,8 @@ class FormTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		// Phase initialization
 		if (initVar) {
@@ -139,15 +143,19 @@ class FormTag extends VoiceXmlNode {
 				Node child = childs.item(i);
 				String nodeName = child.getNodeName();
 				if (initChild.contains(nodeName)) {
-					TagInterpreterFactory.getTagInterpreter(child).interpret(context);
+					TagInterpreterFactory.getTagInterpreter(child).interpret(
+							context);
 				} else if (isFormItem(child)) {
 					String name = getNodeAttributeValue(child, "name");
 					String expr = getNodeAttributeValue(child, "expr");
 					if (name == null) {
-						name = "form_item_generated_name_by_cudl_" + form_item_generated++;
+						name = "form_item_generated_name_by_cudl_"
+								+ form_item_generated++;
 					}
-					context.getDeclaration().declareVariable(name, expr == null ? "undefined" : expr, 60);
-					if ("field".equals(child.getNodeName()) || "initial".equals(child.getNodeName())) {
+					context.getDeclaration().declareVariable(name,
+							expr == null ? "undefined" : expr, 60);
+					if ("field".equals(child.getNodeName())
+							|| "initial".equals(child.getNodeName())) {
 						context.setPromptCounter(child, 1);
 					}
 					context.addFormItemName(child, name);
@@ -167,15 +175,18 @@ class FormTag extends VoiceXmlNode {
 
 			if (formItems.contains(formItem.getNodeName())) {
 				try {
-					TagInterpreterFactory.getTagInterpreter(formItem).interpret(context);
-					context.getDeclaration().resetScopeBinding(InterpreterVariableDeclaration.ANONYME_SCOPE);
+					TagInterpreterFactory.getTagInterpreter(formItem)
+							.interpret(context);
+					context.getDeclaration().resetScopeBinding(
+							InterpreterVariableDeclaration.ANONYME_SCOPE);
 				} catch (ExitException e) {
 					context.setHangup(true);
 					return null;
 				} catch (GotoException e) {
 					context.setNextItemToVisit(e.nextItem);
 					if (e.next != null) {
-						context.getDeclaration().resetScopeBinding(InterpreterVariableDeclaration.DIALOG_SCOPE);
+						context.getDeclaration().resetScopeBinding(
+								InterpreterVariableDeclaration.DIALOG_SCOPE);
 						throw new GotoException(e.next, null);
 					}
 				}
@@ -188,7 +199,8 @@ class FormTag extends VoiceXmlNode {
 		List<Node> grammarActive = new ArrayList<Node>();
 		if (VxmlElementType.isInputItem(context.getSelectedFormItem()))
 			if (VxmlElementType.isAModalItem(context.getSelectedFormItem())) {
-				grammarActive.add(Utils.serachItem(context.getSelectedFormItem(), "grammar"));
+				grammarActive.add(Utils.serachItem(
+						context.getSelectedFormItem(), "grammar"));
 			} else {
 				Node parent = context.getSelectedFormItem();
 				while (null != parent) {
@@ -205,16 +217,22 @@ class FormTag extends VoiceXmlNode {
 	Node selectNextFormItem(InterpreterContext context) {
 		Node node = null;
 		if (context.getNextItemToVisit() != null) {
-			node = Utils.searchItemByName(context.getCurrentDialog(), context.getNextItemToVisit());
+			node = Utils.searchItemByName(context.getCurrentDialog(),
+					context.getNextItemToVisit());
 			context.setNextItemToVisit(null);
 		} else {
-			for (Iterator<Entry<Node, String>> iterator = context.getFormItemNames().entrySet().iterator(); iterator.hasNext();) {
+			for (Iterator<Entry<Node, String>> iterator = context
+					.getFormItemNames().entrySet().iterator(); iterator
+					.hasNext();) {
 				Entry<Node, String> next = iterator.next();
 				Node nextToVisit = next.getKey();
 				String name = next.getValue();
 				String cond = Utils.getNodeAttributeValue(nextToVisit, "cond");
-				if (cond == null || (Boolean) context.getDeclaration().evaluateScript(cond, 50))
-					if (context.getDeclaration().getValue(name).equals(Undefined.instance)) {
+				if (cond == null
+						|| (Boolean) context.getDeclaration().evaluateScript(
+								cond, 50))
+					if (context.getDeclaration().getValue(name)
+							.equals(Undefined.instance)) {
 						return nextToVisit;
 					}
 			}
@@ -263,14 +281,16 @@ class MenuTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		context.setSelectedFormItem(node);
 		NodeList childs = node.getChildNodes();
 		for (int i = 0; i < childs.getLength(); i++) {
 			Node item = childs.item(i);
 			if (execute.contains(item.getNodeName())) // FIXME: remove
-				TagInterpreterFactory.getTagInterpreter(item).interpret(context);
+				TagInterpreterFactory.getTagInterpreter(item)
+						.interpret(context);
 		}
 		return null;
 	}
@@ -310,13 +330,18 @@ class VarTag extends VoiceXmlNode {
 		String name = getName();
 		String[] split = name.split("\\.");
 		if (Utils.scopeNames().contains(split[0]) && split.length > 1) {
-			throw new EventException("error.semantic",
+			throw new EventException(
+					"error.semantic",
 					"Aucune declaration possible avec les noms de porté : [session application document dialog]");
 		}
 		if (!context.getParams().contains(name)) {
 			String expr = getExpr();
-			context.getDeclaration().declareVariable(name, expr == null ? "undefined" : expr,
-					node.getParentNode().getNodeName().equals("form") ? 60 : 50);
+			context.getDeclaration()
+					.declareVariable(
+							name,
+							expr == null ? "undefined" : expr,
+							node.getParentNode().getNodeName().equals("form") ? 60
+									: 50);
 		}
 		return null;
 	}
@@ -347,7 +372,8 @@ class AssignTag extends VoiceXmlNode {
 			// check variable declaration
 			context.getDeclaration().setValue(name, expr);
 		} catch (EcmaError error) {
-			throw new EventException("error.semantic", "La variable " + name + " n'est pas declaré");
+			throw new EventException("error.semantic", "La variable " + name
+					+ " n'est pas declaré");
 		}
 		return null;
 	}
@@ -377,7 +403,8 @@ class LogTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		Log log = new Log();
 
@@ -390,12 +417,14 @@ class LogTag extends VoiceXmlNode {
 			System.err.print(" " + label + " ");
 		}
 
-		log.value += expr == null ? "" : context.getDeclaration().evaluateScript(expr, 50) + " ";
+		log.value += expr == null ? "" : context.getDeclaration()
+				.evaluateScript(expr, 50) + " ";
 
 		NodeList childs = node.getChildNodes();
 		for (int i = 0; i < childs.getLength(); i++) {
 			Node child = childs.item(i);
-			log.value += TagInterpreterFactory.getTagInterpreter(child).interpret(context);
+			log.value += TagInterpreterFactory.getTagInterpreter(child)
+					.interpret(context);
 		}
 		log.value = log.value.trim();
 		System.err.println(log.value);
@@ -447,7 +476,8 @@ class PromptTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		if (!checkCond(node, context)) {
 			return null;
@@ -468,11 +498,13 @@ class PromptTag extends VoiceXmlNode {
 		for (int i = 0; i < childs.getLength(); i++) {
 			Node child = childs.item(i);
 			if (prompt.contains(child.getNodeName())) {
-				Prompt pc = (Prompt) TagInterpreterFactory.getTagInterpreter(child).interpret(context);
+				Prompt pc = (Prompt) TagInterpreterFactory.getTagInterpreter(
+						child).interpret(context);
 				p.audio += pc.audio + " ";
 				p.tts += pc.tts + " ";
 			} else {
-				p.tts += TagInterpreterFactory.getTagInterpreter(child).interpret(context);
+				p.tts += TagInterpreterFactory.getTagInterpreter(child)
+						.interpret(context);
 			}
 		}
 
@@ -518,9 +550,11 @@ class ExitTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws ExitException, EventException {
+	public Object interpret(InterpreterContext context) throws ExitException,
+			EventException {
 		if (node.getAttributes().getLength() > 1)
-			throw new EventException("error.badfetch", "La balise exit doit avoir exactement un attribut.");
+			throw new EventException("error.badfetch",
+					"La balise exit doit avoir exactement un attribut.");
 		context.setHangup(true);
 		throw new ExitException();
 	}
@@ -551,15 +585,19 @@ class ClearTag extends VoiceXmlNode {
 				try {
 					context.getDeclaration().getValue(name);
 				} catch (Exception e) {
-					throw new EventException("error.semantic", "La variable " + name + " n'est pas declaré");
+					throw new EventException("error.semantic", "La variable "
+							+ name + " n'est pas declaré");
 				}
 				context.getDeclaration().setValue(name, "undefined");
 			}
 		} else {
-			for (Iterator<Map.Entry<Node, String>> iterator = context.getFormItemNames().entrySet().iterator(); iterator
+			for (Iterator<Map.Entry<Node, String>> iterator = context
+					.getFormItemNames().entrySet().iterator(); iterator
 					.hasNext();) {
-				Map.Entry<Node, String> FormItem = (Map.Entry<Node, String>) iterator.next();
-				context.getDeclaration().setValue(FormItem.getValue(), "undefined");
+				Map.Entry<Node, String> FormItem = (Map.Entry<Node, String>) iterator
+						.next();
+				context.getDeclaration().setValue(FormItem.getValue(),
+						"undefined");
 			}
 		}
 
@@ -604,15 +642,16 @@ class IfTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws IOException, InterpreterException, SAXException,
-			ParserConfigurationException {
+	public Object interpret(InterpreterContext context) throws IOException,
+			InterpreterException, SAXException, ParserConfigurationException {
 		boolean conditionChecked = checkCond(node, context);
 		NodeList childs = node.getChildNodes();
 		for (int i = 0; i < childs.getLength(); i++) {
 			Node child = childs.item(i);
 			if (VxmlElementType.isAnExecutableItem(child)) {
 				if (conditionChecked) {
-					TagInterpreterFactory.getTagInterpreter(child).interpret(context);
+					TagInterpreterFactory.getTagInterpreter(child).interpret(
+							context);
 				}
 			} else if (VxmlElementType.isConditionalItem(child)) {
 				if (conditionChecked) {
@@ -637,8 +676,10 @@ class TextTag extends VoiceXmlNode {
 
 	@Override
 	public Object interpret(InterpreterContext context) {
-		String textContent = node.getTextContent().replaceAll("[\\s][\\s]+", " ");
-		if (VxmlElementType.isFormItem(node.getParentNode()) && !textContent.trim().equals("")) {
+		String textContent = node.getTextContent().replaceAll("[\\s][\\s]+",
+				" ");
+		if (VxmlElementType.isFormItem(node.getParentNode())
+				&& !textContent.trim().equals("")) {
 			Prompt p = new Prompt();
 			p.tts += textContent.trim();
 			context.addPrompt(p);
@@ -675,16 +716,20 @@ class GotoTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException {
 		String nextItemTmp = getNodeAttributeValue(node, "nextitem");
 		String exprItemTmp = getNodeAttributeValue(node, "expritem");
 
 		String nextItem;
 		if (nextItemTmp != null && exprItemTmp != null) {
-			throw new EventException("error.badfetch", "La balise goto doit un seul attribut parmi : nextitem et expritem");
+			throw new EventException("error.badfetch",
+					"La balise goto doit un seul attribut parmi : nextitem et expritem");
 		} else {
-			nextItem = nextItemTmp != null ? nextItemTmp : exprItemTmp != null ? context.getDeclaration().getValue(exprItemTmp)
-					+ "" : null;
+			nextItem = nextItemTmp != null ? nextItemTmp
+					: exprItemTmp != null ? context.getDeclaration().getValue(
+							exprItemTmp)
+							+ "" : null;
 		}
 
 		if (nextItem != null) {
@@ -696,9 +741,11 @@ class GotoTag extends VoiceXmlNode {
 
 		String next;
 		if (nextTmp != null && exprTmp != null) {
-			throw new EventException("error.badfetch", "La balise goto doit un seul attribut parmi : next et expr");
+			throw new EventException("error.badfetch",
+					"La balise goto doit un seul attribut parmi : next et expr");
 		} else {
-			next = nextTmp != null ? nextTmp : context.getDeclaration().getValue(exprTmp) + "";
+			next = nextTmp != null ? nextTmp : context.getDeclaration()
+					.getValue(exprTmp) + "";
 		}
 		throw new GotoException(next, null);
 	}
@@ -755,7 +802,8 @@ class SubmitTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException {
 		String next = getNext();
 		String expr = getExpr();
 		if (next != null && expr != null) {
@@ -763,7 +811,8 @@ class SubmitTag extends VoiceXmlNode {
 					"La balise submit doit avoir exactement une des deux attributs: next ou expr");
 		}
 
-		next = next != null ? next : context.getDeclaration().getValue(expr) + "";
+		next = next != null ? next : context.getDeclaration().getValue(expr)
+				+ "";
 
 		String nameList = getNameList();
 		if (nameList != null) {
@@ -771,7 +820,8 @@ class SubmitTag extends VoiceXmlNode {
 			String urlSuite = "?";
 			while (tokenizer.hasMoreElements()) {
 				String data = tokenizer.nextToken();
-				urlSuite += data + "=" + context.getDeclaration().getValue(data) + "&";
+				urlSuite += data + "="
+						+ context.getDeclaration().getValue(data) + "&";
 			}
 			next += urlSuite;
 		}
@@ -823,12 +873,15 @@ class ReturnTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException {
 		String namelist = getNameList();
 		String event = getEvent();
 		String eventexpr = getEventExpr();
-		if ((namelist != null && (event != null || eventexpr != null)) || (event != null && eventexpr != null))
-			throw new EventException("error.badfetch",
+		if ((namelist != null && (event != null || eventexpr != null))
+				|| (event != null && eventexpr != null))
+			throw new EventException(
+					"error.badfetch",
 					"La balise submit doit avoir exactement une des attributs: namelist, event ou eventexpr");
 		// TODO: check parent is an subdialog ==> throw semantic error
 		throw new ReturnException(event, eventexpr, namelist);
@@ -861,7 +914,8 @@ class DisconnectTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException {
 		throw new EventException("connection.disconnect.hangup");
 	}
 }
@@ -875,7 +929,8 @@ class ValueTag extends VoiceXmlNode {
 
 	@Override
 	public Object interpret(InterpreterContext context) {
-		Object value = context.getDeclaration().getValue(getNodeAttributeValue(node, "expr"));
+		Object value = context.getDeclaration().getValue(
+				getNodeAttributeValue(node, "expr"));
 		if (prompt.contains(node.getParentNode().getNodeName())) {
 			Prompt p = new Prompt();
 			p.tts = value + "";
@@ -891,10 +946,13 @@ class ThrowTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException {
 		NamedNodeMap attributes = node.getAttributes();
-		if (attributes.getNamedItem("event") != null && attributes.getNamedItem("eventexpr") != null) {
-			throw new EventException("error.badfetch",
+		if (attributes.getNamedItem("event") != null
+				&& attributes.getNamedItem("eventexpr") != null) {
+			throw new EventException(
+					"error.badfetch",
 					"La balise Throw doit avoir exactement une des deux attributs: event ou event expr");
 		}
 		throw new EventException(getNodeAttributeValue(node, "event"));
@@ -907,19 +965,23 @@ class ScriptTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws IOException, InterpreterException {
+	public Object interpret(InterpreterContext context) throws IOException,
+			InterpreterException {
 		String src = getNodeAttributeValue(node, "src");
 		if (src != null && node.hasChildNodes())
 			throw new EventException("error.badfetch",
 					"La balise script ne peut avoir de contenue lorsque il definit un attribut src");
 
 		if (src == null) {
-			context.getDeclaration().evaluateScript(node.getTextContent(), InterpreterVariableDeclaration.DIALOG_SCOPE);
+			context.getDeclaration().evaluateScript(node.getTextContent(),
+					InterpreterVariableDeclaration.DIALOG_SCOPE);
 		} else {
 			try {
-				context.getDeclaration().evaluateFileScript(src, InterpreterVariableDeclaration.DIALOG_SCOPE);
+				context.getDeclaration().evaluateFileScript(src,
+						InterpreterVariableDeclaration.DIALOG_SCOPE);
 			} catch (FileNotFoundException e) {
-				throw new EventException("error.badfetch", "aucun fichier de ce type :" + src);
+				throw new EventException("error.badfetch",
+						"aucun fichier de ce type :" + src);
 			}
 
 		}
@@ -933,7 +995,8 @@ class SubdialogTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		InterpreterVariableDeclaration declaration = context.getDeclaration();
 		String formItemName = context.getFormItemNames().get(node);
@@ -942,7 +1005,8 @@ class SubdialogTag extends VoiceXmlNode {
 		String srcexpr = getNodeAttributeValue(node, "srcexpr");
 
 		if (src != null && srcexpr != null) {
-			throw new EventException("error.badfetch",
+			throw new EventException(
+					"error.badfetch",
 					"La balise subdialog doit avoir exactement une des deux attributs: src et srcexpr");
 		}
 		if (src == null && srcexpr != null) {
@@ -950,7 +1014,8 @@ class SubdialogTag extends VoiceXmlNode {
 		}
 		InternalInterpreter internalInterpreter = null;
 		if (src != null) {
-			String url = Utils.tackWeelFormedUrl(context.getCurrentFileName(), src);
+			String url = Utils.tackWeelFormedUrl(context.getCurrentFileName(),
+					src);
 
 			// if remote url, put namelist values in GET parameters
 			String nameList = getNodeAttributeValue(node, "namelist");
@@ -959,7 +1024,8 @@ class SubdialogTag extends VoiceXmlNode {
 				String urlSuite = "?";
 				while (tokenizer.hasMoreElements()) {
 					String data = tokenizer.nextToken();
-					urlSuite += data + "=" + context.getDeclaration().getValue(data) + "&";
+					urlSuite += data + "="
+							+ context.getDeclaration().getValue(data) + "&";
 				}
 				url += urlSuite;
 			}
@@ -967,7 +1033,8 @@ class SubdialogTag extends VoiceXmlNode {
 			// TODO put namelist values in child context
 
 			// FIXME this is not a viable way to handle subdialogs ;(
-			InterpreterContext subContext = new InterpreterContext(url, context.cookies);
+			InterpreterContext subContext = new InterpreterContext(url,
+					context.cookies);
 			subContext.enterSubdialog();
 			internalInterpreter = new InternalInterpreter(subContext);
 			context.cookies = subContext.cookies;
@@ -976,33 +1043,49 @@ class SubdialogTag extends VoiceXmlNode {
 
 			context.setInternalInterpreter(internalInterpreter);
 			internalInterpreter.interpret(1, null);
-			context.getLogs().addAll(internalInterpreter.getContext().getLogs());
-			context.getPrompts().addAll(internalInterpreter.getContext().getPrompts());
+			context.getLogs()
+					.addAll(internalInterpreter.getContext().getLogs());
+			context.getPrompts().addAll(
+					internalInterpreter.getContext().getPrompts());
 		}
-		context.getDeclaration().evaluateScript(formItemName + "=new Object();", InterpreterVariableDeclaration.DIALOG_SCOPE);
+		context.getDeclaration().evaluateScript(
+				formItemName + "=new Object();",
+				InterpreterVariableDeclaration.DIALOG_SCOPE);
 
 		setReturnVariable(context, formItemName, internalInterpreter);
 
 		return null;
 	}
 
-	void setReturnVariable(InterpreterContext context, String formItemName, InternalInterpreter internalInterpreter)
-			throws EventException, InterpreterException, IOException, SAXException, ParserConfigurationException {
+	void setReturnVariable(InterpreterContext context, String formItemName,
+			InternalInterpreter internalInterpreter) throws EventException,
+			InterpreterException, IOException, SAXException,
+			ParserConfigurationException {
 		if (internalInterpreter != null) {
-			context.getDeclaration().evaluateScript(formItemName + "=new Object();", InterpreterVariableDeclaration.DIALOG_SCOPE);
-			String[] returnValue = internalInterpreter.getContext().getReturnValue();
+			context.getDeclaration().evaluateScript(
+					formItemName + "=new Object();",
+					InterpreterVariableDeclaration.DIALOG_SCOPE);
+			String[] returnValue = internalInterpreter.getContext()
+					.getReturnValue();
 
 			String namelist = returnValue[2];
 			if (namelist != null) {
 				StringTokenizer tokenizer = new StringTokenizer(namelist);
-				InterpreterVariableDeclaration declaration2 = internalInterpreter.getContext().getDeclaration();
+				InterpreterVariableDeclaration declaration2 = internalInterpreter
+						.getContext().getDeclaration();
 				while (tokenizer.hasMoreElements()) {
 					String variable = tokenizer.nextToken();
 
-					String script = formItemName + "." + variable + "="
-							+ cudl.script.Utils.scriptableObjectToString(declaration2.getValue(variable)) + "";
+					String script = formItemName
+							+ "."
+							+ variable
+							+ "="
+							+ cudl.script.Utils
+									.scriptableObjectToString(declaration2
+											.getValue(variable)) + "";
 					System.err.println(script);
-					context.getDeclaration().evaluateScript(script, InterpreterVariableDeclaration.ANONYME_SCOPE);
+					context.getDeclaration().evaluateScript(script,
+							InterpreterVariableDeclaration.ANONYME_SCOPE);
 				}
 			} else if (returnValue[0] != null) {
 				throw new EventException(returnValue[0]);
@@ -1010,22 +1093,26 @@ class SubdialogTag extends VoiceXmlNode {
 
 			Node filled = Utils.serachItem(node, "filled");
 			if (filled != null) {
-				FilledTag tagInterpreter = (FilledTag) TagInterpreterFactory.getTagInterpreter(filled);
+				FilledTag tagInterpreter = (FilledTag) TagInterpreterFactory
+						.getTagInterpreter(filled);
 				tagInterpreter.setExecute(true);
 				tagInterpreter.interpret(context);
 			}
 		}
 	}
 
-	private void declareParams(InternalInterpreter internalInterpreter, NodeList childNodes, InterpreterContext context) {
+	private void declareParams(InternalInterpreter internalInterpreter,
+			NodeList childNodes, InterpreterContext context) {
 		for (int i = 0; i < childNodes.getLength(); i++) {
 			Node item = childNodes.item(i);
 			if (item.getNodeName().equals("param")) {
 				String name = getNodeAttributeValue(item, "name");
 				String value = getNodeAttributeValue(item, "expr");
 				internalInterpreter.getContext().addParam(name);
-				Object evaluateScript = context.getDeclaration().evaluateScript(value, 50);
-				internalInterpreter.getContext().getDeclaration().declareVariable(name, "'" + evaluateScript + "'", 50);
+				Object evaluateScript = context.getDeclaration()
+						.evaluateScript(value, 50);
+				internalInterpreter.getContext().getDeclaration()
+						.declareVariable(name, "'" + evaluateScript + "'", 50);
 			}
 		}
 	}
@@ -1037,10 +1124,12 @@ class TransferTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException {
 		String dest = getNodeAttributeValue(node, "dest");
 		String destExpr = getNodeAttributeValue(node, "destexpr");
-		context.setTransfertDestination((dest != null) ? dest : context.getDeclaration().evaluateScript(destExpr, 50) + "");
+		context.setTransfertDestination((dest != null) ? dest : context
+				.getDeclaration().evaluateScript(destExpr, 50) + "");
 		throw new TransferException();
 	}
 }
@@ -1053,12 +1142,14 @@ class FieldTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		for (VoiceXmlNode tag : childs) {
 			if (tag instanceof PromptTag) {
 				String count = getNodeAttributeValue(tag.node, "count");
-				if (!(count == null || Integer.valueOf(count) == context.getPromptCounter(context.getSelectedFormItem()))) {
+				if (!(count == null || Integer.valueOf(count) == context
+						.getPromptCounter(context.getSelectedFormItem()))) {
 					continue;
 				}
 			}
@@ -1079,7 +1170,8 @@ class AudioTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException {
 		Prompt p = new Prompt();
 		String src = getNodeAttributeValue(node, "src");
 		String expr = getNodeAttributeValue(node, "expr");
@@ -1089,7 +1181,9 @@ class AudioTag extends VoiceXmlNode {
 					"La balise audio doit avoir exactement une des deux attributs: src ou expr");
 		}
 
-		p.audio = (src == null) ? context.getDeclaration().evaluateScript(expr, 50) + "" : src;
+		p.audio = (src == null) ? context.getDeclaration().evaluateScript(expr,
+				50)
+				+ "" : src;
 		p.tts = node.getTextContent();
 
 		if (node.getParentNode().getNodeName().equals("block")) {
@@ -1099,13 +1193,26 @@ class AudioTag extends VoiceXmlNode {
 	}
 }
 
+class BreakTag extends VoiceXmlNode {
+	public BreakTag(Node node) {
+		super(node);
+	}
+
+	@Override
+	Object interpret(InterpreterContext context) throws InterpreterException,
+			IOException, SAXException, ParserConfigurationException {
+			return "";
+	}
+}
+
 class EnumerateTag extends VoiceXmlNode {
 	public EnumerateTag(Node node) {
 		super(node);
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException {
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException {
 		String enumearation = "";
 		NodeList childNodes = context.getSelectedFormItem().getChildNodes();
 		for (int i = 0; i < childNodes.getLength(); i++) {
@@ -1126,7 +1233,8 @@ class RepromptTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		context.incrementPromptCounter(context.getSelectedFormItem());
 		return null;
@@ -1140,7 +1248,8 @@ class ProceduralsTag extends VoiceXmlNode {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		for (VoiceXmlNode tag : childs) {
 			tag.interpret(context);
@@ -1160,9 +1269,11 @@ class BlockTag extends ProceduralsTag {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
-		context.getDeclaration().setValue(context.getFormItemNames().get(node), "true");
+		context.getDeclaration().setValue(context.getFormItemNames().get(node),
+				"true");
 		return super.interpret(context);
 	}
 }
@@ -1175,7 +1286,8 @@ class FilledTag extends ProceduralsTag {
 	}
 
 	@Override
-	public Object interpret(InterpreterContext context) throws InterpreterException, IOException, SAXException,
+	public Object interpret(InterpreterContext context)
+			throws InterpreterException, IOException, SAXException,
 			ParserConfigurationException {
 		if (!execute) {
 			System.err.println("wait user input");

@@ -674,5 +674,14 @@ public class InterpreterTest {
 	
 		assertEquals("Input in subdialog", interpreter.getLogs().get(0));
 		assertEquals("Log: hello", interpreter.getLogs().get(1));
-	}	
+	}
+	
+	
+	@Test
+	public void breakSupport() throws IOException, ParserConfigurationException, SAXException {
+		Interpreter interpreter = new Interpreter(url + "break.vxml");
+		interpreter.start();
+	
+		assertEquals("hello break", interpreter.getPrompts().get(0).tts);
+	}
 }
