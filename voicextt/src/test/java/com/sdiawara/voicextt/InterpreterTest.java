@@ -23,8 +23,6 @@ public class InterpreterTest {
 	public void testSimple() throws ParserConfigurationException, IOException, SAXException {
 		Interpreter interpreter = new Interpreter(url + "simple.vxml");
 		interpreter.start();
-		interpreter.waitSpeaker();
-		
 		
 		assertEquals("simple prompt in block 0", interpreter.getPrompts().get(0));
 		assertEquals("simple prompt in block 1", interpreter.getPrompts().get(1));
@@ -32,5 +30,6 @@ public class InterpreterTest {
 		assertEquals("simple prompt in block 3", interpreter.getPrompts().get(3));	
 		assertEquals("simple prompt in block 4", interpreter.getPrompts().get(4));
 		assertEquals("simple prompt in block 5", interpreter.getPrompts().get(5));
+		//assertEquals("simple prompt in another form", interpreter.getPrompts().get(5));
 	}
 }

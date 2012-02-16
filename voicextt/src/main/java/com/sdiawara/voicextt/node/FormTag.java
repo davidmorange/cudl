@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.w3c.dom.Node;
 
-class MenuTag extends VoiceXmlNode {
+class Menu extends VoiceXmlNode {
 	private static final String ATT_ID = "id";
 	private static final String ATT_SCOPE = "scope";
 	private static final String ATT_DTMF = "dtmf";
@@ -29,7 +29,7 @@ class MenuTag extends VoiceXmlNode {
 		CHILDS.add("value");
 	}
 
-	public MenuTag(Node node) {
+	public Menu(Node node) {
 		super(node);
 	}
 

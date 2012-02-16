@@ -25,7 +25,7 @@ import com.sdiawara.voicextt.node.Var;
 import com.sdiawara.voicextt.node.VoiceXmlNode;
 import com.sdiawara.voicextt.script.Scripting;
 
-public class FormInterpretationAlgorithm extends Thread implements FormItemVisitor{
+public class FormInterpretationAlgorithm extends Thread implements FormItemVisitor {
 	private VoiceXmlNode currentDialog;
 	private final Scripting scripting;
 	private String nextItem;
@@ -36,6 +36,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private final SystemOutput outPut;
 	private Executor executor;
 	private final UserInput userInput;
+	private VoiceXTTException lastException = null;
 
 	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting) {
 		this(dialog, scripting, null, null);
@@ -224,26 +225,23 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			try {
 				collect();
 			} catch (VoiceXTTException e) {
-				String next = ((GotoException) e).getGoto().getNext();
-				String expr = ((GotoException) e).getGoto().getExpr();
-				if (next == null && expr == null) {
-					throw new RuntimeException("Semantic error");
-				}
-				next = ((next == null) ? ((String) scripting.eval(expr)).replace("#", "") : next.replace("#", ""));
-				this.currentDialog = searchDialog(next);
-				initialize();
+				lastException = e;
+				System.err.println("exception occur "+e.getClass().getCanonicalName());
 			}
 		}
 	}
 
 	private VoiceXmlNode searchDialog(String next) {
 		VoiceXmlNode vxml = currentDialog.getParent();
-		List<VoiceXmlNode> maybeDialog = vxml.getChilds();
-		for (VoiceXmlNode voiceXmlNode : maybeDialog) {
+		for (VoiceXmlNode voiceXmlNode : vxml.getChilds()) {
 			if (next.equals(voiceXmlNode.getAttribute("id"))) {
 				return voiceXmlNode;
 			}
 		}
 		return null;
+	}
+
+	public VoiceXTTException getLastException() {
+		return lastException;
 	}
 }

@@ -12,4 +12,8 @@ public abstract class FormItem extends VoiceXmlNode {
 	}
 
 	public abstract void accept(FormItemVisitor formInterpretationAlgorithm) throws VoiceXTTException;
+
+	public String getId() {
+		return getAttribute("id");
+	}
 }
