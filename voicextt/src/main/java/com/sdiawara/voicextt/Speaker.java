@@ -1,6 +1,6 @@
 package com.sdiawara.voicextt;
 
-public class Speaker implements Runnable {
+public class Speaker extends Thread {
 
 	private final UserInput userInput;
 	private String utterance;

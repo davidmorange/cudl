@@ -25,7 +25,7 @@ import com.sdiawara.voicextt.node.Var;
 import com.sdiawara.voicextt.node.VoiceXmlNode;
 import com.sdiawara.voicextt.script.Scripting;
 
-public class FormInterpretationAlgorithm implements FormItemVisitor, Runnable {
+public class FormInterpretationAlgorithm extends Thread implements FormItemVisitor{
 	private VoiceXmlNode currentDialog;
 	private final Scripting scripting;
 	private String nextItem;
