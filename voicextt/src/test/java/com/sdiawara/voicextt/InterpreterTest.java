@@ -30,6 +30,7 @@ public class InterpreterTest {
 		assertEquals("simple prompt in block 3", interpreter.getPrompts().get(3));	
 		assertEquals("simple prompt in block 4", interpreter.getPrompts().get(4));
 		assertEquals("simple prompt in block 5", interpreter.getPrompts().get(5));
-//		assertEquals("simple prompt in another form", interpreter.getPrompts().get(6));
+		assertEquals("simple prompt in block 6", interpreter.getPrompts().get(6));
+		//assertEquals("simple prompt in another form", interpreter.getPrompts().get(6));
 	}
 }
