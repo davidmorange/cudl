@@ -4,8 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-import javax.management.RuntimeErrorException;
-
 import org.mozilla.javascript.Undefined;
 
 import com.sdiawara.voicextt.exception.GotoException;
@@ -13,7 +11,6 @@ import com.sdiawara.voicextt.exception.VoiceXTTException;
 import com.sdiawara.voicextt.node.Audio;
 import com.sdiawara.voicextt.node.Block;
 import com.sdiawara.voicextt.node.Field;
-import com.sdiawara.voicextt.node.Goto;
 import com.sdiawara.voicextt.node.Initial;
 import com.sdiawara.voicextt.node.Prompt;
 import com.sdiawara.voicextt.node.Record;
@@ -90,17 +87,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		while (userInput.getInput() == null) {
 			userInput.readData();
 		}
-	}
-
-	@SuppressWarnings("unused")
-	private VoiceXmlNode serachFilled(Field field) {
-		List<VoiceXmlNode> childs = field.getChilds();
-		for (VoiceXmlNode voiceXmlNode : childs) {
-			if (voiceXmlNode.getNodeName().equals("filled")) {
-				return voiceXmlNode;
-			}
-		}
-		return null;
 	}
 
 	private void playPrompt() throws VoiceXTTException {
@@ -230,16 +216,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				throw new RuntimeException(e);
 			}
 		}
-	}
-
-	private VoiceXmlNode searchDialog(String next) {
-		VoiceXmlNode vxml = getCurrentDialog().getParent();
-		for (VoiceXmlNode voiceXmlNode : vxml.getChilds()) {
-			if (next.equals(voiceXmlNode.getAttribute("id"))) {
-				return voiceXmlNode;
-			}
-		}
-		return null;
 	}
 
 	public VoiceXTTException getLastException() {

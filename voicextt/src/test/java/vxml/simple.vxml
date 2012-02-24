@@ -39,6 +39,12 @@
 	<form id="test2">
 		<block name="toto">
 	   		<prompt>simple prompt in block 6</prompt>
+	   		<goto next="two.vxml"/>
+	   </block>   	   
+	</form>
+	<form id="final">
+		<block name="toto">
+	   		<goto next="final.vxml#test"/>
 	   </block>   	   
 	</form>
 </vxml>
