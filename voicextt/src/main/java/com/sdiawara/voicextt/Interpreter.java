@@ -81,7 +81,7 @@ public class Interpreter {
 						}
 
 					}
-					fia.start();
+					fia.start(); 
 					Interpreter.this.waitSpeaker();
 				} catch (Exception e1) {
 					exceptionTothrow = e1;
