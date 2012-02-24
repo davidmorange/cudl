@@ -26,6 +26,7 @@ public class Interpreter {
 		this.currentFileName = startFileName;
 		this.interpreterContext = new InterpreterContext(startFileName); // session
 		this.speaker = new Speaker(userInput);
+
 		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null).getDocumentElement());
 		this.fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(), outPut, userInput);
 		FormInterpretationAlgorithm.setDefaultUncaughtExceptionHandler(getDefaultUncaughtExceptionHandler());
@@ -37,6 +38,7 @@ public class Interpreter {
 		if(exceptionTothrow != null){
 			throw new RuntimeException(exceptionTothrow);
 		}
+
 	}
 
 	private void waitSpeaker() {
@@ -54,6 +56,7 @@ public class Interpreter {
 
 	private UncaughtExceptionHandler getDefaultUncaughtExceptionHandler() {
 		return new UncaughtExceptionHandler() {
+
 
 			public void uncaughtException(Thread t, Throwable e) {
 				Throwable exception = e.getCause();
