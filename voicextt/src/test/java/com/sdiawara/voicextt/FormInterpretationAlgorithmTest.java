@@ -78,8 +78,6 @@ public class FormInterpretationAlgorithmTest {
 		fia.initialize();
 		fia.setSelectedFormItem(fia.select());
 		fia.collect();
-		//goto nextItem
-		
 		fia.setSelectedFormItem(fia.select());
 		fia.collect();
 		

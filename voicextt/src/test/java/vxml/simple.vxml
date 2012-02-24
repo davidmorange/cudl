@@ -27,12 +27,11 @@
 	<form id="test">
 		<block name="toto">
 	   		<prompt>simple prompt in block 4</prompt>
-	   		<prompt>simple prompt in block 5</prompt>
-	   		<goto next="#test1"/>
+	   		<goto expr="'#test1'"/>
 	   </block>   	   
 	</form>
 	<form id="test1">
-		<block name="toto2">
+		<block name="toto">
 	   		<prompt>simple prompt in block 5</prompt>
 	   </block>   	   
 	</form>

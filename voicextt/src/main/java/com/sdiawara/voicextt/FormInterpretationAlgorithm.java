@@ -226,6 +226,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			try {
 				collect();
 			} catch (VoiceXTTException e) {
+				System.err.println("* "+ e +" *"+((GotoException)e).getGoto().getNext()+"=next expr="+((GotoException)e).getGoto().getExpr());
 				throw new RuntimeException(e);
 			}
 		}
