@@ -1,7 +1,7 @@
 package com.sdiawara.voicextt;
 
 import java.io.IOException;
-import java.net.URL;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -24,36 +24,50 @@ public class Interpreter {
 	public Interpreter(String startFileName) throws ParserConfigurationException, IOException, SAXException {
 		this.interpreterContext = new InterpreterContext(startFileName); // session
 		this.speaker = new Speaker(userInput);
-		vxml = new Vxml(interpreterContext.getDocumentAcces().get(startFileName, null).getDocumentElement());
+		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(startFileName, null)
+				.getDocumentElement());
 		resetFia(vxml.getFirstDialog());
 	}
 
 	private void resetFia(VoiceXmlNode dialog) throws IOException, SAXException {
-		fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut, userInput);
-	}
+		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut, userInput);
+		UncaughtExceptionHandler eh = new UncaughtExceptionHandler() {
 
-	public void start() throws IOException, SAXException {
-		VoiceXTTException lastException = fia.getLastException();
-		do {
-			System.err.println("start");
-			if (!fia.isAlive()) {
-				this.fia.start();
-				waitSpeaker();
-				lastException = fia.getLastException();
-				if (lastException instanceof GotoException) {
-					String next = ((GotoException) lastException).getGoto().getNext();
-					String expr = ((GotoException) lastException).getGoto().getExpr();
+			public void uncaughtException(Thread t, Throwable e) {
+				Throwable exception = e.getCause();
+				System.err.println(exception);
+				if (exception instanceof GotoException) {
+					String next = ((GotoException) exception).getGoto().getNext();
+					String expr = ((GotoException) exception).getGoto().getExpr();
 					if (next == null && expr == null) {
 						throw new RuntimeException("Semantic error");
 					}
+					System.err.println(next);
 					next = ((next == null) ? ((String) interpreterContext.getScripting().eval(expr)) : next);
 					if (next.startsWith("#")) {
-						System.err.println("next " + vxml.getDialogById(next.replace("#", "")));
-						resetFia(vxml.getDialogById(next.replace("#", "")));
+						System.err.println("next " + next.replace("#", "") + " fia is a live= " + fia.isAlive()
+								+ "test isinterrupt " + t.isInterrupted());
+						fia.setCurrentDialog(vxml.getDialogById(next.replace("#", "")));
+						System.err.println("next " + next.replace("#", "") + " fia is a live= " + fia.isAlive()
+								+ "test isinterrupt " + t.isInterrupted());
+						fia.run();
+						System.err.println("after fia is a live= " + fia.isAlive()
+								+ "test isinterrupt " + t.isInterrupted());
+						fia.setUncaughtExceptionHandler(this);
 					}
 				}
 			}
-		} while (lastException != null);
+
+		};
+		fia.setUncaughtExceptionHandler(eh);
+	}
+
+	public void start() throws IOException, SAXException {
+		// if (!fia.isAlive()) {
+		this.fia.start();
+		waitSpeaker();
+		System.err.println("fin");
+		// }
 	}
 
 	private void waitSpeaker() {

@@ -43,7 +43,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut, UserInput userInput) {
-		this.currentDialog = dialog;
+		this.setCurrentDialog(dialog);
 		this.outPut = outPut;
 		this.scripting = scripting;
 		this.userInput = userInput;
@@ -52,7 +52,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	public void initialize() {
-		for (VoiceXmlNode formChild : currentDialog.getChilds()) {
+		for (VoiceXmlNode formChild : getCurrentDialog().getChilds()) {
 			if (formChild instanceof FormItem) {
 				String name = formChild.getAttribute("name");
 				String expr = formChild.getAttribute("expr");
@@ -187,7 +187,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	private VoiceXmlNode getNamedFormItem() {
-		for (VoiceXmlNode formItem : currentDialog.getChilds()) {
+		for (VoiceXmlNode formItem : getCurrentDialog().getChilds()) {
 			if (getNextItem().equals(formItem.getAttribute("name"))) {
 				return formItem;
 			}
@@ -197,7 +197,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	private VoiceXmlNode getFirstUndefinedFormItem() {
-		for (VoiceXmlNode formItem : currentDialog.getChilds()) {
+		for (VoiceXmlNode formItem : getCurrentDialog().getChilds()) {
 			if (Undefined.instance.equals(scripting.get(formItem.getAttribute("name")))) {
 				if (formItem instanceof FormItem) {
 					return formItem;
@@ -214,7 +214,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	public void setSelectedFormItem(VoiceXmlNode select) {
 		this.selectedFormItem = select;
 	}
-
+	
+	@Override
 	public void run() {
 		initialize();
 		while (true) {
@@ -225,14 +226,13 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			try {
 				collect();
 			} catch (VoiceXTTException e) {
-				lastException = e;
-				System.err.println("exception occur "+e.getClass().getCanonicalName());
+				throw new RuntimeException(e);
 			}
 		}
 	}
 
 	private VoiceXmlNode searchDialog(String next) {
-		VoiceXmlNode vxml = currentDialog.getParent();
+		VoiceXmlNode vxml = getCurrentDialog().getParent();
 		for (VoiceXmlNode voiceXmlNode : vxml.getChilds()) {
 			if (next.equals(voiceXmlNode.getAttribute("id"))) {
 				return voiceXmlNode;
@@ -243,5 +243,13 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	public VoiceXTTException getLastException() {
 		return lastException;
+	}
+
+	public VoiceXmlNode getCurrentDialog() {
+		return currentDialog;
+	}
+
+	public void setCurrentDialog(VoiceXmlNode currentDialog) {
+		this.currentDialog = currentDialog;
 	}
 }
