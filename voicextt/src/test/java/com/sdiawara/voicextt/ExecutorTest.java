@@ -2,12 +2,12 @@ package com.sdiawara.voicextt;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -18,7 +18,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mozilla.javascript.Undefined;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -36,6 +35,7 @@ import com.sdiawara.voicextt.node.If;
 import com.sdiawara.voicextt.node.Log;
 import com.sdiawara.voicextt.node.Prompt;
 import com.sdiawara.voicextt.node.Submit;
+import com.sdiawara.voicextt.node.Value;
 import com.sdiawara.voicextt.node.Var;
 import com.sdiawara.voicextt.script.Scripting;
 
@@ -156,7 +156,7 @@ public class ExecutorTest {
 
 	@Test
 	public void testPromptExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException {
+			XPathExpressionException, VoiceXTTException {
 		Document document = documentAcces.get(url + "prompt.vxml", null);
 
 		NodeList childs = document.getElementsByTagName("prompt");
@@ -164,14 +164,12 @@ public class ExecutorTest {
 		for (int i = 0; i < childs.getLength(); i++) {
 			executor.execute(new Prompt(childs.item(i)));
 		}
-
-		assertEquals(6, voiceXTTOutPut.getTTS().size());
+		
+		assertEquals(4, voiceXTTOutPut.getTTS().size());
 		assertEquals("Welcome To this application vocal", voiceXTTOutPut.getTTS().get(0));
 		assertEquals("This is value text", voiceXTTOutPut.getTTS().get(1));
 		assertEquals("This is audio text", voiceXTTOutPut.getTTS().get(2));
-		assertEquals("Welcome To this application vocal", voiceXTTOutPut.getTTS().get(3));
-		assertEquals("This is value text", voiceXTTOutPut.getTTS().get(4));
-		assertEquals("This is audio text", voiceXTTOutPut.getTTS().get(5));
+		assertEquals("Welcome To this application vocal This is value text This is audio text", voiceXTTOutPut.getTTS().get(3));
 	}
 
 	@Test
@@ -224,6 +222,15 @@ public class ExecutorTest {
 		assertEquals("[mylabel] simple log with label", logs.get(1));
 		assertEquals("my_expr simple log with expr", logs.get(2));
 		assertEquals("[mylabel] simple log with label", labeledLogs.get(0));
+	}
+	
+	@Test
+	public void testValueExecutor() throws IOException, SAXException {
+		Value value = mock(Value.class);
+		when(value.getExpr()).thenReturn("'toto '");
+		when(value.isSpeakable()).thenReturn(true);
+		
+		assertEquals("toto ", executor.execute(value));
 	}
 }
 

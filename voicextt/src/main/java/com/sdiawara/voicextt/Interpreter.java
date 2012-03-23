@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -38,7 +37,6 @@ public class Interpreter {
 		if(exceptionTothrow != null){
 			throw new RuntimeException(exceptionTothrow);
 		}
-
 	}
 
 	private void waitSpeaker() {
@@ -46,7 +44,7 @@ public class Interpreter {
 			fia.join();
 			speaker.join();
 		} catch (InterruptedException e) {
-			System.err.println(e);
+			System.err.println("message "+e );
 		}
 	}
 
@@ -92,5 +90,8 @@ public class Interpreter {
 			}
 
 		};
+	}
+
+	public void talk(String string) {
 	}
 }

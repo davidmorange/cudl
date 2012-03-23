@@ -11,6 +11,7 @@ import com.sdiawara.voicextt.exception.VoiceXTTException;
 import com.sdiawara.voicextt.node.Audio;
 import com.sdiawara.voicextt.node.Block;
 import com.sdiawara.voicextt.node.Field;
+import com.sdiawara.voicextt.node.Filled;
 import com.sdiawara.voicextt.node.Initial;
 import com.sdiawara.voicextt.node.Prompt;
 import com.sdiawara.voicextt.node.Record;
@@ -39,7 +40,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		this(dialog, scripting, null, null);
 	}
 
-	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut, UserInput userInput) {
+	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut,
+			UserInput userInput) {
 		this.setCurrentDialog(dialog);
 		this.outPut = outPut;
 		this.scripting = scripting;
@@ -85,15 +87,36 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	public void visit(Field field) throws VoiceXTTException {
 		this.playPrompt();
 		while (userInput.getInput() == null) {
-			userInput.readData();
+		}
+		scripting.set(field.getName(), "'" + userInput.getInput() + "'");
+		for (VoiceXmlNode voiceXmlNode : field.getChilds()) {
+			if (voiceXmlNode instanceof Filled) {
+				executor.execute(voiceXmlNode);
+			}
 		}
 	}
 
 	private void playPrompt() throws VoiceXTTException {
-		while (!promptQueue.isEmpty()) {
-			VoiceXmlNode remove = promptQueue.remove();
-			executor.execute(remove);
+
+		Queue<VoiceXmlNode> pNodes = promptQueue;
+		for (VoiceXmlNode voiceXmlNode : pNodes) {
+			Object tts = executor.execute(voiceXmlNode);
+
+			if (tts != null && (voiceXmlNode instanceof Audio || voiceXmlNode instanceof Value)) {
+				outPut.addTTS(tts.toString().trim());
+			}
+
 		}
+		return;
+		// while (!promptQueue.isEmpty()) {
+		// VoiceXmlNode promptToPlay = promptQueue.remove();
+		// Object tts = executor.execute(promptToPlay);
+		//
+		// if(tts != null && (promptToPlay instanceof Audio || promptToPlay
+		// instanceof Value)) {
+		// outPut.addTTS(tts.toString().trim());
+		// }
+		// }
 	}
 
 	public void visit(Subdialog subdialog) {
@@ -200,7 +223,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	public void setSelectedFormItem(VoiceXmlNode select) {
 		this.selectedFormItem = select;
 	}
-	
+
 	@Override
 	public void run() {
 		initialize();
@@ -212,7 +235,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			try {
 				collect();
 			} catch (VoiceXTTException e) {
-				System.err.println("* "+ e +" *"+((GotoException)e).getGoto().getNext()+"=next expr="+((GotoException)e).getGoto().getExpr());
+				System.err.println("* " + e + " *" + ((GotoException) e).getGoto().getNext() + "=next expr="
+						+ ((GotoException) e).getGoto().getExpr());
 				throw new RuntimeException(e);
 			}
 		}

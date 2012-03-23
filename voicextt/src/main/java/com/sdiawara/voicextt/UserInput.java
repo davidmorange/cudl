@@ -17,7 +17,7 @@ public class UserInput {
 	public void setInput(String str) {
 		lock.writeLock().lock();
 		try {
-			System.out.println("input incomming");
+			System.out.println("input incomming"); 
 			input = str;
 			try {
 				Thread.sleep(100);

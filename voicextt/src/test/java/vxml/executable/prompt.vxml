@@ -8,9 +8,8 @@
 	   		<prompt>Welcome To this application vocal</prompt>
 	   		<prompt><value expr="'This is value text'"/></prompt>
 	   		<prompt><audio>This is audio text</audio></prompt>
-	   		
 	   		<prompt>Welcome To this application vocal
-	   				<value expr="'This is value text'"/>
+	   				<value expr="'This is value text'"/> 
 	   				<audio>This is audio text</audio></prompt>
 	   	</block>
 	</form>

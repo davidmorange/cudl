@@ -45,9 +45,9 @@ public class Executor {
 		logger.addAppender(newAppender);
 	}
 
-	public void execute(VoiceXmlNode child) throws VoiceXTTException {
+	public Object execute(VoiceXmlNode child) throws VoiceXTTException {
 		try {
-			Executor.class.getMethod("execute", child.getClass()).invoke(this, child);
+			return Executor.class.getMethod("execute", child.getClass()).invoke(this, child);
 		} catch (IllegalArgumentException e) {
 		} catch (SecurityException e) {
 		} catch (IllegalAccessException e) {
@@ -58,17 +58,18 @@ public class Executor {
 			throw new RuntimeException("No implementation for Executor.execute("
 					+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
 		}
+		return null;
 	}
 
-	public void execute(Goto goto1) throws VoiceXTTException {
+	public Object execute(Goto goto1) throws VoiceXTTException {
 		throw new GotoException(goto1);
 	}
 
-	public void execute(Exit Exit) throws VoiceXTTException {
+	public Object execute(Exit Exit) throws VoiceXTTException {
 		throw new RuntimeException("implement Exit executor");
 	}
 
-	public void execute(Log log) throws VoiceXTTException {
+	public Object execute(Log log) throws VoiceXTTException {
 		String debug = "";
 		String label = log.getLabel();
 		String expr = log.getExpr();
@@ -83,39 +84,42 @@ public class Executor {
 
 		debug += " " + log.getTextContent();
 		voiceXTTOutPut.addLog(debug.trim());
+		return null;
 	}
 
-	public void execute(Return return1) throws VoiceXTTException {
+	public Object execute(Return return1) throws VoiceXTTException {
 		throw new RuntimeException("implement Return executor");
 	}
 
-	public void execute(Disconnect disconnect) throws VoiceXTTException {
+	public Object execute(Disconnect disconnect) throws VoiceXTTException {
 		throw new RuntimeException("implement Disconnect executor");
 	}
 
-	public void execute(Submit submit) throws VoiceXTTException {
+	public Object execute(Submit submit) throws VoiceXTTException {
 		throw new SubmitException(submit);
 	}
 
-	public void execute(Audio audio) {
-		voiceXTTOutPut.addTTS(audio.getTextContent());
+	public Object execute(Audio audio) {
+		return audio.getTextContent();
 	}
 
-	public void execute(Var var) {
+	public Object execute(Var var) {
 		String name = var.getAttribute("name");
 		String expr = var.getAttribute("expr");
 		logger.info("[var] " + name + "=" + expr);
 		scripting.put(name, expr == null ? "undefined" : expr);
+		return null;
 	}
 
-	public void execute(Assign assign) {
+	public Object execute(Assign assign) {
 		String name = assign.getAttribute("name");
 		String expr = assign.getAttribute("expr");
 		logger.info("[assign] " + name + "=" + expr);
 		scripting.set(name, expr);
+		return null;
 	}
 
-	public void execute(Clear clear) {
+	public Object execute(Clear clear) {
 		String nameList = clear.getAttribute("namelist");
 		StringTokenizer tokenizer = new StringTokenizer(nameList, " ");
 		logger.info("[Clear] " + nameList);
@@ -123,34 +127,35 @@ public class Executor {
 			String name = (String) tokenizer.nextElement();
 			scripting.set(name, "undefined");
 		}
+		return null;
 	}
 
-	public void execute(Text text) {
+	public Object execute(Text text) {
 		String value = text.getValue().trim();
-		if (value.isEmpty())
-			return;
-		if (text.isSpeakable()) {
-			voiceXTTOutPut.addTTS(value);
-		} else {
-			voiceXTTOutPut.addLog(value);
+		if (value.isEmpty()) {
+			return "";
 		}
+		return value;
 	}
 
-	public void execute(Value value) {
-		String expr = scripting.eval(value.getExpr()).toString();
-		if (value.isSpeakable()) {
-			voiceXTTOutPut.addTTS(expr);
-		} else {
-			voiceXTTOutPut.addLog(expr);
+	public Object execute(Value value) {
+		return scripting.eval(value.getExpr());
+	}
+
+	public Object execute(Prompt prompt) throws VoiceXTTException {
+		String tts = "";
+		for (VoiceXmlNode voiceXmlNode : prompt.getChilds()) {
+			tts += " " + execute(voiceXmlNode);
+			tts = tts.trim();
 		}
+
+		voiceXTTOutPut.addTTS(tts.trim());
+		return null;
 	}
 
-	public void execute(Prompt prompt) {
-		proceduralExecution(prompt);
-	}
-
-	public void execute(Filled filled) {
+	public Object execute(Filled filled) {
 		proceduralExecution(filled);
+		return null;
 	}
 
 	private void proceduralExecution(VoiceXmlNode node) {
@@ -179,6 +184,7 @@ public class Executor {
 		} else {
 			execute(getInFalseChilds(if1));
 		}
+
 	}
 
 	private List<VoiceXmlNode> getInFalseChilds(If if1) {
