@@ -63,7 +63,8 @@ public class Interpreter {
 	private UncaughtExceptionHandler getDefaultUncaughtExceptionHandler() {
 		return new UncaughtExceptionHandler() {
 
-			public void uncaughtException(Thread t, Throwable e) {
+			@Override
+            public void uncaughtException(Thread t, Throwable e) {
 				Throwable exception = e.getCause();
 				try {
 					if (exception instanceof GotoException) {
