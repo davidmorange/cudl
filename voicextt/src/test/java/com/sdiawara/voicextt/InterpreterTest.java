@@ -45,12 +45,15 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testSimpleTalk() throws ParserConfigurationException, IOException, SAXException {
+	public void testRegularScenarioWithInteraction() throws ParserConfigurationException, IOException, SAXException {
 		Interpreter interpreter = new Interpreter(url + "simpleTalk.vxml");
 		interpreter.start();
 
 		interpreter.talk("blabla");
+		interpreter.talk("toto");
 		
+		interpreter.waits();
 		assertEquals("you say blabla", interpreter.getPrompts().get(0));
+		assertEquals("hello toto", interpreter.getPrompts().get(1));
 	}
 }

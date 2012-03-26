@@ -12,7 +12,7 @@ import com.sdiawara.voicextt.exception.GotoException;
 import com.sdiawara.voicextt.node.Vxml;
 
 public class Interpreter {
-	private final Speaker speaker;
+	// private final Speaker speaker;
 	private final InterpreterContext interpreterContext;
 	private final UserInput userInput = new UserInput();;
 	private final SystemOutput outPut = new SystemOutput();
@@ -20,11 +20,12 @@ public class Interpreter {
 	private Vxml vxml;
 	private String currentFileName;
 	private Exception exceptionTothrow;
+	private boolean isStartedTalk;
 
 	public Interpreter(String startFileName) throws ParserConfigurationException, IOException, SAXException {
 		this.currentFileName = startFileName;
 		this.interpreterContext = new InterpreterContext(startFileName); // session
-		this.speaker = new Speaker(userInput);
+		this.isStartedTalk = false;
 
 		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null)
 				.getDocumentElement());
@@ -42,12 +43,12 @@ public class Interpreter {
 
 	public void talk(String sentence) {
 		try {
-			this.speaker.setUtterance(sentence);
-			this.speaker.start();
-			this.fia.join();
-			this.speaker.join();
+			Speaker speaker = new Speaker(userInput);
+			speaker.setUtterance(sentence);
+			speaker.start();
+			speaker.join();
 		} catch (InterruptedException e) {
-			System.err.println(e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -55,7 +56,7 @@ public class Interpreter {
 		try {
 			this.fia.join();
 		} catch (InterruptedException e) {
-			System.err.println("message " + e);
+			throw new RuntimeException(e);
 		}
 	}
 

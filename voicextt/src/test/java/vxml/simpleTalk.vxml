@@ -9,6 +9,13 @@
 	  <field name="one">
 		  <filled>
 		  	 <prompt><value expr="ys +' '+ one "/></prompt>
+		  	 <goto nextitem="two"/>
+		  </filled>
+	  </field>
+	  
+	  <field name="two">
+		  <filled>
+		  	 <prompt><value expr="'hello '+ two "/></prompt>
 		  </filled>
 	  </field>
 	 	</form>

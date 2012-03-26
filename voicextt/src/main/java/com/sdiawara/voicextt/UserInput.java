@@ -13,7 +13,7 @@ public class UserInput {
 	public void setInput(String str) {
 		lock.writeLock().lock();
 		try {
-			System.out.println("input incomming"); 
+			System.out.println("input incomming  "+str);
 			input = str;
 			try {
 				Thread.sleep(100);
@@ -27,8 +27,12 @@ public class UserInput {
 
 	public String readData() {
 		lock.readLock().lock();
+		String inputTmp = null;
 		try {
-			System.out.println("wait for user input");
+			if (null != input) {
+				inputTmp = "" + input;
+			}
+			input = null;
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -37,6 +41,6 @@ public class UserInput {
 		} finally {
 			lock.readLock().unlock();
 		}
-		return input;
+		return inputTmp;
 	}
 }

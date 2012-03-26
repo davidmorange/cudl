@@ -35,6 +35,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private Executor executor;
 	private final UserInput userInput;
 	private VoiceXTTException lastException = null;
+	
 
 	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting) {
 		this(dialog, scripting, null, null);
@@ -87,10 +88,13 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	public void visit(Field field) throws VoiceXTTException {
 		this.playPrompt();
 		String input = userInput.readData();
-		while (input == null) {
-			Thread.yield();
+		System.out.println("wait for " + input);
+		while (input == null ) {
 			input = userInput.readData();
+			System.out.println("okok");
+			Thread.yield();
 		}
+		
 		scripting.set(field.getName(), "'" + input + "'");
 		for (VoiceXmlNode voiceXmlNode : field.getChilds()) {
 			if (voiceXmlNode instanceof Filled) {
@@ -111,7 +115,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 		}
 		return;
- 	}
+	}
 
 	public void visit(Subdialog subdialog) {
 		throw new RuntimeException("implement subdialog visit");
