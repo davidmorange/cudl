@@ -25,7 +25,6 @@ public class InterpreterTest {
 		Interpreter interpreter = new Interpreter(url + "simple.vxml");
 		interpreter.start();
 
-		interpreter.waits();
 		assertEquals("simple prompt in block 0", interpreter.getPrompts().get(0));
 		assertEquals("simple prompt in block 1", interpreter.getPrompts().get(1));
 		assertEquals("simple prompt in block 2", interpreter.getPrompts().get(2));
@@ -52,7 +51,6 @@ public class InterpreterTest {
 		interpreter.talk("blabla");
 		interpreter.talk("toto");
 		
-		interpreter.waits();
 		assertEquals("you say blabla", interpreter.getPrompts().get(0));
 		assertEquals("hello toto", interpreter.getPrompts().get(1));
 	}

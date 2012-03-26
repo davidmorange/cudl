@@ -37,6 +37,11 @@ public class Interpreter {
 		if (exceptionTothrow != null) {
 			throw new RuntimeException(exceptionTothrow);
 		}
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void talk(String sentence) {
@@ -45,14 +50,7 @@ public class Interpreter {
 			speaker.setUtterance(sentence);
 			speaker.start();
 			speaker.join();
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public void waits() {
-		try {
-			this.fia.join();
+			this.fia.join(150);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -97,7 +95,7 @@ public class Interpreter {
 
 					}
 					fia.start();
-					Interpreter.this.waits();
+					fia.join();
 				} catch (Exception e1) {
 					exceptionTothrow = e1;
 				}
