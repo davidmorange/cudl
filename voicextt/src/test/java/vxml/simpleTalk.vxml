@@ -16,6 +16,14 @@
 	  <field name="two">
 		  <filled>
 		  	 <prompt><value expr="'hello '+ two "/></prompt>
+		  	  <goto nextitem="three"/>
+		  </filled>
+	  </field>
+	  
+	   <field name="three">
+	   	  <prompt>Welcome to menu three</prompt>
+		  <filled>
+		  	 <prompt><value expr="'not heard'"/></prompt>
 		  </filled>
 	  </field>
 	 	</form>

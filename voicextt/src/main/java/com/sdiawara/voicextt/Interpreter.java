@@ -38,7 +38,7 @@ public class Interpreter {
 			throw new RuntimeException(exceptionTothrow);
 		}
 		try {
-			Thread.sleep(300);
+			Thread.sleep(150);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}

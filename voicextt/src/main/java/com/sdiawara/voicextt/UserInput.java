@@ -13,13 +13,7 @@ public class UserInput {
 	public void setInput(String str) {
 		lock.writeLock().lock();
 		try {
-			System.out.println("input incomming  "+str);
 			input = str;
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -33,11 +27,6 @@ public class UserInput {
 				inputTmp = "" + input;
 			}
 			input = null;
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		} finally {
 			lock.readLock().unlock();
 		}

@@ -8,7 +8,6 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -44,14 +43,16 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testRegularScenarioWithInteraction() throws ParserConfigurationException, IOException, SAXException {
+	public void testRegularScenarioWithInteraction() throws ParserConfigurationException, IOException,
+			SAXException {
 		Interpreter interpreter = new Interpreter(url + "simpleTalk.vxml");
 		interpreter.start();
 
 		interpreter.talk("blabla");
 		interpreter.talk("toto");
-		
+
 		assertEquals("you say blabla", interpreter.getPrompts().get(0));
 		assertEquals("hello toto", interpreter.getPrompts().get(1));
+		assertEquals("Welcome to menu three", interpreter.getPrompts().get(2));
 	}
 }
