@@ -9,7 +9,8 @@ public class Speaker extends Thread {
 		this.userInput = userInput;
 	}
 
-	public synchronized  void run() {
+	@Override
+    public synchronized  void run() {
 		super.run();
 		userInput.setInput(utterance);
 	}

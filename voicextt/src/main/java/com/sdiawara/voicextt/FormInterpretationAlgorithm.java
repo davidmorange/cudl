@@ -77,7 +77,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 	}
 
-	public void visit(Block block) throws VoiceXTTException {
+	@Override
+    public void visit(Block block) throws VoiceXTTException {
 		scripting.set(block.getAttribute("name"), "true");
 		List<VoiceXmlNode> childs = block.getChilds();
 		for (VoiceXmlNode voiceXmlNode : childs) {
@@ -85,7 +86,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 	}
 
-	public void visit(Field field) throws VoiceXTTException {
+	@Override
+    public void visit(Field field) throws VoiceXTTException {
 		this.playPrompt();
 		String input = userInput.readData();
 		while (input == null ) {
@@ -115,23 +117,28 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		return;
 	}
 
-	public void visit(Subdialog subdialog) {
+	@Override
+    public void visit(Subdialog subdialog) {
 		throw new RuntimeException("implement subdialog visit");
 	}
 
-	public void visit(Transfer transfer) {
+	@Override
+    public void visit(Transfer transfer) {
 		throw new RuntimeException("implement transfer visit");
 	}
 
-	public void visit(Record Record) {
+	@Override
+    public void visit(Record Record) {
 		throw new RuntimeException("implement Record visit");
 	}
 
-	public void visit(Initial Initial) {
+	@Override
+    public void visit(Initial Initial) {
 		throw new RuntimeException("implement Initial visit");
 	}
 
-	public void visit(com.sdiawara.voicextt.node.Object object) {
+	@Override
+    public void visit(com.sdiawara.voicextt.node.Object object) {
 		throw new RuntimeException("implement object visit");
 	}
 
