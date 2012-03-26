@@ -20,12 +20,10 @@ public class Interpreter {
 	private Vxml vxml;
 	private String currentFileName;
 	private Exception exceptionTothrow;
-	private boolean isStartedTalk;
 
 	public Interpreter(String startFileName) throws ParserConfigurationException, IOException, SAXException {
 		this.currentFileName = startFileName;
 		this.interpreterContext = new InterpreterContext(startFileName); // session
-		this.isStartedTalk = false;
 
 		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null)
 				.getDocumentElement());

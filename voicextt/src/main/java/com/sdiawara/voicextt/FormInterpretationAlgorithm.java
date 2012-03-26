@@ -88,10 +88,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	public void visit(Field field) throws VoiceXTTException {
 		this.playPrompt();
 		String input = userInput.readData();
-		System.out.println("wait for " + input);
 		while (input == null ) {
 			input = userInput.readData();
-			System.out.println("okok");
 			Thread.yield();
 		}
 		
