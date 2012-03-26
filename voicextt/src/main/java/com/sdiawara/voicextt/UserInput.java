@@ -10,10 +10,6 @@ public class UserInput {
 	public UserInput() {
 	}
 
-	public String getInput() {
-		return input;
-	}
-
 	public void setInput(String str) {
 		lock.writeLock().lock();
 		try {
@@ -29,7 +25,7 @@ public class UserInput {
 		}
 	}
 
-	public void readData() {
+	public String readData() {
 		lock.readLock().lock();
 		try {
 			System.out.println("wait for user input");
@@ -41,5 +37,6 @@ public class UserInput {
 		} finally {
 			lock.readLock().unlock();
 		}
+		return input;
 	}
 }

@@ -26,35 +26,45 @@ public class Interpreter {
 		this.interpreterContext = new InterpreterContext(startFileName); // session
 		this.speaker = new Speaker(userInput);
 
-		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null).getDocumentElement());
-		this.fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(), outPut, userInput);
+		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null)
+				.getDocumentElement());
+		this.fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(),
+				outPut, userInput);
 		FormInterpretationAlgorithm.setDefaultUncaughtExceptionHandler(getDefaultUncaughtExceptionHandler());
 	}
 
 	public void start() throws IOException, SAXException {
 		this.fia.start();
-		waitSpeaker();
-		if(exceptionTothrow != null){
+		if (exceptionTothrow != null) {
 			throw new RuntimeException(exceptionTothrow);
 		}
 	}
 
-	private void waitSpeaker() {
+	public void talk(String sentence) {
 		try {
-			fia.join();
-			speaker.join();
+			this.speaker.setUtterance(sentence);
+			this.speaker.start();
+			this.fia.join();
+			this.speaker.join();
 		} catch (InterruptedException e) {
-			System.err.println("message "+e );
+			System.err.println(e);
+		}
+	}
+
+	public void waits() {
+		try {
+			this.fia.join();
+		} catch (InterruptedException e) {
+			System.err.println("message " + e);
 		}
 	}
 
 	public List<String> getPrompts() {
-		return outPut.getTTS();
+		return this.outPut.getTTS();
 	}
 
 	private UncaughtExceptionHandler getDefaultUncaughtExceptionHandler() {
 		return new UncaughtExceptionHandler() {
-
 
 			public void uncaughtException(Thread t, Throwable e) {
 				Throwable exception = e.getCause();
@@ -68,22 +78,27 @@ public class Interpreter {
 						next = ((next == null) ? ((String) interpreterContext.getScripting().eval(expr)) : next);
 						if (next.startsWith("#")) {
 							next = next.replace("#", "");
-							fia = new FormInterpretationAlgorithm(vxml.getDialogById(next), interpreterContext.getScripting(), outPut, userInput);
+							fia = new FormInterpretationAlgorithm(vxml.getDialogById(next),
+									interpreterContext.getScripting(), outPut, userInput);
 						} else {
-							currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/")) + "/" + next;
-							vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null).getDocumentElement());
+							currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/"))
+									+ "/" + next;
+							vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null)
+									.getDocumentElement());
 							System.err.println(currentFileName);
 							if (next.contains("#")) {
 								next = next.substring(next.lastIndexOf("#") + 1);
-								fia = new FormInterpretationAlgorithm(vxml.getDialogById(next), interpreterContext.getScripting(), outPut, userInput);
+								fia = new FormInterpretationAlgorithm(vxml.getDialogById(next),
+										interpreterContext.getScripting(), outPut, userInput);
 							} else {
-								fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(), outPut, userInput);
+								fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(),
+										interpreterContext.getScripting(), outPut, userInput);
 							}
 						}
 
 					}
-					fia.start(); 
-					Interpreter.this.waitSpeaker();
+					fia.start();
+					Interpreter.this.waits();
 				} catch (Exception e1) {
 					exceptionTothrow = e1;
 				}
@@ -92,6 +107,4 @@ public class Interpreter {
 		};
 	}
 
-	public void talk(String string) {
-	}
 }

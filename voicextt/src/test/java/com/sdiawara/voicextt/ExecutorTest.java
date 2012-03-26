@@ -174,7 +174,7 @@ public class ExecutorTest {
 
 	@Test
 	public void testFilledExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException {
+			XPathExpressionException, VoiceXTTException {
 
 		Document document = documentAcces.get(url + "filled.vxml", null);
 

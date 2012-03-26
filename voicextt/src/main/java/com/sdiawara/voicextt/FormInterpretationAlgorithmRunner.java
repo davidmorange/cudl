@@ -13,7 +13,7 @@ public class FormInterpretationAlgorithmRunner {
 		this.fia.start();
 	}
 
-	public void speech(String utterance) {
+	public void talk(String utterance) {
 		try {
 			this.speecher.setUtterance(utterance);
 			this.speecher.start();

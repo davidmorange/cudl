@@ -9,11 +9,12 @@ public class Speaker extends Thread {
 		this.userInput = userInput;
 	}
 
-	public void run() {
+	public synchronized  void run() {
+		super.run();
 		userInput.setInput(utterance);
 	}
 
-	public void setUtterance(String utterance) {
+	public synchronized void setUtterance(String utterance) {
 		this.utterance = utterance;
 	}
 }

@@ -5,11 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-
 import com.sdiawara.voicextt.exception.GotoException;
 import com.sdiawara.voicextt.exception.SubmitException;
 import com.sdiawara.voicextt.exception.VoiceXTTException;
@@ -34,15 +29,12 @@ import com.sdiawara.voicextt.node.VoiceXmlNode;
 import com.sdiawara.voicextt.script.Scripting;
 
 public class Executor {
-	private Logger logger = Logger.getLogger(Executor.class);
 	private final Scripting scripting;
 	private final SystemOutput voiceXTTOutPut;
 
 	public Executor(Scripting scripting, SystemOutput voiceXTTOutPut) {
 		this.scripting = scripting;
 		this.voiceXTTOutPut = voiceXTTOutPut;
-		Appender newAppender = new ConsoleAppender(new SimpleLayout());
-		logger.addAppender(newAppender);
 	}
 
 	public Object execute(VoiceXmlNode child) throws VoiceXTTException {
@@ -106,7 +98,6 @@ public class Executor {
 	public Object execute(Var var) {
 		String name = var.getAttribute("name");
 		String expr = var.getAttribute("expr");
-		logger.info("[var] " + name + "=" + expr);
 		scripting.put(name, expr == null ? "undefined" : expr);
 		return null;
 	}
@@ -114,7 +105,6 @@ public class Executor {
 	public Object execute(Assign assign) {
 		String name = assign.getAttribute("name");
 		String expr = assign.getAttribute("expr");
-		logger.info("[assign] " + name + "=" + expr);
 		scripting.set(name, expr);
 		return null;
 	}
@@ -122,7 +112,6 @@ public class Executor {
 	public Object execute(Clear clear) {
 		String nameList = clear.getAttribute("namelist");
 		StringTokenizer tokenizer = new StringTokenizer(nameList, " ");
-		logger.info("[Clear] " + nameList);
 		while (tokenizer.hasMoreElements()) {
 			String name = (String) tokenizer.nextElement();
 			scripting.set(name, "undefined");
@@ -153,28 +142,11 @@ public class Executor {
 		return null;
 	}
 
-	public Object execute(Filled filled) {
-		proceduralExecution(filled);
-		return null;
-	}
-
-	private void proceduralExecution(VoiceXmlNode node) {
-		List<VoiceXmlNode> childs = node.getChilds();
-		for (VoiceXmlNode voiceXmlNode : childs) {
-			boolean text = voiceXmlNode instanceof Text;
-			boolean value = voiceXmlNode instanceof Value;
-			if (text) {
-				((Text) voiceXmlNode).setSpeakable(true);
-			}
-			if (value) {
-				((Value) voiceXmlNode).setSpeakable(true);
-			}
-			try {
-				execute(voiceXmlNode);
-			} catch (Throwable e) {
-				e.printStackTrace();
-			}
+	public Object execute(Filled filled) throws VoiceXTTException {
+		for (VoiceXmlNode voiceXmlNode : filled.getChilds()) {
+			execute(voiceXmlNode);
 		}
+		return null;
 	}
 
 	public void execute(If if1) {

@@ -97,7 +97,7 @@ public class FormInterpretationAlgorithmTest {
 		FormInterpretationAlgorithmRunner runner = new FormInterpretationAlgorithmRunner(fia, speecher);
 		runner.start();
 		
-		runner.speech("blabla");
+		runner.talk("blabla");
 		 
 		System.err.println(outPut.getTTS());
 		assertEquals(4, outPut.getTTS().size());

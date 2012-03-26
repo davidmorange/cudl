@@ -86,18 +86,21 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	public void visit(Field field) throws VoiceXTTException {
 		this.playPrompt();
-		while (userInput.getInput() == null) {
+		String input = userInput.readData();
+		while (input == null) {
+			Thread.yield();
+			input = userInput.readData();
 		}
-		scripting.set(field.getName(), "'" + userInput.getInput() + "'");
+		scripting.set(field.getName(), "'" + input + "'");
 		for (VoiceXmlNode voiceXmlNode : field.getChilds()) {
 			if (voiceXmlNode instanceof Filled) {
 				executor.execute(voiceXmlNode);
+				return;
 			}
 		}
 	}
 
 	private void playPrompt() throws VoiceXTTException {
-
 		Queue<VoiceXmlNode> pNodes = promptQueue;
 		for (VoiceXmlNode voiceXmlNode : pNodes) {
 			Object tts = executor.execute(voiceXmlNode);
@@ -108,16 +111,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 		}
 		return;
-		// while (!promptQueue.isEmpty()) {
-		// VoiceXmlNode promptToPlay = promptQueue.remove();
-		// Object tts = executor.execute(promptToPlay);
-		//
-		// if(tts != null && (promptToPlay instanceof Audio || promptToPlay
-		// instanceof Value)) {
-		// outPut.addTTS(tts.toString().trim());
-		// }
-		// }
-	}
+ 	}
 
 	public void visit(Subdialog subdialog) {
 		throw new RuntimeException("implement subdialog visit");
