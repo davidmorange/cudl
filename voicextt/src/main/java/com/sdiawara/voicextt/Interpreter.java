@@ -13,23 +13,40 @@ import com.sdiawara.voicextt.node.Vxml;
 
 public class Interpreter {
 	// private final Speaker speaker;
-	private final InterpreterContext interpreterContext;
+	protected final InterpreterContext interpreterContext;
 	private final UserInput userInput = new UserInput();;
 	private final SystemOutput outPut = new SystemOutput();
 	private FormInterpretationAlgorithm fia;
 	private Vxml vxml;
 	private String currentFileName;
 	private Exception exceptionTothrow;
-
+	private static final String APPLICATION_VARIABLES ="lastresult$[0].confidence = 1; "
+			+ "lastresult$[0].utterance = undefined;" + "lastresult$[0].inputmode = undefined;"
+			+ "lastresult$[0].interpretation = undefined;";
+	
 	public Interpreter(String startFileName) throws ParserConfigurationException, IOException, SAXException {
 		this.currentFileName = startFileName;
-		this.interpreterContext = new InterpreterContext(startFileName); // session
+		this.interpreterContext = new InterpreterContext(startFileName);
 
 		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null)
 				.getDocumentElement());
 		this.fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(),
 				outPut, userInput);
 		FormInterpretationAlgorithm.setDefaultUncaughtExceptionHandler(getDefaultUncaughtExceptionHandler());
+		interpreterContext.getScripting().enterScope(); // in scope application
+		initializeApplicationVariables();
+		// interpreterContext.getScripting().enterScope(); // in scope document
+		// initializeDocumentVariables();
+	}
+
+	protected void initializeApplicationVariables() {
+		interpreterContext.getScripting().put("lastresult$","new Array()");
+		interpreterContext.getScripting().eval("lastresult$[0] = new Object()");
+		interpreterContext.getScripting().eval(APPLICATION_VARIABLES);
+	}
+
+	protected void initializeDocumentVariables() {
+
 	}
 
 	public void start() throws IOException, SAXException {
@@ -38,7 +55,7 @@ public class Interpreter {
 			throw new RuntimeException(exceptionTothrow);
 		}
 		try {
-			Thread.sleep(150);
+			Thread.sleep(300);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -50,7 +67,7 @@ public class Interpreter {
 			speaker.setUtterance(sentence);
 			speaker.start();
 			speaker.join();
-			this.fia.join(150);
+			this.fia.join(300);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -64,7 +81,7 @@ public class Interpreter {
 		return new UncaughtExceptionHandler() {
 
 			@Override
-            public void uncaughtException(Thread t, Throwable e) {
+			public void uncaughtException(Thread t, Throwable e) {
 				Throwable exception = e.getCause();
 				try {
 					if (exception instanceof GotoException) {

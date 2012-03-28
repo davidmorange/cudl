@@ -56,7 +56,7 @@ public class ScriptingTest {
 	public void weCanUseDeclaredVaribleInScript() {
 		scripting.put("variableName", "[]");
 		scripting.put("variableName1", "[1, 2]");
-		assertEquals(0.0, scripting.eval("variableName.length"));
+		assertEquals(0.0, scripting.get("variableName.length"));
 		assertEquals(1.0, scripting.eval("variableName1[0]"));
 		assertEquals(2, scripting.eval("var le= variableName1.length-1;variableName1[le]"));
 	}
@@ -65,6 +65,7 @@ public class ScriptingTest {
 	public void sessionScope() {
 		scripting.put("variableName", "[]");
 		scripting.put("variableName1", "[1, 2]");
+
 		assertEquals(0.0, scripting.eval("session.variableName.length"));
 		assertEquals(1.0, scripting.eval("session.variableName1[0]"));
 		assertEquals(2, scripting.eval("var le= variableName1.length-1;variableName1[session.le]"));
@@ -74,10 +75,15 @@ public class ScriptingTest {
 	public void applicationScope() {
 		scripting.enterScope();
 		scripting.put("variableName", "[]");
-		scripting.put("variableName1", "[1, 2]");
+		
 		assertEquals(0.0, scripting.eval("application.variableName.length"));
+		
+		scripting.enterScope();
+		scripting.exitScope();
+		scripting.put("variableName1", "[1, 2]");
+		
 		assertEquals(1.0, scripting.eval("application.variableName1[0]"));
-		assertEquals(2, scripting.eval("var le= variableName1.length-1;variableName1[application.le]"));
+		assertEquals(2, scripting.eval("var le= variableName1.length-1; application.variableName1[application.le]"));
 	}
 
 	@Test

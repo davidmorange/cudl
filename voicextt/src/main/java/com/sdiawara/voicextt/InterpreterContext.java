@@ -11,7 +11,6 @@ public class InterpreterContext {
 
 	public InterpreterContext(String startFileName) throws ParserConfigurationException {
 		this.scripting = new Scripting();
-		this.scripting.enterScope(); // in scope application
 		this.documentAcces = new DocumentAcces(USER_AGENT);
 	}
 

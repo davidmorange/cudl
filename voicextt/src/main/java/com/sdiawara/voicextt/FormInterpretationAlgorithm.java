@@ -52,6 +52,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	public void initialize() {
+	//	scripting.enterScope(); // enter scope dialog
 		for (VoiceXmlNode formChild : getCurrentDialog().getChilds()) {
 			if (formChild instanceof FormItem) {
 				String name = formChild.getAttribute("name");

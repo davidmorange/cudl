@@ -121,7 +121,7 @@ public class ExecutorTest {
 
 	@Test
 	public void testIfExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException {
+			XPathExpressionException, VoiceXTTException {
 
 		Document document = documentAcces.get(url + "if.vxml", null);
 		XPath xpath = XPathFactory.newInstance().newXPath();
@@ -164,12 +164,13 @@ public class ExecutorTest {
 		for (int i = 0; i < childs.getLength(); i++) {
 			executor.execute(new Prompt(childs.item(i)));
 		}
-		
+
 		assertEquals(4, voiceXTTOutPut.getTTS().size());
 		assertEquals("Welcome To this application vocal", voiceXTTOutPut.getTTS().get(0));
 		assertEquals("This is value text", voiceXTTOutPut.getTTS().get(1));
 		assertEquals("This is audio text", voiceXTTOutPut.getTTS().get(2));
-		assertEquals("Welcome To this application vocal This is value text This is audio text", voiceXTTOutPut.getTTS().get(3));
+		assertEquals("Welcome To this application vocal This is value text This is audio text", voiceXTTOutPut
+				.getTTS().get(3));
 	}
 
 	@Test
@@ -215,7 +216,7 @@ public class ExecutorTest {
 		for (int i = 0; i < childs.getLength(); i++) {
 			executor.execute(new Log(childs.item(i)));
 		}
-		
+
 		List<String> logs = voiceXTTOutPut.getLogs();
 		List<String> labeledLogs = voiceXTTOutPut.getLogs("mylabel");
 		assertEquals("simple log", logs.get(0));
@@ -223,15 +224,13 @@ public class ExecutorTest {
 		assertEquals("my_expr simple log with expr", logs.get(2));
 		assertEquals("[mylabel] simple log with label", labeledLogs.get(0));
 	}
-	
+
 	@Test
 	public void testValueExecutor() throws IOException, SAXException {
 		Value value = mock(Value.class);
 		when(value.getExpr()).thenReturn("'toto '");
 		when(value.isSpeakable()).thenReturn(true);
-		
+
 		assertEquals("toto ", executor.execute(value));
 	}
 }
-
-

@@ -44,8 +44,10 @@ public class Executor {
 		} catch (SecurityException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
-			if (e.getCause() instanceof VoiceXTTException)
+			if (e.getCause() instanceof VoiceXTTException) {
+				System.err.println("blah");
 				throw (VoiceXTTException) e.getCause();
+			}
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException("No implementation for Executor.execute("
 					+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
@@ -149,9 +151,13 @@ public class Executor {
 		return null;
 	}
 
-	public void execute(If if1) {
+	public void execute(If if1) throws VoiceXTTException {
 		String cond = if1.getCond();
-		if (Boolean.parseBoolean(scripting.eval(cond).toString())) {
+
+		String string = scripting.eval(cond).toString();
+		System.err.println("cond = " + string);
+
+		if (Boolean.parseBoolean(string)) {
 			execute(getInTrueChilds(if1));
 		} else {
 			execute(getInFalseChilds(if1));
@@ -195,12 +201,14 @@ public class Executor {
 		return childsTrue;
 	}
 
-	private void execute(List<VoiceXmlNode> voiceXmlNodes) {
+	private void execute(List<VoiceXmlNode> voiceXmlNodes) throws VoiceXTTException {
 		for (VoiceXmlNode voiceXmlNode : voiceXmlNodes) {
 			try {
 				execute(voiceXmlNode);
 			} catch (Throwable e) {
-				e.printStackTrace();
+				if (e instanceof VoiceXTTException) {
+					throw (VoiceXTTException) e;
+				}
 			}
 		}
 	}

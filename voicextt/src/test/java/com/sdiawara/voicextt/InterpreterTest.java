@@ -1,6 +1,7 @@
 package com.sdiawara.voicextt;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +10,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
 import org.xml.sax.SAXException;
+
+import com.sdiawara.voicextt.script.Scripting;
 
 public class InterpreterTest {
 	String url;
@@ -17,6 +22,19 @@ public class InterpreterTest {
 	@Before
 	public void setUp() throws IOException {
 		url = "file:" + new File(".").getCanonicalPath() + "/src/test/java/vxml/";
+	}
+
+	@Test
+	public void initializeApplicationVariables() throws ParserConfigurationException, IOException, SAXException {
+		Interpreter interpreter = new Interpreter(url + "simple.vxml");
+		Scripting scripting = interpreter.interpreterContext.getScripting();
+		
+		assertTrue(scripting.eval("application") instanceof NativeObject);
+		assertTrue(scripting.eval("application.lastresult$") instanceof NativeArray);
+		scripting.enterScope();
+		assertTrue(scripting.eval("application.lastresult$[0]") instanceof NativeObject);
+		assertEquals(1.0, scripting.eval("application.lastresult$[0].confidence"));
+		assertEquals(1.0, scripting.eval("application.lastresult$[0].confidence"));
 	}
 
 	@Test
@@ -51,6 +69,7 @@ public class InterpreterTest {
 		interpreter.talk("blabla");
 		interpreter.talk("toto");
 
+		assertEquals(3, interpreter.getPrompts().size());
 		assertEquals("you say blabla", interpreter.getPrompts().get(0));
 		assertEquals("hello toto", interpreter.getPrompts().get(1));
 		assertEquals("Welcome to menu three", interpreter.getPrompts().get(2));
