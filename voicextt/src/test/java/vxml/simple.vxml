@@ -6,7 +6,7 @@
 	<form>   	   
 	   <var name="variable1"/>
 	   <var name="variable2" expr="'toto'"/>
-	   <block name="toto">
+	   <block>
 	   		<prompt>simple prompt in block 0</prompt>
 	   </block>
 	   <block name="tata">

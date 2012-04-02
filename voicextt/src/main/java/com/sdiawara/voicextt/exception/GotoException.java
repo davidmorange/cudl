@@ -2,7 +2,7 @@ package com.sdiawara.voicextt.exception;
 
 import com.sdiawara.voicextt.node.Goto;
 
-public class GotoException extends VoiceXTTException {
+public class GotoException extends InterpreterException {
 	private final Goto goto1;
 
 	public GotoException(Goto goto1) {

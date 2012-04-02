@@ -7,7 +7,7 @@ import org.w3c.dom.Node;
 
 import com.sdiawara.voicextt.FormItemVisitor;
 import com.sdiawara.voicextt.InputFormItem;
-import com.sdiawara.voicextt.exception.VoiceXTTException;
+import com.sdiawara.voicextt.exception.InterpreterException;
 
 /**
  * 
@@ -85,16 +85,8 @@ public class Field extends InputFormItem {
 	}
 
 	@Override
-	public void accept(FormItemVisitor visitor) throws VoiceXTTException {
+	public void accept(FormItemVisitor visitor) throws InterpreterException {
 		visitor.visit(this);
-	}
-
-	/**
-	 * 
-	 * @return the attName
-	 */
-	public String getName() {
-		return getAttribute(ATT_NAME);
 	}
 
 	/**

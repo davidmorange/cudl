@@ -4,7 +4,7 @@ import org.w3c.dom.Node;
 
 import com.sdiawara.voicextt.FormItemVisitor;
 import com.sdiawara.voicextt.InputFormItem;
-import com.sdiawara.voicextt.exception.VoiceXTTException;
+import com.sdiawara.voicextt.exception.InterpreterException;
 
 public class Record  extends InputFormItem{
 	public Record(Node node) {
@@ -12,7 +12,7 @@ public class Record  extends InputFormItem{
 	}
 
 	@Override
-	public void accept(FormItemVisitor formInterpretationAlgorithm) throws VoiceXTTException {
+	public void accept(FormItemVisitor formInterpretationAlgorithm) throws InterpreterException {
 		formInterpretationAlgorithm.visit(this);
 	}
 }

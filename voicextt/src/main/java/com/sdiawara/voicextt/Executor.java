@@ -7,7 +7,7 @@ import java.util.StringTokenizer;
 
 import com.sdiawara.voicextt.exception.GotoException;
 import com.sdiawara.voicextt.exception.SubmitException;
-import com.sdiawara.voicextt.exception.VoiceXTTException;
+import com.sdiawara.voicextt.exception.InterpreterException;
 import com.sdiawara.voicextt.node.Assign;
 import com.sdiawara.voicextt.node.Audio;
 import com.sdiawara.voicextt.node.Clear;
@@ -37,16 +37,16 @@ public class Executor {
 		this.voiceXTTOutPut = voiceXTTOutPut;
 	}
 
-	public Object execute(VoiceXmlNode child) throws VoiceXTTException {
+	public Object execute(VoiceXmlNode child) throws InterpreterException {
 		try {
 			return Executor.class.getMethod("execute", child.getClass()).invoke(this, child);
 		} catch (IllegalArgumentException e) {
 		} catch (SecurityException e) {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
-			if (e.getCause() instanceof VoiceXTTException) {
+			if (e.getCause() instanceof InterpreterException) {
 				System.err.println("blah");
-				throw (VoiceXTTException) e.getCause();
+				throw (InterpreterException) e.getCause();
 			}
 		} catch (NoSuchMethodException e) {
 			throw new RuntimeException("No implementation for Executor.execute("
@@ -55,15 +55,15 @@ public class Executor {
 		return null;
 	}
 
-	public Object execute(Goto goto1) throws VoiceXTTException {
+	public Object execute(Goto goto1) throws InterpreterException {
 		throw new GotoException(goto1);
 	}
 
-	public Object execute(Exit Exit) throws VoiceXTTException {
+	public Object execute(Exit Exit) throws InterpreterException {
 		throw new RuntimeException("implement Exit executor");
 	}
 
-	public Object execute(Log log) throws VoiceXTTException {
+	public Object execute(Log log) throws InterpreterException {
 		String debug = "";
 		String label = log.getLabel();
 		String expr = log.getExpr();
@@ -81,15 +81,15 @@ public class Executor {
 		return null;
 	}
 
-	public Object execute(Return return1) throws VoiceXTTException {
+	public Object execute(Return return1) throws InterpreterException {
 		throw new RuntimeException("implement Return executor");
 	}
 
-	public Object execute(Disconnect disconnect) throws VoiceXTTException {
+	public Object execute(Disconnect disconnect) throws InterpreterException {
 		throw new RuntimeException("implement Disconnect executor");
 	}
 
-	public Object execute(Submit submit) throws VoiceXTTException {
+	public Object execute(Submit submit) throws InterpreterException {
 		throw new SubmitException(submit);
 	}
 
@@ -133,7 +133,7 @@ public class Executor {
 		return scripting.eval(value.getExpr());
 	}
 
-	public Object execute(Prompt prompt) throws VoiceXTTException {
+	public Object execute(Prompt prompt) throws InterpreterException {
 		String tts = "";
 		for (VoiceXmlNode voiceXmlNode : prompt.getChilds()) {
 			tts += " " + execute(voiceXmlNode);
@@ -144,14 +144,14 @@ public class Executor {
 		return null;
 	}
 
-	public Object execute(Filled filled) throws VoiceXTTException {
+	public Object execute(Filled filled) throws InterpreterException {
 		for (VoiceXmlNode voiceXmlNode : filled.getChilds()) {
 			execute(voiceXmlNode);
 		}
 		return null;
 	}
 
-	public void execute(If if1) throws VoiceXTTException {
+	public void execute(If if1) throws InterpreterException {
 		String cond = if1.getCond();
 
 		String string = scripting.eval(cond).toString();
@@ -201,13 +201,13 @@ public class Executor {
 		return childsTrue;
 	}
 
-	private void execute(List<VoiceXmlNode> voiceXmlNodes) throws VoiceXTTException {
+	private void execute(List<VoiceXmlNode> voiceXmlNodes) throws InterpreterException {
 		for (VoiceXmlNode voiceXmlNode : voiceXmlNodes) {
 			try {
 				execute(voiceXmlNode);
 			} catch (Throwable e) {
-				if (e instanceof VoiceXTTException) {
-					throw (VoiceXTTException) e;
+				if (e instanceof InterpreterException) {
+					throw (InterpreterException) e;
 				}
 			}
 		}

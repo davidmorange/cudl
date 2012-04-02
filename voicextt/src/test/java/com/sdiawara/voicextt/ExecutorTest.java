@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
 
 import com.sdiawara.voicextt.exception.GotoException;
 import com.sdiawara.voicextt.exception.SubmitException;
-import com.sdiawara.voicextt.exception.VoiceXTTException;
+import com.sdiawara.voicextt.exception.InterpreterException;
 import com.sdiawara.voicextt.node.Assign;
 import com.sdiawara.voicextt.node.Clear;
 import com.sdiawara.voicextt.node.Filled;
@@ -121,7 +121,7 @@ public class ExecutorTest {
 
 	@Test
 	public void testIfExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException, VoiceXTTException {
+			XPathExpressionException, InterpreterException {
 
 		Document document = documentAcces.get(url + "if.vxml", null);
 		XPath xpath = XPathFactory.newInstance().newXPath();
@@ -156,7 +156,7 @@ public class ExecutorTest {
 
 	@Test
 	public void testPromptExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException, VoiceXTTException {
+			XPathExpressionException, InterpreterException {
 		Document document = documentAcces.get(url + "prompt.vxml", null);
 
 		NodeList childs = document.getElementsByTagName("prompt");
@@ -175,7 +175,7 @@ public class ExecutorTest {
 
 	@Test
 	public void testFilledExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException, VoiceXTTException {
+			XPathExpressionException, InterpreterException {
 
 		Document document = documentAcces.get(url + "filled.vxml", null);
 
@@ -190,7 +190,7 @@ public class ExecutorTest {
 
 	@Test(expected = GotoException.class)
 	public void testGotoExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException, VoiceXTTException {
+			XPathExpressionException, InterpreterException {
 
 		Document document = documentAcces.get(url + "goto.vxml", null);
 
@@ -199,7 +199,7 @@ public class ExecutorTest {
 
 	@Test(expected = SubmitException.class)
 	public void testSubmitExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException, VoiceXTTException {
+			XPathExpressionException, InterpreterException {
 
 		Document document = documentAcces.get(url + "submit.vxml", null);
 
@@ -208,7 +208,7 @@ public class ExecutorTest {
 
 	@Test
 	public void testLogExecutor() throws IOException, SAXException, ParserConfigurationException,
-			XPathExpressionException, VoiceXTTException {
+			XPathExpressionException, InterpreterException {
 
 		Document document = documentAcces.get(url + "log.vxml", null);
 

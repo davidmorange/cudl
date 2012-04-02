@@ -7,7 +7,7 @@ import org.w3c.dom.Node;
 
 import com.sdiawara.voicextt.FormItem;
 import com.sdiawara.voicextt.FormItemVisitor;
-import com.sdiawara.voicextt.exception.VoiceXTTException;
+import com.sdiawara.voicextt.exception.InterpreterException;
 
 public class Subdialog extends FormItem {
 	private static final List<String> CHILDS;
@@ -35,7 +35,7 @@ public class Subdialog extends FormItem {
 	}
 	
 	@Override
-	public void accept(FormItemVisitor formInterpretationAlgorithm) throws VoiceXTTException {
+	public void accept(FormItemVisitor formInterpretationAlgorithm) throws InterpreterException {
 		formInterpretationAlgorithm.visit(this);
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Queue;
 import org.mozilla.javascript.Undefined;
 
 import com.sdiawara.voicextt.exception.GotoException;
-import com.sdiawara.voicextt.exception.VoiceXTTException;
+import com.sdiawara.voicextt.exception.InterpreterException;
 import com.sdiawara.voicextt.node.Audio;
 import com.sdiawara.voicextt.node.Block;
 import com.sdiawara.voicextt.node.Field;
@@ -34,8 +34,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private final SystemOutput outPut;
 	private Executor executor;
 	private final UserInput userInput;
-	private VoiceXTTException lastException = null;
-	
+	private InterpreterException lastException = null;
 
 	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting) {
 		this(dialog, scripting, null, null);
@@ -52,12 +51,11 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	public void initialize() {
-	//	scripting.enterScope(); // enter scope dialog
+		// scripting.enterScope(); // enter scope dialog
 		for (VoiceXmlNode formChild : getCurrentDialog().getChilds()) {
 			if (formChild instanceof FormItem) {
-				String name = formChild.getAttribute("name");
+				String name = ((FormItem) formChild).getName();
 				String expr = formChild.getAttribute("expr");
-				name = ((name == null) ? formChild.getNodeName() + "_generate_name" : name);
 				expr = ((expr == null) ? "undefined" : expr);
 				scripting.put(name, expr);
 				if (formChild instanceof InputFormItem) {
@@ -79,8 +77,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	@Override
-    public void visit(Block block) throws VoiceXTTException {
-		scripting.set(block.getAttribute("name"), "true");
+	public void visit(Block block) throws InterpreterException {
+		scripting.set(block.getName(), "true");
 		List<VoiceXmlNode> childs = block.getChilds();
 		for (VoiceXmlNode voiceXmlNode : childs) {
 			executor.execute(voiceXmlNode);
@@ -88,14 +86,14 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	@Override
-    public void visit(Field field) throws VoiceXTTException {
+	public void visit(Field field) throws InterpreterException {
 		this.playPrompt();
 		String input = userInput.readData();
-		while (input == null ) {
+		while (input == null) {
 			input = userInput.readData();
 			Thread.yield();
 		}
-		
+
 		scripting.set(field.getName(), "'" + input + "'");
 		for (VoiceXmlNode voiceXmlNode : field.getChilds()) {
 			if (voiceXmlNode instanceof Filled) {
@@ -105,7 +103,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 	}
 
-	private void playPrompt() throws VoiceXTTException {
+	private void playPrompt() throws InterpreterException {
 		Queue<VoiceXmlNode> pNodes = promptQueue;
 		for (VoiceXmlNode voiceXmlNode : pNodes) {
 			Object tts = executor.execute(voiceXmlNode);
@@ -119,27 +117,27 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	@Override
-    public void visit(Subdialog subdialog) {
+	public void visit(Subdialog subdialog) {
 		throw new RuntimeException("implement subdialog visit");
 	}
 
 	@Override
-    public void visit(Transfer transfer) {
+	public void visit(Transfer transfer) {
 		throw new RuntimeException("implement transfer visit");
 	}
 
 	@Override
-    public void visit(Record Record) {
+	public void visit(Record Record) {
 		throw new RuntimeException("implement Record visit");
 	}
 
 	@Override
-    public void visit(Initial Initial) {
+	public void visit(Initial Initial) {
 		throw new RuntimeException("implement Initial visit");
 	}
 
 	@Override
-    public void visit(com.sdiawara.voicextt.node.Object object) {
+	public void visit(com.sdiawara.voicextt.node.Object object) {
 		throw new RuntimeException("implement object visit");
 	}
 
@@ -155,7 +153,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		this.nextItem = nextItem;
 	}
 
-	public void collect() throws VoiceXTTException {
+	public void collect() throws InterpreterException {
 		// Queue up prompts for the form item.
 		if (!lastIterationReprompt || !dialogChanged) {
 			if (selectedFormItem instanceof InputFormItem) {
@@ -185,7 +183,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				throw e;
 			}
 			setNextItem(nextItem == null ? scripting.eval(expritem).toString() : nextItem);
-		} catch (VoiceXTTException e) {
+		} catch (InterpreterException e) {
 			e.printStackTrace();
 		}
 	}
@@ -201,7 +199,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	private VoiceXmlNode getNamedFormItem() {
 		for (VoiceXmlNode formItem : getCurrentDialog().getChilds()) {
-			if (getNextItem().equals(formItem.getAttribute("name"))) {
+			if (formItem instanceof FormItem && getNextItem().equals(((FormItem) formItem).getName())) {
 				return formItem;
 			}
 		}
@@ -211,8 +209,10 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	private VoiceXmlNode getFirstUndefinedFormItem() {
 		for (VoiceXmlNode formItem : getCurrentDialog().getChilds()) {
-			if (Undefined.instance.equals(scripting.get(formItem.getAttribute("name")))) {
-				if (formItem instanceof FormItem) {
+			if (formItem instanceof FormItem) {
+				String name = ((FormItem) formItem).getName();
+				System.err.println(name);
+				if (Undefined.instance.equals(scripting.get(name))) {
 					return formItem;
 				}
 			}
@@ -238,7 +238,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			}
 			try {
 				collect();
-			} catch (VoiceXTTException e) {
+			} catch (InterpreterException e) {
 				System.err.println("* " + e + " *" + ((GotoException) e).getGoto().getNext() + "=next expr="
 						+ ((GotoException) e).getGoto().getExpr());
 				throw new RuntimeException(e);
@@ -246,7 +246,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 	}
 
-	public VoiceXTTException getLastException() {
+	public InterpreterException getLastException() {
 		return lastException;
 	}
 
