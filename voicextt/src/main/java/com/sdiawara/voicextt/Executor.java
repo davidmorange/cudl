@@ -76,7 +76,10 @@ public class Executor {
 			debug += scripting.eval(expr);
 		}
 
-		debug += " " + log.getTextContent();
+		System.err.println(log.getChilds().size()+"");
+		for (VoiceXmlNode node : log.getChilds()) {
+			debug += " " + execute(node);
+		}
 		voiceXTTOutPut.addLog(debug.trim());
 		return null;
 	}
@@ -130,6 +133,7 @@ public class Executor {
 	}
 
 	public Object execute(Value value) {
+		System.err.println(scripting.eval(value.getExpr()));
 		return scripting.eval(value.getExpr());
 	}
 

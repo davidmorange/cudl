@@ -49,15 +49,15 @@ class InterpreterEventHandler {
 		int counter = (eventCounter.get(eventType) == null) ? 1 : eventCounter.get(eventType) + 1;
 		//System.err.println(context.getSelectedFormItem() + "********************");
 		eventCounter.put(eventType, counter);
-		Node node = searchEventHandlers(eventType, counter, context.getSelectedFormItem());
-		Document rootDoc = context.getRootDocument();
-		node = (node == null && rootDoc != null) ? searchEventHandlers(eventType, counter, rootDoc.getElementsByTagName("vxml").item(0)) : node;
+		Node node = searchEventHandlers(eventType, counter,null/* context.getSelectedFormItem()*/);
+		//Document rootDoc = context.getRootDocument();
+		//node = (node == null && rootDoc != null) ? searchEventHandlers(eventType, counter, rootDoc.getElementsByTagName("vxml").item(0)) : node;
 
-		if (node == null) {
-			// FIXME what are we supposed to do here ? Check the spec...
+//		if (node == null) {
+//			// FIXME what are we supposed to do here ? Check the spec...
 			throw new RuntimeException("No event handler found for event " + eventType);
-		}
-		TagInterpreterFactory.getTagInterpreter(node).interpret(context);
+//		}
+//		TagInterpreterFactory.getTagInterpreter(node).interpret(context);
 	}
 
 	private Node searchEventHandlers(String eventType, int eventCounter, Node parent) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vxml version="2.0">
 <form>
-<var name="form_0_scope_var" expr="toto='variable de global'; 'variable de formulaire'"/>
+<var name="form_0_scope_var" expr="var toto='variable de global'; 'variable de formulaire'"/>
  	<block> 
 		<var name="block_0_scope_var" expr="toto='variable de global'; 'variable de block'"/>
 		<log><value expr="block_0_scope_var"/></log>
@@ -12,10 +12,8 @@
    </block>
 </form>
 <form id="forme2">
-<catch event="error.semantic"><conf:pass/></catch>
-
    <block> 
- 		<prompt><value expr="form_0_scope_var"/> 2</prompt>
+ 		<prompt><value expr="dialog.form_0_scope_var"/> 2</prompt>
    </block>
 </form>
 </vxml>

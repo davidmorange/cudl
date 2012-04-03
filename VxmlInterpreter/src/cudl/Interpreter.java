@@ -1,22 +1,7 @@
 package cudl;
 
-import static cudl.InternalInterpreter.BLIND_TRANSFER_SUCCESSSS;
-import static cudl.InternalInterpreter.CALLER_HUNGUP_DURING_TRANSFER;
-import static cudl.InternalInterpreter.DESTINATION_BUSY;
-import static cudl.InternalInterpreter.DESTINATION_HANGUP;
-import static cudl.InternalInterpreter.DTMF;
-import static cudl.InternalInterpreter.EVENT;
-import static cudl.InternalInterpreter.MAX_TIME_DISCONNECT;
-import static cudl.InternalInterpreter.NETWORK_BUSY;
-import static cudl.InternalInterpreter.NOANSWER;
-import static cudl.InternalInterpreter.START;
-import static cudl.InternalInterpreter.TALK;
-
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 import java.util.Properties;
 
@@ -24,117 +9,226 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import cudl.utils.Utils;
+import cudl.node.Script;
+import cudl.node.Var;
+import cudl.node.VoiceXmlNode;
+import cudl.node.Vxml;
 
 public class Interpreter {
-	private InternalInterpreter internalInterpreter;
-	private InterpreterContext context;
-		
+	protected InterpreterContext interpreterContext;
+	private UserInput userInput = new UserInput();;
+	private SystemOutput outPut = new SystemOutput();
+	private FormInterpretationAlgorithm fia;
+	private Vxml vxml;
+	private String currentFileName;
+	private Exception exceptionTothrow;
+	private static final String APPLICATION_VARIABLES = "lastresult$[0].confidence = 1; "
+			+ "lastresult$[0].utterance = undefined;" + "lastresult$[0].inputmode = undefined;"
+			+ "lastresult$[0].interpretation = undefined;";
+
 	public Interpreter(String url) throws IOException, ParserConfigurationException, SAXException {
-		context = new InterpreterContext(url);
-		internalInterpreter = new InternalInterpreter(context);
-	}
-	
-	public Interpreter(String url, String sessionVariables) throws IOException,
-			ParserConfigurationException, SAXException {
-		context = new InterpreterContext(url, null, sessionVariables);
-		internalInterpreter = new InternalInterpreter(context);
+		this.currentFileName = url;
+		this.interpreterContext = new InterpreterContext(url);
+
+		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null)
+				.getDocumentElement());
+		this.fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(),
+				outPut, userInput);
+		FormInterpretationAlgorithm.setDefaultUncaughtExceptionHandler(getDefaultUncaughtExceptionHandler());
+		interpreterContext.getScripting().enterScope(); // in scope application
+		try {
+			initializeApplicationVariables();
+		} catch (InterpreterException e) {
+			throw new RuntimeException(e);
+		}
+		interpreterContext.getScripting().enterScope(); // in scope document
+		try {
+			initializeDocumentVariables();
+		} catch (InterpreterException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public void start() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(START, null);
+	
+	public Interpreter(String url, String sessionVariables) throws IOException, ParserConfigurationException,
+			SAXException {
+	}
+
+	public void start() throws IOException, SAXException {
+		this.fia.start();
+		if (exceptionTothrow != null) {
+			throw new RuntimeException(exceptionTothrow);
+		}
+		try {
+			Thread.sleep(300);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void noInput() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(EVENT, "noinput");
+		throw new RuntimeException("noinput not implemented");
+		// internalInterpreter.interpret(EVENT, "noinput");
 	}
 
 	public void noMatch() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(EVENT, "nomatch");
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(EVENT, "nomatch");
 	}
 
 	public void disconnect() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(EVENT, "connection.disconnect.hangup");
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(EVENT, "connection.disconnect.hangup");
 	}
 
 	public void blindTransferSuccess() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(BLIND_TRANSFER_SUCCESSSS, null);
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(BLIND_TRANSFER_SUCCESSSS, null);
 	}
 
 	public void noAnswer() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(NOANSWER, null);
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(NOANSWER, null);
 	}
 
 	public void callerHangupDuringTransfer() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(CALLER_HUNGUP_DURING_TRANSFER, null);
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(CALLER_HUNGUP_DURING_TRANSFER, null);
 	}
 
 	public void networkBusy() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(NETWORK_BUSY, null);
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(NETWORK_BUSY, null);
 	}
 
 	public void destinationBusy() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(DESTINATION_BUSY, null);
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(DESTINATION_BUSY, null);
 	}
 
 	public void transferTimeout() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(MAX_TIME_DISCONNECT, null);
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(MAX_TIME_DISCONNECT, null);
 	}
 
-	public void talk(String sentence) throws UnsupportedEncodingException, IOException, SAXException,
-			ParserConfigurationException {
-		String utterance = "'" + URLEncoder.encode(sentence, "UTF-8").replaceAll("'", "") + "'";
-		internalInterpreter.interpret(TALK, utterance);
+	public void talk(String sentence) {
+		try {
+			Speaker speaker = new Speaker(userInput);
+			speaker.setUtterance(sentence);
+			speaker.start();
+			speaker.join();
+			this.fia.join(300);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void submitDtmf(String dtmf) throws IOException, SAXException, ParserConfigurationException {
-		String utterance = "'" + dtmf.replaceAll(" ", "") + "'";
-		internalInterpreter.interpret(DTMF, utterance);
+		throw new RuntimeException("noMatch not implemented");
+		// String utterance = "'" + dtmf.replaceAll(" ", "") + "'";
+		// internalInterpreter.interpret(DTMF, utterance);
 	}
 
 	public List<String> getLogsWithLabel(String... label) {
-		List<String> logs = new ArrayList<String>();
-		for (java.util.Iterator<Log> iterator = context.getLogs().iterator(); iterator.hasNext();) {
-			Log log = (Log) iterator.next();
-			for (int i = 0; i < label.length; i++) {
-				if (log.label.equals(label[i])) {
-					logs.add(log.value);
-				}
-			}
-		}
-		return logs;
+		return outPut.getLogs(label);
 	}
 
 	public List<String> getLogs() {
-		List<String> logs = new ArrayList<String>();
-		for (Iterator<Log> iterator = context.getLogs().iterator(); iterator.hasNext();) {
-			logs.add(((Log) iterator.next()).value);
-		}
-
-		return logs;
+		return outPut.getLogs();
 	}
 
 	public boolean hungup() {
-		return context.isHangup();
+		return !fia.isAlive();
 	}
 
 	public List<Prompt> getPrompts() {
-		return context.getPrompts();
+		return outPut.getPrompts();
 	}
 
 	public String getTranferDestination() {
-		return context.getTransferDestination();
+		return null;// context.getTransferDestination();
 	}
 
 	public String getActiveGrammar() {
-		return Utils.getNodeAttributeValue(context.getGrammarActive().get(0), "src").trim();
+		return null;// Utils.getNodeAttributeValue(context.getGrammarActive().get(0),
+					// "src").trim();
 	}
 
 	public Properties getCurrentDialogProperties() {
-		return internalInterpreter.getCurrentDialogProperties();
+		return null;// internalInterpreter.getCurrentDialogProperties();
 	}
 
 	public void destinationHangup() throws IOException, SAXException, ParserConfigurationException {
-		internalInterpreter.interpret(DESTINATION_HANGUP, null);
+		throw new RuntimeException("noMatch not implemented");
+		// internalInterpreter.interpret(DESTINATION_HANGUP, null);
 	}
+
+	private UncaughtExceptionHandler getDefaultUncaughtExceptionHandler() {
+		return new UncaughtExceptionHandler() {
+
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				Throwable exception = e.getCause();
+				try {
+					if (exception instanceof GotoException) {
+						String next = ((GotoException) exception).getGoto().getNext();
+						String expr = ((GotoException) exception).getGoto().getExpr();
+						if (next == null && expr == null) {
+							throw new RuntimeException("Semantic error");
+						}
+						next = ((next == null) ? ((String) interpreterContext.getScripting().eval(expr)) : next);
+						if (next.startsWith("#")) {
+							next = next.replace("#", "");
+							fia = new FormInterpretationAlgorithm(vxml.getDialogById(next),
+									interpreterContext.getScripting(), outPut, userInput);
+						} else {
+							currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/"))
+									+ "/" + next;
+							vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null)
+									.getDocumentElement());
+							System.err.println(currentFileName);
+							if (next.contains("#")) {
+								next = next.substring(next.lastIndexOf("#") + 1);
+								fia = new FormInterpretationAlgorithm(vxml.getDialogById(next),
+										interpreterContext.getScripting(), outPut, userInput);
+							} else {
+								fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(),
+										interpreterContext.getScripting(), outPut, userInput);
+							}
+						}
+						fia.start();
+						fia.join();
+					}
+				} catch (Exception e1) {
+					exceptionTothrow = e1;
+				}
+			}
+
+		};
+	}
+
+	protected void initializeApplicationVariables() throws IOException, SAXException, InterpreterException {
+		interpreterContext.getScripting().put("lastresult$", "new Array()");
+		interpreterContext.getScripting().eval("lastresult$[0] = new Object()");
+		interpreterContext.getScripting().eval(APPLICATION_VARIABLES);
+		String rootName = vxml.getApplication();
+
+		if (rootName != null) {
+			Vxml root = new Vxml(interpreterContext.getDocumentAcces().get(rootName, null).getDocumentElement());
+			for (VoiceXmlNode voiceXmlNode : root.getChilds()) {
+				if (voiceXmlNode instanceof Var || voiceXmlNode instanceof Script) {
+					new Executor(interpreterContext.getScripting(), null).execute(voiceXmlNode);
+				}
+			}
+		}
+	}
+	
+	protected void initializeDocumentVariables() throws InterpreterException {
+		for (VoiceXmlNode voiceXmlNode : vxml.getChilds()) {
+			if (voiceXmlNode instanceof Var || voiceXmlNode instanceof Script) {
+				new Executor(interpreterContext.getScripting(), null).execute(voiceXmlNode);
+			}
+		}
+	}
+
 }

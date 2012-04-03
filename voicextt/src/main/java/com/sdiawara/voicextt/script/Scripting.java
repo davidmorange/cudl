@@ -21,7 +21,6 @@ public class Scripting {
 	}
 
 	public void put(String name, String value) {
-		System.err.println(name+" = "+value);
 		scopes.peek().put(name, scopes.peek(), eval(value));
 	}
 

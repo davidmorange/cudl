@@ -4,6 +4,8 @@ import java.lang.reflect.Constructor;
 
 import org.w3c.dom.Node;
 
+import cudl.node.VoiceXmlNode;
+
 class TagInterpreterFactory {
 	static VoiceXmlNode getTagInterpreter(Node node) {
 		String nodeName = node.getNodeName().replaceAll("#|:", "");

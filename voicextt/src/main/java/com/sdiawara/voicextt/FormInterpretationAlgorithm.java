@@ -211,7 +211,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		for (VoiceXmlNode formItem : getCurrentDialog().getChilds()) {
 			if (formItem instanceof FormItem) {
 				String name = ((FormItem) formItem).getName();
-				System.err.println(name);
 				if (Undefined.instance.equals(scripting.get(name))) {
 					return formItem;
 				}

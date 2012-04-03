@@ -7,6 +7,8 @@ import java.io.IOException;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import cudl.node.VoiceXmlNode;
+
 abstract class TxmlTag extends VoiceXmlNode {
 	TxmlTag(Node node) {
 		super(node);
@@ -19,12 +21,11 @@ class ConfpassTag extends TxmlTag {
 		super(node);
 	}
 
-	@Override
 	public Object interpret(InterpreterContext context) throws InterpreterException, IOException,
 			SAXException {
 		Prompt prompt = new Prompt();
 		prompt.tts = "pass";
-		context.getPrompts().add(prompt);
+		//context.getPrompts().add(prompt);
 		throw new ExitException();
 	}
 
@@ -36,14 +37,13 @@ class ConffailTag extends TxmlTag {
 		super(node);
 	}
 
-	@Override
 	public Object interpret(InterpreterContext context) throws InterpreterException, IOException,
 			SAXException {
 		String reason = getNodeAttributeValue(node, "reason");
 		if (reason == null) {
 			String expr = getNodeAttributeValue(node, "expr");
-			if (expr != null)
-				reason = "" + context.getDeclaration().evaluateScript(expr, 50);
+			//if (expr != null)
+			//	reason = "" + context.getDeclaration().evaluateScript(expr, 50);
 			
 		}
 		throw new RuntimeException(reason == null ? "Fail" : "Fail reason -> " + reason);
@@ -56,7 +56,6 @@ class ConfcommentTag extends TxmlTag {
 		super(node);
 	}
 
-	@Override
 	public Object interpret(InterpreterContext context) {
 		return null;
 	}

@@ -65,6 +65,7 @@ public class InterpreterTest extends TestCase {
 		interpreter = new Interpreter(url + "VxmlGlobalServletService");
 		interpreter.start();
 
+		
 		assertEquals(expectedLogs, interpreter.getLogs());
 		assertEquals(expectedStats, interpreter.getLogsWithLabel("stats"));
 		System.err.println(expectedPrompts);

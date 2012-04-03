@@ -2,7 +2,9 @@ package cudl;
 
 import org.w3c.dom.Node;
 
-class InterpreterException extends Exception {
+import cudl.node.Goto;
+
+public class InterpreterException extends Exception {
 }
 
 class TransferException extends InterpreterException {
@@ -17,12 +19,14 @@ class ExitException extends InterpreterException {
 }
 
 class GotoException extends InterpreterException {
-	String next;
-	String nextItem;
+	final Goto goto1;
 
-	GotoException(String next, String nextItem) {
-		this.next = next;
-		this.nextItem = nextItem;
+	public GotoException(Goto goto1) {
+		this.goto1 = goto1;
+	}
+
+	public Goto getGoto() {
+		return goto1;
 	}
 }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <vxml version="2.0">
 <var name="varRoot" expr="'variable application'"/>
+<var name="root_scope_var" expr="'variable application2'"/>
 <form>
 <var name="appli_scope_var" expr="'cette variable est defini partout dans le formulaire'"/>
 	<block>

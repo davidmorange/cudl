@@ -11,10 +11,6 @@
     </block>
      <block>
         <log>LOG Hello 3</log>
-        
     </block>
-   <block> 
-    
-   </block>  
    </form>
 </vxml>
