@@ -13,6 +13,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import cudl.node.Field;
+import cudl.node.VoiceXmlNode;
 import cudl.utils.Utils;
 
 //http://www.yoyodesign.org/doc/w3c/voicexml20/#dml5.2.2 french
@@ -45,57 +47,74 @@ class InterpreterEventHandler {
 		// reset to 0 ?
 	}
 
-	public void doEvent(String eventType) throws IOException, SAXException, InterpreterException, ParserConfigurationException {
-		int counter = (eventCounter.get(eventType) == null) ? 1 : eventCounter.get(eventType) + 1;
-		//System.err.println(context.getSelectedFormItem() + "********************");
-		eventCounter.put(eventType, counter);
-		Node node = searchEventHandlers(eventType, counter,null/* context.getSelectedFormItem()*/);
-		//Document rootDoc = context.getRootDocument();
-		//node = (node == null && rootDoc != null) ? searchEventHandlers(eventType, counter, rootDoc.getElementsByTagName("vxml").item(0)) : node;
-
-//		if (node == null) {
-//			// FIXME what are we supposed to do here ? Check the spec...
-			throw new RuntimeException("No event handler found for event " + eventType);
-//		}
-//		TagInterpreterFactory.getTagInterpreter(node).interpret(context);
+	public void doEvent(String eventType) throws IOException, SAXException, InterpreterException,
+			ParserConfigurationException {
+		// int counter = (eventCounter.get(eventType) == null) ? 1 :
+		// eventCounter.get(eventType) + 1;
+		// // System.err.println(context.getSelectedFormItem() +
+		// // "********************");
+		// eventCounter.put(eventType, counter);
+		// //Node node = searchEventHandlers(eventType, counter, null/*
+		// * context.
+		// * getSelectedFormItem
+		// * ()
+		// */);
+		// // Document rootDoc = context.getRootDocument();
+		// // node = (node == null && rootDoc != null) ?
+		// // searchEventHandlers(eventType, counter,
+		// // rootDoc.getElementsByTagName("vxml").item(0)) : node;
+		//
+		// // if (node == null) {
+		// // // FIXME what are we supposed to do here ? Check the spec...
+		// throw new RuntimeException("No event handler found for event " +
+		// eventType);
+		// }
+		// TagInterpreterFactory.getTagInterpreter(node).interpret(context);
 	}
 
-	private Node searchEventHandlers(String eventType, int eventCounter, Node parent) {
-		List<Node> availableHandler = new ArrayList<Node>();
-
+	private static VoiceXmlNode searchEventHandlers(String eventType, int eventCounter, VoiceXmlNode parent) {
+		List<VoiceXmlNode> availableHandler = new ArrayList<VoiceXmlNode>();
 		while (parent != null) {
-			NodeList nodeList = parent.getChildNodes();
-			// System.err.println(parent + " parent");
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				if (isHandlerForEventType(eventType, node)) {
-					String countAsString = Utils.getNodeAttributeValue(node, "count");
-					int nodeCount = countAsString == null ? 1 : Integer.parseInt(countAsString);
+			List<VoiceXmlNode> childs = parent.getChilds();
+			for (VoiceXmlNode node : childs) {
+				if (eventType.endsWith(node.getNodeName()) || isHandlerForEventType(eventType, node)) {
+					String count = node.getAttribute("count");
+					int nodeCount = (count == null) ? 1 : Integer.parseInt(count);
 					if (nodeCount == eventCounter) {
-						// FIXME we should select the event handler with the count
-						// closer to counter
-						// here we check only equality
 						return node;
 					}
 					availableHandler.add(node);
 				}
 			}
-			parent = parent.getParentNode();
+			parent = parent.getParent();
 		}
 
 		return availableHandler.size() == 0 ? null : availableHandler.get(0);
 	}
 
-	private boolean isHandlerForEventType(String eventType, Node node) {
+	private static boolean isHandlerForEventType(String eventType, VoiceXmlNode node) {
 		return node.getNodeName().equals(eventType) || isCatchItemAndContainsEvent(node, eventType);
 	}
 
-	private boolean isCatchItemAndContainsEvent(Node node, String eventName) {
-		String eventAttribute = Utils.getNodeAttributeValue(node, "event");
-		return node.getNodeName().equals("catch") && eventAttribute != null && eventAttribute.contains(eventName);
+	private static boolean isCatchItemAndContainsEvent(VoiceXmlNode node, String eventName) {
+		String eventAttribute = node.getAttribute("event");
+		return node.getNodeName().equals("catch") && eventAttribute != null
+				&& eventAttribute.contains(eventName);
 	}
 
 	public void resetEventCounter() {
 		this.eventCounter = new Hashtable<String, Integer>();
+	}
+
+	public static void doEvent(VoiceXmlNode field, Executor executor, String eventType, int eventCount)
+			throws InterpreterException {
+		VoiceXmlNode eventHandlers = searchEventHandlers(eventType, eventCount, field);
+		if (eventHandlers != null) {
+			List<VoiceXmlNode> childs = eventHandlers.getChilds();
+			for (VoiceXmlNode voiceXmlNode : childs) {
+				System.err.println(voiceXmlNode);
+				executor.execute(voiceXmlNode);
+			}
+		}
 	}
 }

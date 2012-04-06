@@ -13,6 +13,7 @@ import cudl.node.Script;
 import cudl.node.Var;
 import cudl.node.VoiceXmlNode;
 import cudl.node.Vxml;
+import cudl.script.Scripting;
 
 public class Interpreter {
 	protected InterpreterContext interpreterContext;
@@ -27,6 +28,11 @@ public class Interpreter {
 			+ "lastresult$[0].interpretation = undefined;";
 
 	public Interpreter(String url) throws IOException, ParserConfigurationException, SAXException {
+		this(url, "");
+	}
+
+	public Interpreter(String url, String sessionVariables) throws IOException, ParserConfigurationException,
+			SAXException {
 		this.currentFileName = url;
 		this.interpreterContext = new InterpreterContext(url);
 
@@ -35,6 +41,7 @@ public class Interpreter {
 		this.fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(),
 				outPut, userInput);
 		FormInterpretationAlgorithm.setDefaultUncaughtExceptionHandler(getDefaultUncaughtExceptionHandler());
+		interpreterContext.getScripting().eval(sessionVariables);
 		interpreterContext.getScripting().enterScope(); // in scope application
 		try {
 			initializeApplicationVariables();
@@ -47,11 +54,6 @@ public class Interpreter {
 		} catch (InterpreterException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	
-	public Interpreter(String url, String sessionVariables) throws IOException, ParserConfigurationException,
-			SAXException {
 	}
 
 	public void start() throws IOException, SAXException {
@@ -67,13 +69,21 @@ public class Interpreter {
 	}
 
 	public void noInput() throws IOException, SAXException, ParserConfigurationException {
-		throw new RuntimeException("noinput not implemented");
-		// internalInterpreter.interpret(EVENT, "noinput");
+		try {
+			enterInput("noinput", "event$");
+			this.fia.join(300);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void noMatch() throws IOException, SAXException, ParserConfigurationException {
-		throw new RuntimeException("noMatch not implemented");
-		// internalInterpreter.interpret(EVENT, "nomatch");
+		try {
+			enterInput("nomatch", "event$");
+			this.fia.join(300);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public void disconnect() throws IOException, SAXException, ParserConfigurationException {
@@ -113,20 +123,27 @@ public class Interpreter {
 
 	public void talk(String sentence) {
 		try {
-			Speaker speaker = new Speaker(userInput);
-			speaker.setUtterance(sentence);
-			speaker.start();
-			speaker.join();
+			enterInput(sentence, "voice$");
 			this.fia.join(300);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+	private void enterInput(String sentence, String inputType) throws InterruptedException {
+		Speaker speaker = new Speaker(userInput);
+		speaker.setUtterance(inputType + sentence);
+		speaker.start();
+		speaker.join();
+	}
+
 	public void submitDtmf(String dtmf) throws IOException, SAXException, ParserConfigurationException {
-		throw new RuntimeException("noMatch not implemented");
-		// String utterance = "'" + dtmf.replaceAll(" ", "") + "'";
-		// internalInterpreter.interpret(DTMF, utterance);
+		try {
+			enterInput(dtmf, "dtmf$");
+			this.fia.join(300);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public List<String> getLogsWithLabel(String... label) {
@@ -169,6 +186,7 @@ public class Interpreter {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				Throwable exception = e.getCause();
+
 				try {
 					if (exception instanceof GotoException) {
 						String next = ((GotoException) exception).getGoto().getNext();
@@ -186,7 +204,6 @@ public class Interpreter {
 									+ "/" + next;
 							vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null)
 									.getDocumentElement());
-							System.err.println(currentFileName);
 							if (next.contains("#")) {
 								next = next.substring(next.lastIndexOf("#") + 1);
 								fia = new FormInterpretationAlgorithm(vxml.getDialogById(next),
@@ -198,6 +215,27 @@ public class Interpreter {
 						}
 						fia.start();
 						fia.join();
+					} else if (exception instanceof ChoiceException) {
+						String next = ((ChoiceException) exception).getChoice().getAttribute("next");
+						if (next != null) {
+							currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/"))
+									+ "/" + next;
+							vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null)
+									.getDocumentElement());
+							if (next.contains("#")) {
+								next = next.substring(next.lastIndexOf("#") + 1);
+								fia = new FormInterpretationAlgorithm(vxml.getDialogById(next),
+										interpreterContext.getScripting(), outPut, userInput);
+							} else {
+								fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(),
+										interpreterContext.getScripting(), outPut, userInput);
+							}
+							fia.start();
+							fia.join();
+						}
+
+					} else {
+						throw new RuntimeException(e);
 					}
 				} catch (Exception e1) {
 					exceptionTothrow = e1;
@@ -222,7 +260,7 @@ public class Interpreter {
 			}
 		}
 	}
-	
+
 	protected void initializeDocumentVariables() throws InterpreterException {
 		for (VoiceXmlNode voiceXmlNode : vxml.getChilds()) {
 			if (voiceXmlNode instanceof Var || voiceXmlNode instanceof Script) {
@@ -230,5 +268,4 @@ public class Interpreter {
 			}
 		}
 	}
-
 }

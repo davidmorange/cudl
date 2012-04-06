@@ -5,12 +5,11 @@ import java.util.List;
 
 import org.w3c.dom.Node;
 
-public class Noinput extends VoiceXmlNode {
-
-	public Noinput(Node node) {
+public class Catch extends VoiceXmlNode {
+	public Catch(Node node) {
 		super(node);
 	}
-
+	
 	private static final List<String> CHILDS;
 	static {
 		CHILDS = new ArrayList<String>();
@@ -37,4 +36,5 @@ public class Noinput extends VoiceXmlNode {
 	public boolean canContainsChild(VoiceXmlNode child) {
 		return CHILDS.contains(child.getNodeName());
 	}
+
 }

@@ -21,6 +21,7 @@ import com.sdiawara.voicextt.node.If;
 import com.sdiawara.voicextt.node.Log;
 import com.sdiawara.voicextt.node.Prompt;
 import com.sdiawara.voicextt.node.Return;
+import com.sdiawara.voicextt.node.Script;
 import com.sdiawara.voicextt.node.Submit;
 import com.sdiawara.voicextt.node.Text;
 import com.sdiawara.voicextt.node.Value;
@@ -45,12 +46,13 @@ public class Executor {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof InterpreterException) {
-				System.err.println("blah");
 				throw (InterpreterException) e.getCause();
 			}
 		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("No implementation for Executor.execute("
-					+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
+			if (!(child instanceof Else || child instanceof Elseif)) {
+				throw new RuntimeException("No implementation for Executor.execute("
+						+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
+			}
 		}
 		return null;
 	}
@@ -76,7 +78,7 @@ public class Executor {
 			debug += scripting.eval(expr);
 		}
 
-		System.err.println(log.getChilds().size()+"");
+		System.err.println(log.getChilds().size() + "");
 		for (VoiceXmlNode node : log.getChilds()) {
 			debug += " " + execute(node);
 		}
@@ -107,6 +109,10 @@ public class Executor {
 		return null;
 	}
 
+	public Object execute(Script script) throws InterpreterException {
+		throw new InterpreterException();
+	}
+	
 	public Object execute(Assign assign) {
 		String name = assign.getAttribute("name");
 		String expr = assign.getAttribute("expr");

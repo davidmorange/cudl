@@ -32,12 +32,14 @@ public abstract class VoiceXmlNode {
 
 	public String getAttribute(String att) {
 		NamedNodeMap attributes = node.getAttributes();
-		if (attributes == null)
+		if (attributes == null){
 			return null;
+		}
 
 		Node attValue = attributes.getNamedItem(att);
-		if (attValue == null)
+		if (attValue == null) {
 			return null;
+		}
 
 		return attValue.getNodeValue();
 	}

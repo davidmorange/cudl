@@ -91,14 +91,6 @@ public class Field extends InputFormItem {
 
 	/**
 	 * 
-	 * @return the attName
-	 */
-	public String getName() {
-		return getAttribute(ATT_NAME);
-	}
-
-	/**
-	 * 
 	 * @return the attExpr
 	 */
 	public String getExpr() {

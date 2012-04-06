@@ -2,7 +2,7 @@
 <!-- @ Copyright 1998-2003 W3C (MIT, ERCIM, Keio), All Rights Reserved. See http://www.w3.org/Consortium/Legal/. @ -->
 <vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" xmlns:conf="http://www.w3.org/2002/vxml-conformance">
   <catch>
-    <conf:fail expr="'document caught event ' + _event"/>
+    <prompt><value expr="'document caught event ' + _event"/></prompt>
   </catch>
   <var name="firstVariable" expr="1"/>
   <var name="secondVariable" expr="1000"/>
@@ -16,7 +16,7 @@
       </log>
       Look into logging message to verify that the log message 
       and evaluation are reported in document order.
-      <conf:pass/>
+     <prompt>pass</prompt>
     </block>
   </form>
 </vxml>

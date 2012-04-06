@@ -5,9 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.print.attribute.standard.MediaSize.NA;
+
+import org.mozilla.javascript.EcmaError;
+
 import cudl.node.Assign;
 import cudl.node.Audio;
 import cudl.node.Block;
+import cudl.node.Choice;
 import cudl.node.Clear;
 import cudl.node.Disconnect;
 import cudl.node.Else;
@@ -20,6 +25,7 @@ import cudl.node.If;
 import cudl.node.Log;
 import cudl.node.Prompt;
 import cudl.node.Return;
+import cudl.node.Script;
 import cudl.node.Submit;
 import cudl.node.Text;
 import cudl.node.Value;
@@ -44,12 +50,13 @@ public class Executor {
 		} catch (IllegalAccessException e) {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof InterpreterException) {
-				System.err.println("blah");
 				throw (InterpreterException) e.getCause();
 			}
 		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("No implementation for Executor.execute("
-					+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
+			if (!(child instanceof Else || child instanceof Elseif)) {
+				throw new RuntimeException("No implementation for Executor.execute("
+						+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
+			}
 		}
 		return null;
 	}
@@ -86,6 +93,10 @@ public class Executor {
 		throw new RuntimeException("implement Return executor");
 	}
 
+	public Object execute(Choice choice) throws InterpreterException {
+		throw new ChoiceException(choice);
+	}
+
 	public Object execute(Disconnect disconnect) throws InterpreterException {
 		throw new RuntimeException("implement Disconnect executor");
 	}
@@ -109,11 +120,18 @@ public class Executor {
 		return p;
 	}
 
-	public Object execute(Var var) {
+	public Object execute(Var var) throws InterpreterException {
 		String name = var.getAttribute("name");
+		if (!validateName(name)) {
+			throw new SemanticException(var, "ne doi pas ");
+		}
 		String expr = var.getAttribute("expr");
 		scripting.put(name, expr == null ? "undefined" : expr);
 		return null;
+	}
+
+	private boolean validateName(String name) {
+		return !name.startsWith("dialog.");
 	}
 
 	public Object execute(Assign assign) {
@@ -123,19 +141,33 @@ public class Executor {
 		return null;
 	}
 
-	public Object execute(Clear clear) {
+	public Object execute(Script script) throws InterpreterException {
+		try {
+			Object eval = scripting.eval(script.getTextContent());
+			return eval;
+		} catch (EcmaError e) {
+			throw new SemanticException(script, e.getMessage());
+		}
+	}
+
+	public Object execute(Clear clear) throws SemanticException {
 		String nameList = clear.getAttribute("namelist");
-		StringTokenizer tokenizer = new StringTokenizer(nameList, " ");
-		if (!tokenizer.hasMoreElements()) {
-			for (VoiceXmlNode voiceXmlNode : getEnclosingDialog(clear).getChilds()) {
-				if (voiceXmlNode instanceof FormItem) {
-					//scripting.set(((FormItem)voiceXmlNode).getName(), "undefined");
+		try {
+			if (nameList == null) {
+				for (VoiceXmlNode voiceXmlNode : getEnclosingDialog(clear).getChilds()) {
+					if (voiceXmlNode instanceof FormItem) {
+						scripting.set(((FormItem) voiceXmlNode).getName(), "undefined");
+					}
+				}
+			} else {
+				StringTokenizer tokenizer = new StringTokenizer(nameList, " ");
+				while (tokenizer.hasMoreElements()) {
+					String name = (String) tokenizer.nextElement();
+					scripting.set(name, "undefined");
 				}
 			}
-		}
-		while (tokenizer.hasMoreElements()) {
-			String name = (String) tokenizer.nextElement();
-			scripting.set(name, "undefined");
+		} catch (EcmaError e) {
+			throw new SemanticException(clear, e.getMessage());
 		}
 		return null;
 	}
@@ -154,9 +186,7 @@ public class Executor {
 		if (value.trim().isEmpty()) {
 			return "";
 		}
-		if (value.contains(".")) {
-			System.err.println("ok" + value);
-		}
+
 		if (text.getParent() instanceof Block) {
 			cudl.Prompt p = new cudl.Prompt();
 			p.tts += value.trim();
@@ -168,7 +198,6 @@ public class Executor {
 	public Object execute(Value value) {
 		Object eval = null;
 		eval = scripting.eval(value.getExpr());
-		System.err.println("***" + eval + "***");
 		if (value.getParent() instanceof Block /* catch */) {
 			cudl.Prompt p = new cudl.Prompt();
 			p.tts += eval;
@@ -264,13 +293,7 @@ public class Executor {
 
 	private void execute(List<VoiceXmlNode> voiceXmlNodes) throws InterpreterException {
 		for (VoiceXmlNode voiceXmlNode : voiceXmlNodes) {
-			try {
-				execute(voiceXmlNode);
-			} catch (Throwable e) {
-				if (e instanceof InterpreterException) {
-					throw (InterpreterException) e;
-				}
-			}
+			execute(voiceXmlNode);
 		}
 	}
 }

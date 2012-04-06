@@ -40,7 +40,6 @@ public class Scripting {
 		context = ContextFactory.getGlobal().enterContext();
 		ScriptableObject peek = scopes.peek();
 		Object evaluateString = context.evaluateString(peek, script, script, 1, null);
-		System.err.println(script + " (" + evaluateString + ") " + scopes.size() + " " + exitedScopes.size());
 		return evaluateString;
 	}
 

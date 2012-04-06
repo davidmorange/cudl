@@ -5,7 +5,7 @@
       <prompt>a badfetch error occur</prompt>
   </catch>
     <block>
-       <throw event="toto" eventexpr="toto"/>
+       <throw event="" eventexpr=""/>
     </block>
     
     <catch event="toto"/>

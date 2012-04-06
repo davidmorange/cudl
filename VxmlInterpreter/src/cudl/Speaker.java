@@ -1,7 +1,7 @@
 package cudl;
 
 public class Speaker extends Thread {
-
+	
 	private final UserInput userInput;
 	private String utterance;
 

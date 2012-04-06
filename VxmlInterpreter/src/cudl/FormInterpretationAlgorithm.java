@@ -1,22 +1,24 @@
 package cudl;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import org.mozilla.javascript.Undefined;
 
 import cudl.node.Audio;
 import cudl.node.Block;
+import cudl.node.Choice;
 import cudl.node.Field;
 import cudl.node.Filled;
-import cudl.node.Goto;
+import cudl.node.Form;
 import cudl.node.Initial;
 import cudl.node.Prompt;
 import cudl.node.Record;
 import cudl.node.Script;
 import cudl.node.Subdialog;
-import cudl.node.Submit;
 import cudl.node.Transfer;
 import cudl.node.Value;
 import cudl.node.Var;
@@ -35,6 +37,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private Executor executor;
 	private final UserInput userInput;
 	private InterpreterException lastException = null;
+	private Map<String, Integer> eventCounterMap = new HashMap<String, Integer>();
 
 	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting) {
 		this(dialog, scripting, null, null);
@@ -89,18 +92,51 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	public void visit(Field field) throws InterpreterException {
 		this.playPrompt();
 		String input = userInput.readData();
-		while (input == null) {
+		while (input == null || !"voice dtmf".contains(input.split("\\$")[0])) {
+			if (input != null) {
+				String eventType = input.split("\\$")[1];
+				InterpreterEventHandler.doEvent(field, executor, eventType, getEventCount(eventType));
+				updateEventCount(eventType);
+			}
 			input = userInput.readData();
 			Thread.yield();
 		}
+		if ("voice dtmf".contains(input.split("\\$")[0])) {
+			setUterrance(field, input);
+			executeFilled(field);
+		}
+	}
 
-		scripting.set(field.getName(), "'" + input + "'");
+	private void updateEventCount(String eventType) {
+		eventCounterMap.put(eventType, getEventCount(eventType) + 1);
+	}
+
+	private int getEventCount(String eventType) {
+		Integer integer = eventCounterMap.get(eventType);
+		if (integer == null) {
+			return 1;
+		}
+		return integer;
+	}
+
+	private void executeFilled(Field field) throws InterpreterException {
 		for (VoiceXmlNode voiceXmlNode : field.getChilds()) {
 			if (voiceXmlNode instanceof Filled) {
 				executor.execute(voiceXmlNode);
 				return;
 			}
 		}
+	}
+
+	private void setUterrance(Field field, String input) {
+		String[] split = input.split("\\$");
+		String utterance = "'" + split[1] + "'";
+		String inputmode = "'" + split[1] + "'";
+		scripting.set(field.getName(), utterance);
+		scripting.put(field.getName() + "$", "new Object()");
+		scripting.eval("application.lastresult$.utterance =" + field.getName() + "$.utterance=" + utterance);
+		scripting.eval("application.lastresult$.inputmode =" + field.getName() + "$.inputmode=" + inputmode);
+		scripting.eval(field.getName() + "$.confidence=" + 1);
 	}
 
 	private void playPrompt() throws InterpreterException {
@@ -182,6 +218,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			setNextItem(nextItem);// Item == null ?
 									// scripting.eval(expritem).toString() :
 									// nextItem);
+		} catch (SemanticException e) {
+			InterpreterEventHandler.doEvent(e.node, executor, "error.semantic", getEventCount("error.semanic"));
 		} catch (InterpreterException e) {
 			throw e;
 		}
@@ -228,6 +266,54 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	@Override
 	public void run() {
 		scripting.enterScope(); // in scope dialog
+		if (currentDialog instanceof Form) {
+			executeForm();
+		} else {
+			executeMenu();
+		}
+	}
+
+	private void executeMenu() {
+		try {
+			for (VoiceXmlNode node : currentDialog.getChilds()) {
+				if (node instanceof Prompt) {
+					executor.execute(node);
+				}
+			}
+		
+			String input = getInput();
+			if (input != null) {
+				int i = 1;
+				for (VoiceXmlNode node : currentDialog.getChilds()) {
+					if (node instanceof Choice) {
+						while (i == Integer.parseInt(input.split("\\$")[1])) {
+							executor.execute(node);
+						}
+						i++;
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private String getInput() throws InterpreterException {
+		String input = userInput.readData();
+		while (input == null || !"voice dtmf".contains(input.split("\\$")[0])) {
+			if (input != null) {
+				String eventType = input.split("\\$")[1];
+				InterpreterEventHandler.doEvent(currentDialog, executor, eventType, getEventCount(eventType));
+				updateEventCount(eventType);
+			}
+			input = userInput.readData();
+
+			Thread.yield();
+		}
+		return input;
+	}
+
+	private void executeForm() {
 		initialize();
 		while (true) {
 			selectedFormItem = select();
@@ -236,10 +322,10 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			}
 			try {
 				collect();
+			} catch (ExitException e) {
+				// setIshangup
+				return;
 			} catch (InterpreterException e) {
-				// System.err.println("* " + e + " *" + ((GotoException) e).next
-				// + "=next expr="
-				// + ((GotoException) e).getGoto().getExpr());
 				throw new RuntimeException(e);
 			}
 		}

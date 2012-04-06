@@ -17,6 +17,7 @@ public class VoiceXmlNodeFactory {
 		} catch (ClassNotFoundException e) {
 			throw new UnsupportedOperationException(capitalize(nodeName) + ".java not found");
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException(e.getCause());
 		}
 	}

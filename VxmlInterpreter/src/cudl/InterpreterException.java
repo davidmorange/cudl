@@ -2,9 +2,18 @@ package cudl;
 
 import org.w3c.dom.Node;
 
+import cudl.node.Choice;
 import cudl.node.Goto;
+import cudl.node.VoiceXmlNode;
 
 public class InterpreterException extends Exception {
+
+	public InterpreterException(String message) {
+		super(message);
+	}
+
+	public InterpreterException() {
+	}
 }
 
 class TransferException extends InterpreterException {
@@ -46,6 +55,19 @@ class SubmitException extends InterpreterException {
 	}
 }
 
+class ChoiceException extends InterpreterException {
+	private final Choice choice;
+
+	public ChoiceException(Choice choice) {
+		this.choice = choice;
+	}
+
+	public Choice getChoice() {
+		return choice;
+	}
+
+}
+
 class ReturnException extends InterpreterException {
 	final String namelist;
 	final String eventexpr;
@@ -56,4 +78,14 @@ class ReturnException extends InterpreterException {
 		this.eventexpr = eventexpr;
 		this.namelist = namelist;
 	}
+}
+
+class SemanticException extends InterpreterException {
+	final VoiceXmlNode node;
+
+	public SemanticException(VoiceXmlNode node, String message) {
+		super(message);
+		this.node = node;
+	}
+
 }
