@@ -40,10 +40,10 @@ class GotoException extends InterpreterException {
 }
 
 class EventException extends InterpreterException {
-	String type;
+	String eventType;
 
-	EventException(String type) {
-		this.type = type;
+	EventException(VoiceXmlNode node, String eventType) {
+		this.eventType = eventType;
 	}
 }
 

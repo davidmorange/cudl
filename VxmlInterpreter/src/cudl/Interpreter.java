@@ -38,7 +38,13 @@ public class Interpreter {
 
 		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null)
 				.getDocumentElement());
-		this.fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(),
+		VoiceXmlNode dialog;
+		if(!url.contains("#")){
+			dialog= vxml.getFirstDialog();
+		}else {
+			dialog = vxml.getDialogById(url.split("#")[1]);
+		}
+		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(),
 				outPut, userInput);
 		FormInterpretationAlgorithm.setDefaultUncaughtExceptionHandler(getDefaultUncaughtExceptionHandler());
 		interpreterContext.getScripting().eval(sessionVariables);
@@ -233,7 +239,6 @@ public class Interpreter {
 							fia.start();
 							fia.join();
 						}
-
 					} else {
 						throw new RuntimeException(e);
 					}

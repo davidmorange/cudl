@@ -54,8 +54,8 @@ public class Executor {
 			}
 		} catch (NoSuchMethodException e) {
 			if (!(child instanceof Else || child instanceof Elseif)) {
-				throw new RuntimeException("No implementation for Executor.execute("
-						+ child.getClass().getSimpleName() + " " + child.getNodeName() + ")");
+				throw new RuntimeException("No implementation for Executor.execute(" + child.getClass().getSimpleName() + " " + child.getNodeName()
+						+ ")");
 			}
 		}
 		return null;
@@ -94,6 +94,11 @@ public class Executor {
 	}
 
 	public Object execute(Choice choice) throws InterpreterException {
+		if (choice.getAttribute("event") != null) {
+			InterpreterEventHandler.doEvent(choice, this, choice.getAttribute("event"), 1);
+			return null;
+		}
+		
 		throw new ChoiceException(choice);
 	}
 

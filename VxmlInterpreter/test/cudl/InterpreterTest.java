@@ -81,8 +81,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testLogTraceWithIfElseifAndElse() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void testLogTraceWithIfElseifAndElse() throws IOException, ParserConfigurationException, SAXException {
 		List<String> traceLog = new ArrayList<String>();
 		traceLog.add("LOG Hello");
 		traceLog.add("LOG Hello 1");
@@ -236,8 +235,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void documentScopeVariableIsVisibleInAllDocument() throws IOException, URISyntaxException,
-			ParserConfigurationException, SAXException {
+	public void documentScopeVariableIsVisibleInAllDocument() throws IOException, URISyntaxException, ParserConfigurationException, SAXException {
 		List<Prompt> prompts = new ArrayList<Prompt>();
 		Prompt promptExecepeted;
 
@@ -282,8 +280,7 @@ public class InterpreterTest {
 	@Test
 	// @Ignore //see testVariable declaration ===>
 	// globalVariableCantBeAssignInscript
-	public void RootVariableIsAllWaysVisibleAnotherVersion() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void RootVariableIsAllWaysVisibleAnotherVersion() throws IOException, ParserConfigurationException, SAXException {
 		List<String> expectedLogs = new ArrayList<String>();
 
 		expectedLogs.add("NO_INPUT");
@@ -344,8 +341,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void comparerTwoVariableInDifferentScope() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void comparerTwoVariableInDifferentScope() throws IOException, ParserConfigurationException, SAXException {
 
 		interpreter = new Interpreter(url + "compareTwoVariableDeclaredIndifferentScope");
 		interpreter.start();
@@ -375,8 +371,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testEventCounterIsOneWhenDialogEntered() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void testEventCounterIsOneWhenDialogEntered() throws IOException, SAXException, ParserConfigurationException {
 		List<Prompt> expectedPrompt = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "pass";
@@ -392,12 +387,12 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testMenuChoiceDtmfAutoGenerateForChoice() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void testMenuChoiceDtmfAutoGenerateForChoice() throws IOException, ParserConfigurationException, SAXException {
 		List<Prompt> exceptedPrompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "Pour le français tapez 1, pour l'anglais tapez 2, Pour le chinois tapez 3";
-		exceptedPrompts.add(prompt);prompt = new Prompt();
+		exceptedPrompts.add(prompt);
+		prompt = new Prompt();
 		prompt.tts = "passssss";
 		exceptedPrompts.add(prompt);
 
@@ -412,8 +407,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testMenuChoiceVoiceAutoGenerateForChoice() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void testMenuChoiceVoiceAutoGenerateForChoice() throws IOException, ParserConfigurationException, SAXException {
 		List<Prompt> exceptedPrompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "Pour le français tapez 1, pour l'anglais tapez 2, Pour le chinois tapez 3";
@@ -431,20 +425,25 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void choiceInMenuElementCanThrowEventWhenItSelected() throws IOException,
-			ParserConfigurationException, SAXException {
+	public void choiceInMenuElementCanThrowEventWhenItSelected() throws IOException, ParserConfigurationException, SAXException {
 		List<Prompt> exceptedPrompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "Pour le français tapez 1, pour l'anglais tapez 2, Pour le chinois tapez 3";
 		exceptedPrompts.add(prompt);
-
 		prompt = new Prompt();
 		prompt.tts = "vous avez choisi anglais";
+		exceptedPrompts.add(prompt);
+
+		prompt = new Prompt();
+		prompt.tts = "passssss";
 		exceptedPrompts.add(prompt);
 
 		interpreter = new Interpreter(url + "choiceThrowEvent.txml");
 		interpreter.start();
 		interpreter.talk("anglais");
+
+		System.err.println(exceptedPrompts);
+		System.err.println(interpreter.getPrompts());
 
 		assertEquals(exceptedPrompts, interpreter.getPrompts());
 		assertTrue(interpreter.hungup());
@@ -452,8 +451,7 @@ public class InterpreterTest {
 
 	@Test
 	@Ignore
-	public void whenThrowElementDefineExprEventandEventAnErrorOccur() throws IOException,
-			ParserConfigurationException, SAXException {
+	public void whenThrowElementDefineExprEventandEventAnErrorOccur() throws IOException, ParserConfigurationException, SAXException {
 
 		List<Prompt> expectedprompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
@@ -467,40 +465,35 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void whenThenVarNameBeginByScopeNameTheInterpreterThrowAsemanticError() throws IOException,
-			ParserConfigurationException, SAXException {
+	public void whenThenVarNameBeginByScopeNameTheInterpreterThrowAsemanticError() throws IOException, ParserConfigurationException, SAXException {
 
 		List<Prompt> expectedprompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "an semantic error occur";
 		expectedprompts.add(prompt);
 
-		interpreter = new Interpreter(url
-				+ "whenThenVarNameBeginByScopeNameTheInterpreterThrowAsemanticError.vxml");
+		interpreter = new Interpreter(url + "whenThenVarNameBeginByScopeNameTheInterpreterThrowAsemanticError.vxml");
 		interpreter.start();
 
 		assertEquals(expectedprompts, interpreter.getPrompts());
 	}
 
 	@Test
-	public void ifClearNameListContainsUndeclaredVariableHeThrowSemanticError() throws IOException,
-			ParserConfigurationException, SAXException {
+	public void ifClearNameListContainsUndeclaredVariableHeThrowSemanticError() throws IOException, ParserConfigurationException, SAXException {
 
 		List<Prompt> expectedprompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "semantic error";
 		expectedprompts.add(prompt);
 
-		interpreter = new Interpreter(url
-				+ "ifClearNameListContainsUndeclaredVariableHeThrowSemanticError.vxml");
+		interpreter = new Interpreter(url + "ifClearNameListContainsUndeclaredVariableHeThrowSemanticError.vxml");
 		interpreter.start();
 
 		assertEquals(expectedprompts, interpreter.getPrompts());
 	}
 
 	@Test
-	public void whenClearTagNotIndicateNamelistAllFormitemIsCleared() throws IOException,
-			ParserConfigurationException, SAXException {
+	public void whenClearTagNotIndicateNamelistAllFormitemIsCleared() throws IOException, ParserConfigurationException, SAXException {
 
 		List<Prompt> expectedprompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
@@ -514,14 +507,11 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testHeartWelcomeMessageAndSaySubmitDTMF() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void testHeartWelcomeMessageAndSaySubmitDTMF() throws IOException, ParserConfigurationException, SAXException {
 		List<Prompt> expectedprompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
-		prompt.tts = "Bonjour, bienvenue chez Orange et France Télécom. "
-				+ "Le temps d'attente avant la mise en relation avec votre conseiller "
-				+ "est gratuit. Cet appel est facturé au tarif d'une communication "
-				+ "locale si vous appelez d'une ligne fixe France Télécom ... .";
+		prompt.tts = "Bonjour, bienvenue chez Orange et France Télécom. " + "Le temps d'attente avant la mise en relation avec votre conseiller "
+				+ "est gratuit. Cet appel est facturé au tarif d'une communication " + "locale si vous appelez d'une ligne fixe France Télécom ... .";
 		expectedprompts.add(prompt);
 
 		prompt = new Prompt();
@@ -540,8 +530,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testIfExprIsIndicateToLogItIsExecuted() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void testIfExprIsIndicateToLogItIsExecuted() throws IOException, ParserConfigurationException, SAXException {
 		List<String> expectedLogs = new ArrayList<String>();
 
 		expectedLogs.add("[labelThatMustBePresentInLogMessage]This is a log message.");
@@ -555,15 +544,13 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void logTagSouldCombinatePCDATAAndValueElement() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void logTagSouldCombinatePCDATAAndValueElement() throws IOException, ParserConfigurationException, SAXException {
 		// The <log> element may contain any combination of text (CDATA) and
 		// <value> elements.
 		List<String> expectedLogs = new ArrayList<String>();
 
 		expectedLogs.add("This is a log message. " + "firstVariable value must be 2: firstVariable = 2.0 "
-				+ "secondVariable incremented by firstVariable must be 1002: "
-				+ "secondVariable + firstVariable = 1002.0");
+				+ "secondVariable incremented by firstVariable must be 1002: " + "secondVariable + firstVariable = 1002.0");
 
 		interpreter = new Interpreter(url + "1152.txml");
 		interpreter.start();
@@ -628,8 +615,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void subdialogSrcExprIsEvaluateAndExecute() throws IOException, ParserConfigurationException,
-			SAXException {
+	public void subdialogSrcExprIsEvaluateAndExecute() throws IOException, ParserConfigurationException, SAXException {
 		Interpreter interpreter = new Interpreter(url + "subdialogSrcExpr.vxml");
 		interpreter.start();
 
@@ -649,8 +635,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void subdialogCantReturnAnyObjectType() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void subdialogCantReturnAnyObjectType() throws IOException, SAXException, ParserConfigurationException {
 
 		Interpreter interpreter = new Interpreter(url + "subdialogReturnAnyObjectType.vxml");
 		interpreter.start();

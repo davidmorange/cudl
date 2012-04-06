@@ -6,4 +6,8 @@ public class Choice extends VoiceXmlNode {
 	public Choice(Node node) {
 		super(node);
 	}
+	
+	public String getTextContent() {
+		return node.getTextContent();
+	}
 }

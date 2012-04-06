@@ -1,12 +1,17 @@
 package cudl;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.mozilla.javascript.Undefined;
+import org.xml.sax.SAXException;
 
 import cudl.node.Audio;
 import cudl.node.Block;
@@ -43,8 +48,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		this(dialog, scripting, null, null);
 	}
 
-	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut,
-			UserInput userInput) {
+	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut, UserInput userInput) {
 		this.setCurrentDialog(dialog);
 		this.outPut = outPut;
 		this.scripting = scripting;
@@ -149,7 +153,19 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	@Override
 	public void visit(Subdialog subdialog) {
-		throw new RuntimeException("implement subdialog visit");
+		String srcexpr = subdialog.getAttribute("srcexpr");
+		try {
+			Interpreter interpreter = new Interpreter("file:test/docVxml/subdialogSrcExpr.vxml"+"#"+scripting.eval(srcexpr));
+			interpreter.start();
+			outPut.getPrompts().addAll(interpreter.getPrompts());
+			List<String> logs = interpreter.getLogs();
+			for (String log : logs) {
+				outPut.addLog(log);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		//throw new RuntimeException("implement subdialog visit");
 	}
 
 	@Override
@@ -280,21 +296,39 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 					executor.execute(node);
 				}
 			}
-		
+
 			String input = getInput();
 			if (input != null) {
-				int i = 1;
-				for (VoiceXmlNode node : currentDialog.getChilds()) {
-					if (node instanceof Choice) {
-						while (i == Integer.parseInt(input.split("\\$")[1])) {
-							executor.execute(node);
-						}
-						i++;
-					}
+				if ("dtmf".equals(input.split("\\$")[0])) {
+					executeChoiceByDtmf(input);
+				} else {
+					executeChoiceByVoice(input);
 				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	private void executeChoiceByVoice(String input) throws InterpreterException {
+		for (VoiceXmlNode node : currentDialog.getChilds()) {
+			if (node instanceof Choice) {
+				if (((Choice) node).getTextContent().contains(input.split("\\$")[1])) {
+					executor.execute(node);
+				}
+			}
+		}
+	}
+
+	private void executeChoiceByDtmf(String input) throws InterpreterException {
+		int i = 1;
+		for (VoiceXmlNode node : currentDialog.getChilds()) {
+			if (node instanceof Choice) {
+				if (i == Integer.parseInt(input.split("\\$")[1])) {
+					executor.execute(node);
+				}
+				i++;
+			}
 		}
 	}
 
