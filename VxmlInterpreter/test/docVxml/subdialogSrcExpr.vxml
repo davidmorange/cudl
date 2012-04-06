@@ -10,7 +10,7 @@
     </form>
     <form id="sub">
        <var name="return_value" expr="'return_value'"/>
-       <block>
+       <block name="blaser">
        		<return namelist="return_value"/>
        </block>
     </form>

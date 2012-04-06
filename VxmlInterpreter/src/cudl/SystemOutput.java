@@ -6,6 +6,7 @@ import java.util.List;
 public class SystemOutput {
 	private List<String> logs = new ArrayList<String>();
 	private List<cudl.Prompt> prompts = new ArrayList<cudl.Prompt>();
+	private String dest;
 
 	public void addLog(String log) {
 		logs.add(log);
@@ -46,5 +47,17 @@ public class SystemOutput {
 
 	public List<Prompt> getPrompts() {
 		return prompts;
+	}
+
+	public void setTransfertDestination(String dest) {
+		this.dest = dest;
+	}
+
+	public String getTranferDestination() {
+		return dest;
+	}
+
+	public String getActiveGrammar() {
+		return null;
 	}
 }

@@ -26,6 +26,15 @@ public class InterpreterTest {
 	}
 
 	@Test
+	@Ignore
+	public void test5555() throws IOException, ParserConfigurationException, SAXException {
+		// http://sdiawara.dev33.cvf/gv/services/5555/index.vxml
+
+		interpreter = new Interpreter("http://sdiawara.dev33.cvf/gv/services/5555/index.vxml");
+		interpreter.start();
+	}
+
+	@Test
 	public void testLogTrace() throws IOException, ParserConfigurationException, SAXException {
 		List<String> traceLog = new ArrayList<String>();
 		traceLog.add("LOG Hello");
@@ -397,7 +406,8 @@ public class InterpreterTest {
 		List<Prompt> exceptedPrompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "Pour le français tapez 1, pour l'anglais tapez 2, Pour le chinois tapez 3";
-		exceptedPrompts.add(prompt);prompt = new Prompt();
+		exceptedPrompts.add(prompt);
+		prompt = new Prompt();
 		prompt.tts = "passssss";
 		exceptedPrompts.add(prompt);
 
@@ -437,14 +447,20 @@ public class InterpreterTest {
 		Prompt prompt = new Prompt();
 		prompt.tts = "Pour le français tapez 1, pour l'anglais tapez 2, Pour le chinois tapez 3";
 		exceptedPrompts.add(prompt);
-
 		prompt = new Prompt();
 		prompt.tts = "vous avez choisi anglais";
+		exceptedPrompts.add(prompt);
+
+		prompt = new Prompt();
+		prompt.tts = "passssss";
 		exceptedPrompts.add(prompt);
 
 		interpreter = new Interpreter(url + "choiceThrowEvent.txml");
 		interpreter.start();
 		interpreter.talk("anglais");
+
+		System.err.println(exceptedPrompts);
+		System.err.println(interpreter.getPrompts());
 
 		assertEquals(exceptedPrompts, interpreter.getPrompts());
 		assertTrue(interpreter.hungup());

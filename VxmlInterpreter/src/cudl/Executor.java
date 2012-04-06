@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.print.attribute.standard.MediaSize.NA;
-
 import org.mozilla.javascript.EcmaError;
+import org.mozilla.javascript.commonjs.module.provider.CachingModuleScriptProviderBase.CachedModuleScript;
 
 import cudl.node.Assign;
 import cudl.node.Audio;
 import cudl.node.Block;
+import cudl.node.Catch;
 import cudl.node.Choice;
 import cudl.node.Clear;
 import cudl.node.Disconnect;
@@ -51,7 +51,7 @@ public class Executor {
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof InterpreterException) {
 				throw (InterpreterException) e.getCause();
-			}
+			} 
 		} catch (NoSuchMethodException e) {
 			if (!(child instanceof Else || child instanceof Elseif)) {
 				throw new RuntimeException("No implementation for Executor.execute("
@@ -62,7 +62,26 @@ public class Executor {
 	}
 
 	public Object execute(Goto goto1) throws InterpreterException {
-		throw new GotoException(goto1);
+		if (goto1.getNextItem() != null) {
+			throw new FormItemChangeException(goto1.getNextItem());
+		} else if (goto1.getExpritem() != null) {
+			throw new FormItemChangeException(scripting.eval(goto1.getExpritem()).toString());
+		}
+		if (goto1.getNext() != null) {
+			if (goto1.getNext().startsWith("#")) {
+				throw new DialogChangeException(goto1.getNext().split("#")[1]);
+			} else {
+				throw new DocumentChangeException(goto1.getNext(), null);
+			}
+		} else if (goto1.getExpr() != null) {
+			String next = scripting.eval(goto1.getExpr()).toString();
+			if (next.startsWith("#")) {
+				throw new DialogChangeException(next.split("#")[1]);
+			} else {
+				throw new DocumentChangeException(next, null);
+			}
+		}
+		throw new RuntimeException("badfetch error");
 	}
 
 	public Object execute(Exit Exit) throws InterpreterException {
@@ -94,6 +113,11 @@ public class Executor {
 	}
 
 	public Object execute(Choice choice) throws InterpreterException {
+		if (choice.getAttribute("event") != null) {
+			InterpreterEventHandler.doEvent(choice, this, choice.getAttribute("event"), 1);
+			return null;
+		}
+
 		throw new ChoiceException(choice);
 	}
 
@@ -102,7 +126,7 @@ public class Executor {
 	}
 
 	public Object execute(Submit submit) throws InterpreterException {
-		throw new RuntimeException("implement submit executor");
+		throw new DocumentChangeException(submit.getAttribute("next"), submit.getAttribute("method"));
 	}
 
 	public Object execute(Audio audio) {
@@ -195,6 +219,10 @@ public class Executor {
 		return value;
 	}
 
+	public Object execute(Catch catch1) throws InterpreterException {
+		execute(catch1.getChilds());
+		return  null;
+	}
 	public Object execute(Value value) {
 		Object eval = null;
 		eval = scripting.eval(value.getExpr());

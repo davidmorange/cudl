@@ -35,4 +35,10 @@ public class Transfer extends InputFormItem {
 	public void accept(FormItemVisitor formInterpretationAlgorithm) throws InterpreterException {
 		formInterpretationAlgorithm.visit(this);
 	}
+	
+	@Override
+	public boolean canContainsChild(VoiceXmlNode node) {
+		return CHILDS.contains(node.getNodeName());
+	}
 }
+

@@ -2,8 +2,8 @@ package test;
 
 import cudl.utils.CudlSession;
 
-public class Session  implements CudlSession{
-	private String session = 
+public class Session {
+	private static String session = 
 			"connection =  new Object();"+
 			"session.connection  = connection;"+
 			"connection.local  =  new Object();"+
@@ -26,8 +26,7 @@ public class Session  implements CudlSession{
 			"connection.protocol.isdnvn6.transferresult= undefined;"+
 			"connection.channel = '1';";
 
-	@Override
-	public String getSessionScript() {
+	public static String getSessionScript() {
 		return session;
 	}
 }

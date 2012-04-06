@@ -54,9 +54,6 @@ public abstract class VoiceXmlNode {
 		return false;
 	}
 
-	public boolean canContainsChild(String childName) {
-		return false;
-	}
 
 	public String getNodeName() {
 		return node.getNodeName();
