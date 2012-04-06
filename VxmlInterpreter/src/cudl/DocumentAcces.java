@@ -27,7 +27,7 @@ public class DocumentAcces {
 	private String cookies;
 	private DocumentBuilder documentBuilder;
 	private final String userAgent;
-	private URL lastBaseUrl;
+	private URL lastBaseUrl = null;
 
 	public DocumentAcces(final String userAgent) throws ParserConfigurationException {
 		this.userAgent = userAgent;
@@ -71,7 +71,7 @@ public class DocumentAcces {
 		URL url = ((lastBaseUrl == null) ? new URL(uri) : new URL(lastBaseUrl, uri));
 		URLConnection connection = (URLConnection) url.openConnection();
 		connection.setRequestProperty("User-agent", userAgent);
-		// setCookies(connection);
+		//		 setCookies(connection);
 		lastBaseUrl = url;
 		return documentBuilder.parse(connection.getInputStream());
 	}

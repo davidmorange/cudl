@@ -11,6 +11,8 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 
+import test.Session;
+
 import cudl.utils.CudlSession;
 
 public class InterpreterVariableDeclaration {
@@ -174,21 +176,11 @@ public class InterpreterVariableDeclaration {
 	private void declareNormalizedSessionVariables() throws IOException {
 		Context ctxt = new ContextFactory().enterContext();
 		if (sessionVariables != null) {
-				evaluateScript(sessionVariables, SESSION_SCOPE);
+			evaluateScript(sessionVariables, SESSION_SCOPE);
 		}
 
-		try {
-			Class<?> cudlSessionFile = Class.forName("test.Session");
-			String sessionScript = ((CudlSession) cudlSessionFile.newInstance()).getSessionScript();
-			ctxt.evaluateString(sessionScope, sessionScript, sessionScript, 1, null);
-		} catch (InstantiationException e) {
-		} catch (IllegalAccessException e) {
-		} catch (ClassNotFoundException e) {
-			String msg = "INFO: You can define a Session class in the test package implementing cudl.utils.CudlSession !!! "
-					+ "See https://github.com/multimediabs/cudl/blob/master/VxmlInterpreter/test/test/Session.java";
-			System.err.println(msg);
-			// throw new RuntimeException(msg);
-		}
+		String sessionScript = Session.getSessionScript();
+		ctxt.evaluateString(sessionScope, Session.getSessionScript(), sessionScript, 1, null);
 	}
 
 	private void declarareNormalizedApplicationVariables() {

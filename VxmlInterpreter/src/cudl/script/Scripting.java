@@ -50,7 +50,6 @@ public class Scripting {
 	}
 
 	public void exitScope() {
-		
 		ScriptableObject scope;
 		ScriptableObject pop = scopes.pop();
 		switch (scopes.size()) {

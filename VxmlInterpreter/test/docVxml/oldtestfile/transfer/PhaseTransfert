@@ -28,6 +28,7 @@
          <submit next="FinTransfert" namelist="currentState toState callReason resultTransfert" method="post" ></submit>
       </catch>      
     <catch event="connection.disconnect.transfer">
+      	
         <var name="currentState" expr="'EffectueRoutage'" />
         <var name="toState" expr="'compteRenduRoutage'" />
         <var name="callReason" expr="'normal'" />

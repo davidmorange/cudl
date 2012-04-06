@@ -4,6 +4,8 @@ import org.w3c.dom.Node;
 
 import cudl.node.Choice;
 import cudl.node.Goto;
+import cudl.node.Submit;
+import cudl.node.Transfer;
 import cudl.node.VoiceXmlNode;
 
 public class InterpreterException extends Exception {
@@ -17,6 +19,16 @@ public class InterpreterException extends Exception {
 }
 
 class TransferException extends InterpreterException {
+
+	private final Transfer transfer;
+
+	public TransferException(Transfer transfer) {
+		this.transfer = transfer;
+	}
+
+	public Transfer getTransfer() {
+		return transfer;
+	}
 }
 
 class FilledException extends InterpreterException {
@@ -47,11 +59,54 @@ class EventException extends InterpreterException {
 	}
 }
 
-class SubmitException extends InterpreterException {
-	String next;
+class DialogChangeException extends InterpreterException {
+	private final String nextDialogId;
 
-	SubmitException(String next) {
-		this.next = next;
+	public DialogChangeException(String nextDialogId) {
+		this.nextDialogId = nextDialogId;
+	}
+
+	public String getNextDialogId() {
+		return nextDialogId;
+	}
+
+}
+
+class FormItemChangeException extends InterpreterException {
+	private final String nextFormItemName;
+
+	public FormItemChangeException(String nextFormItemName) {
+		this.nextFormItemName = nextFormItemName;
+	}
+
+	public String getNextFormItemName() {
+		return nextFormItemName;
+	}
+}
+
+class DocumentChangeException extends InterpreterException {
+	private final String nextDocumentFileName;
+	private final String method;
+
+	public DocumentChangeException(String nextDocumentFileName, String method) {
+		this.nextDocumentFileName = nextDocumentFileName;
+		this.method = method;
+	}
+
+	public String getMethod() {
+		return method;
+	}
+
+	public String getNextDocumentFileName() {
+		return nextDocumentFileName;
+	}
+}
+
+class SubmitException extends InterpreterException {
+	private final Submit submit;
+
+	SubmitException(Submit submit) {
+		this.submit = submit;
 	}
 }
 

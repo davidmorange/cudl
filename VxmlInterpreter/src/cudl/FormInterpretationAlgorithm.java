@@ -1,17 +1,13 @@
 package cudl;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.mozilla.javascript.Undefined;
-import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
 
 import cudl.node.Audio;
 import cudl.node.Block;
@@ -28,6 +24,7 @@ import cudl.node.Transfer;
 import cudl.node.Value;
 import cudl.node.Var;
 import cudl.node.VoiceXmlNode;
+import cudl.node.Vxml;
 import cudl.script.Scripting;
 
 public class FormInterpretationAlgorithm extends Thread implements FormItemVisitor {
@@ -153,24 +150,56 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	@Override
 	public void visit(Subdialog subdialog) {
+
+		scripting.set(subdialog.getName(), "true");
 		String srcexpr = subdialog.getAttribute("srcexpr");
 		try {
-			Interpreter interpreter = new Interpreter("file:test/docVxml/subdialogSrcExpr.vxml"+"#"+scripting.eval(srcexpr));
-			interpreter.start();
-			outPut.getPrompts().addAll(interpreter.getPrompts());
-			List<String> logs = interpreter.getLogs();
-			for (String log : logs) {
-				outPut.addLog(log);
+			String url = "file:test/docVxml/subdialogSrcExpr.vxml" + scripting.eval(srcexpr);
+			Document document = new DocumentAcces("voicextt/0.1").get(url, null);
+			Vxml vxml = new Vxml(document.getDocumentElement());
+			System.err.println("scrip  f111111111" + scripting.get("f1"));
+			VoiceXmlNode dialog;
+			if (!url.contains("#")) {
+				dialog = vxml.getFirstDialog();
+			} else {
+				dialog = vxml.getDialogById(url.split("#")[1]);
+				System.err.println(dialog);
 			}
+			FormInterpretationAlgorithm fia = new FormInterpretationAlgorithm(dialog, scripting, outPut,
+					userInput);
+			scripting.exitScope();
+			scripting.exitScope();
+			fia.start();
+
+			// Interpreter interpreter = new
+			// Interpreter("file:test/docVxml/subdialogSrcExpr.vxml" +
+			// scripting.eval(srcexpr));
+			// interpreter.start();
+			// System.err.println(interpreter.getLogs());
+			// System.err.println(interpreter.getPrompts());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//throw new RuntimeException("implement subdialog visit");
 	}
 
 	@Override
-	public void visit(Transfer transfer) {
-		throw new RuntimeException("implement transfer visit");
+	public void visit(Transfer transfer) throws InterpreterException {
+		String dest = transfer.getAttribute("dest");
+		System.err.println();
+		outPut.setTransfertDestination(dest);
+
+		String input = getInput();
+
+		if (input.split("\\$")[0].equals("transfer")) {
+			scripting.set(transfer.getName(), input.split("\\$")[1]);
+
+			System.err.println("ok ===============" + transfer.getChilds().size());
+			for (VoiceXmlNode voiceXmlNode : transfer.getChilds()) {
+				if (voiceXmlNode instanceof Filled) {
+					executor.execute(voiceXmlNode);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -225,15 +254,9 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			scripting.enterScope();
 			((FormItem) selectedFormItem).accept(this);
 			scripting.exitScope();
-		} catch (GotoException e) {
-			String expritem = e.getGoto().getExpritem();
-			String nextItem = e.getGoto().getNextItem();
-			if (nextItem == null && expritem == null) {
-				throw e;
-			}
-			setNextItem(nextItem);// Item == null ?
-									// scripting.eval(expritem).toString() :
-									// nextItem);
+		} catch (FormItemChangeException e) {
+			scripting.exitScope();
+			setNextItem(e.getNextFormItemName());
 		} catch (SemanticException e) {
 			InterpreterEventHandler.doEvent(e.node, executor, "error.semantic", getEventCount("error.semanic"));
 		} catch (InterpreterException e) {
@@ -306,6 +329,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				}
 			}
 		} catch (Exception e) {
+			scripting.exitScope();
 			throw new RuntimeException(e);
 		}
 	}
@@ -334,9 +358,10 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	private String getInput() throws InterpreterException {
 		String input = userInput.readData();
-		while (input == null || !"voice dtmf".contains(input.split("\\$")[0])) {
+		while (input == null || !"voice dtmf transfer".contains(input.split("\\$")[0])) {
 			if (input != null) {
 				String eventType = input.split("\\$")[1];
+				System.err.println(eventType);
 				InterpreterEventHandler.doEvent(currentDialog, executor, eventType, getEventCount(eventType));
 				updateEventCount(eventType);
 			}
@@ -352,17 +377,15 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		while (true) {
 			selectedFormItem = select();
 			if (selectedFormItem == null) {
-				return;
+				throw new RuntimeException(new ExitException());
 			}
 			try {
 				collect();
-			} catch (ExitException e) {
-				// setIshangup
-				return;
 			} catch (InterpreterException e) {
 				throw new RuntimeException(e);
 			}
 		}
+
 	}
 
 	public InterpreterException getLastException() {

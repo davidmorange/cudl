@@ -26,6 +26,15 @@ public class InterpreterTest {
 	}
 
 	@Test
+	@Ignore
+	public void test5555() throws IOException, ParserConfigurationException, SAXException {
+		// http://sdiawara.dev33.cvf/gv/services/5555/index.vxml
+
+		interpreter = new Interpreter("http://sdiawara.dev33.cvf/gv/services/5555/index.vxml");
+		interpreter.start();
+	}
+
+	@Test
 	public void testLogTrace() throws IOException, ParserConfigurationException, SAXException {
 		List<String> traceLog = new ArrayList<String>();
 		traceLog.add("LOG Hello");
@@ -441,6 +450,9 @@ public class InterpreterTest {
 		interpreter = new Interpreter(url + "choiceThrowEvent.txml");
 		interpreter.start();
 		interpreter.talk("anglais");
+
+		System.err.println(exceptedPrompts);
+		System.err.println(interpreter.getPrompts());
 
 		System.err.println(exceptedPrompts);
 		System.err.println(interpreter.getPrompts());

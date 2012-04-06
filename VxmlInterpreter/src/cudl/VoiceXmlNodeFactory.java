@@ -9,7 +9,7 @@ import cudl.node.VoiceXmlNode;
 public class VoiceXmlNodeFactory {
 
 	public static VoiceXmlNode newInstance(Node node) {
-		String nodeName = node.getNodeName().replaceAll("#", "");
+		String nodeName = node.getNodeName().replaceAll("[#-]", "");
 		String className = getClassName(nodeName);
 		try {
 			Constructor<?> constructor = Class.forName(className).getConstructor(new Class[] { Node.class });

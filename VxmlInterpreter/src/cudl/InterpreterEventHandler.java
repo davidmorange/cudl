@@ -36,7 +36,7 @@ class InterpreterEventHandler {
 		while (parent != null) {
 			List<VoiceXmlNode> childs = parent.getChilds();
 			for (VoiceXmlNode node : childs) {
-				if (eventType.endsWith(node.getNodeName()) || isHandlerForEventType(eventType, node)) {
+				if (eventType.equals(node.getNodeName()) || isHandlerForEventType(eventType, node)) {
 					String count = node.getAttribute("count");
 					int nodeCount = (count == null) ? 1 : Integer.parseInt(count);
 					if (nodeCount == eventCounter) {
