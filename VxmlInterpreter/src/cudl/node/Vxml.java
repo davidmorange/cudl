@@ -69,8 +69,12 @@ public class Vxml extends VoiceXmlNode {
 
 	public VoiceXmlNode getDialogById(String id) {
 		for (VoiceXmlNode child : getChilds()) {
-			if (child instanceof Form || child instanceof Menu) {
+			if (child instanceof Form ) {
 				if (id.equals(((Form) child).getId())) {
+					return child;
+				}
+			} else if (child instanceof Menu ){
+				if (id.equals(((Menu) child).getId())) {
 					return child;
 				}
 			}

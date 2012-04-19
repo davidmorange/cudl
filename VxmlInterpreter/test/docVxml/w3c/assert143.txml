@@ -19,7 +19,7 @@
     <field>
       <conf:speech value="alpha"/>
       <conf:grammar utterance="alpha" interp="alpha"/>
-    <filled>
+    <filled/>
     
     </field>
 	

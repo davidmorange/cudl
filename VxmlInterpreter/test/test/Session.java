@@ -1,6 +1,5 @@
 package test;
 
-import cudl.utils.CudlSession;
 
 public class Session {
 	private static String session = 

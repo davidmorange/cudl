@@ -564,6 +564,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test()
+	@Ignore
 	public void w3cIRTest() throws IOException, ScriptException, ParserConfigurationException, SAXException {
 
 		int count = 0;
@@ -634,6 +635,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void w3cManual1() throws IOException, ScriptException, ParserConfigurationException, SAXException {
 		// If the last main FIA loop did not result in a goto nextitem
 		// and there is no form item which is eligible to be visited
@@ -667,6 +669,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void w3c219Test() throws IOException, ScriptException, ParserConfigurationException, SAXException {
 		// An enumerate element can be used inside catch element elements
 		// associated with a menu element.
@@ -686,6 +689,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void w3c216Test() throws IOException, ScriptException, ParserConfigurationException, SAXException {
 		// The enumerate element without content inside a prompt lists all the
 		// choices, following the order in which they appear in the menu.
@@ -723,6 +727,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void WhenErrorOccureTheInterpreterThrowError() throws IOException, ParserConfigurationException, SAXException {
 		interpreter = new Interpreter(url + "w3c/a32.txml");
 		interpreter.start();
@@ -732,6 +737,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void w3c236Test() throws IOException, ScriptException, ParserConfigurationException, SAXException {
 		List<Prompt> exceptedPrompts = new ArrayList<Prompt>();
 		prompt = new Prompt();
@@ -759,6 +765,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void w3c524Test() throws IOException, ParserConfigurationException, SAXException {
 		List<Prompt> expectedPrompts = new ArrayList<Prompt>();
 
@@ -801,6 +808,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void shouldPlayAudioExprSpecified() throws IOException, ParserConfigurationException, SAXException {
 		// The interpreter evaluates, fetches, and plays the URI associated with
 		// the expr attribute of the audio element.
@@ -817,6 +825,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void testPromptCounterInInputTagTakeEffect() throws Exception {
 		List<Prompt> expectedPrompts = new ArrayList<Prompt>();
 

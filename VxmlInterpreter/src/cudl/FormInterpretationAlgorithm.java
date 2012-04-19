@@ -206,18 +206,24 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	@Override
-	public void visit(Record Record) {
-		throw new RuntimeException("implement Record visit");
+	public void visit(Record record) {
+		scripting.set(record.getName(), "true");
+		System.err.println("record");
+		//throw new RuntimeException("implement Record visit");
 	}
 
 	@Override
-	public void visit(Initial Initial) {
-		throw new RuntimeException("implement Initial visit");
+	public void visit(Initial initial) {
+		scripting.set(initial.getName(), "true");
+		System.err.println("initial");
+		//throw new RuntimeException("implement Initial visit");
 	}
 
 	@Override
 	public void visit(cudl.node.Object object) {
-		throw new RuntimeException("implement object visit");
+		scripting.set(object.getName(), "true");	
+		System.err.println("object");
+//		throw new RuntimeException("implement object visit");
 	}
 
 	public VoiceXmlNode select() throws ExitException {
@@ -462,11 +468,14 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 					ReturnException returnException = (ReturnException) cause;
 					String namelist = returnException.getReturn().getAttribute("namelist");
 					scripting.eval(((FormItem) selectedFormItem).getName() + "= new Object();");
-					StringTokenizer tokenizer = new StringTokenizer(namelist);
-					while (tokenizer.hasMoreElements()) {
-						String nextToken = tokenizer.nextToken();
-						scripting.eval(((FormItem) selectedFormItem).getName() + "." + nextToken + "="
-								+ Utils.scriptableObjectToString(subScripting.eval(nextToken)));
+					if(namelist != null){
+						StringTokenizer tokenizer = new StringTokenizer(namelist);
+						System.err.println("filled");
+						while (tokenizer.hasMoreElements()) {
+							String nextToken = tokenizer.nextToken();
+							scripting.eval(((FormItem) selectedFormItem).getName() + "." + nextToken + "="
+									+ Utils.scriptableObjectToString(subScripting.eval(nextToken)));
+						}
 					}
 					try {
 						executeFilled(subdialog);
