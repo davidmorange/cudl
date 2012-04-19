@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.mozilla.javascript.EcmaError;
-import org.mozilla.javascript.commonjs.module.provider.CachingModuleScriptProviderBase.CachedModuleScript;
+
 
 import cudl.node.Assign;
 import cudl.node.Audio;
@@ -109,7 +109,7 @@ public class Executor {
 	}
 
 	public Object execute(Return return1) throws InterpreterException {
-		throw new RuntimeException("implement Return executor");
+		throw new ReturnException(return1);
 	}
 
 	public Object execute(Choice choice) throws InterpreterException {
@@ -117,7 +117,7 @@ public class Executor {
 			InterpreterEventHandler.doEvent(choice, this, choice.getAttribute("event"), 1);
 			return null;
 		}
-		throw new ChoiceException(choice);
+		throw new DocumentChangeException(choice.getAttribute("next"), null);
 	}
 
 	public Object execute(Disconnect disconnect) throws InterpreterException {

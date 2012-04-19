@@ -65,8 +65,6 @@ public class InterpreterTest extends TestCase {
 		interpreter = new Interpreter(url + "VxmlGlobalServletService");
 		interpreter.start();
 
-		System.err.println(expectedPrompts);
-		System.err.println(interpreter.getPrompts());
 
 		assertEquals(expectedLogs, interpreter.getLogs());
 		assertEquals(expectedStats, interpreter.getLogsWithLabel("stats"));
@@ -136,8 +134,7 @@ public class InterpreterTest extends TestCase {
 		// a pas hungup
 		assertFalse(interpreter.getLogs().isEmpty());
 		assertEquals(expectedLogs, interpreter.getLogs());
-		// System.err.println(interpreter.hungup() + " ---->");
-		// assertTrue(interpreter.hungup());
+		assertTrue(interpreter.hungup());
 	}
 
 	@Test

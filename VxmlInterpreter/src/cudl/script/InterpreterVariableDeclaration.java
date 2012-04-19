@@ -136,7 +136,6 @@ public class InterpreterVariableDeclaration {
 	}
 
 	public void resetScopeBinding(int scope) {
-		System.err.println("reset scope" + scope);
 		Context context = Context.enter();
 		switch (scope) {
 		case APPLICATION_SCOPE:
@@ -205,7 +204,6 @@ public class InterpreterVariableDeclaration {
 	}
 
 	public void enterScope() {
-		System.err.println(peekStack.size() + "size");
 		if (currentScope > 50) {
 			currentScope -= SCOPE_STEP;
 			peekStack.push(tmpStatck.pop());

@@ -4,6 +4,7 @@ import org.w3c.dom.Node;
 
 import cudl.node.Choice;
 import cudl.node.Goto;
+import cudl.node.Return;
 import cudl.node.Submit;
 import cudl.node.Transfer;
 import cudl.node.VoiceXmlNode;
@@ -124,14 +125,14 @@ class ChoiceException extends InterpreterException {
 }
 
 class ReturnException extends InterpreterException {
-	final String namelist;
-	final String eventexpr;
-	final String event;
+	private final Return return1;
 
-	ReturnException(String event, String eventexpr, String namelist) {
-		this.event = event;
-		this.eventexpr = eventexpr;
-		this.namelist = namelist;
+	public ReturnException(Return return1) {
+		this.return1 = return1;
+	}
+
+	public Return getReturn() {
+		return return1;
 	}
 }
 

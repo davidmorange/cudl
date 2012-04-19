@@ -38,4 +38,12 @@ public class Subdialog extends FormItem {
 	public void accept(FormItemVisitor formInterpretationAlgorithm) throws InterpreterException {
 		formInterpretationAlgorithm.visit(this);
 	}
+
+	public String getSrc() {
+		return getAttribute("src");
+	}
+
+	public String getSrcexpr() {
+		return getAttribute("srcexpr");
+	}
 }

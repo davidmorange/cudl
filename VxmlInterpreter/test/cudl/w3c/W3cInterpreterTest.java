@@ -570,8 +570,6 @@ public class W3cInterpreterTest {
 		for (Iterator<String> iterator = fileNames.iterator(); iterator.hasNext();) {
 			String fileName = iterator.next();
 
-			if (fileName.endsWith("a75-var-driver.txml"))
-				System.err.println(":p");
 			interpreter = new Interpreter(url + fileName);
 			interpreter.start();
 

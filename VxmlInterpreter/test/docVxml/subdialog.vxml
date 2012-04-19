@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.w3.org/2001/vxml
+http://www.w3.org/TR/voicexml20/vxml.xsd">
+	<!-- Un dialogue de formulaire qui appelle un sous-dialogue -->
+	<form>
+		<subdialog name="resultat" src="#demander_permis_conduire">
+	 		<param name="date_naissance" expr="'2000-02-10'" /> 
+			<filled>
+				<submit next="http://monservice.example.com/cgi-bin/traiter" />
+			</filled>
+		</subdialog>
+	</form>
+	<!-- Un sous-dialogue pour obtenir les permis de conduire -->
+	<form id="demander_permis_conduire">
+		<var name="date_naissance" />
+		<field name="permis_conduire">
+			<grammar src="http://grammarlib/grammaire_conduite.grxml"
+				type="application/srgs+xml" />
+			<prompt> Veuillez indiquer le numéro de votre permis de conduire.
+			</prompt>
+			<filled>
+				<if cond="permis_conduire == 20120505 &amp;&amp; date_naissance == '2000-02-10'">
+					<prompt>votre permis de 	 conduire (N°<value expr="permis_conduire"/>) est valide</prompt>
+					<var name="statut" expr="true" />
+					<else />
+					<prompt>no no no</prompt>
+					<var name="statut" expr="false" />
+				</if>
+				<return namelist="permis_conduire statut" />
+			</filled>
+		</field>
+	</form>
+</vxml>

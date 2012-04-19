@@ -12,7 +12,7 @@
    </block>
 </form>
 <form id="forme2">
-   <block> 
+   <block name="tetetetet"> 
  		<prompt><value expr="dialog.form_0_scope_var"/> 2</prompt>
    </block>
 </form>
