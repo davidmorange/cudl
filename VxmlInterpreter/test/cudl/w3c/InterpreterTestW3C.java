@@ -20,6 +20,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.internal.util.reflection.FieldInitializationReport;
 import org.xml.sax.SAXException;
 
 import cudl.Interpreter;
@@ -41,15 +42,17 @@ public class InterpreterTestW3C {
 	@BeforeClass
 	public static void setUp() throws IOException, TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException {
 		url =  new File(".").getCanonicalPath() + "/test/docVxml/w3c/";
+		new File(url+ "xslt_output/").mkdirs();
+		
+		for (String name : filenames) {
+			if (name.endsWith(".txml")) {
+				txmlToVxml(name, name.replace(".txml", ".vxml"));
+				System.err.println(name);
+			}
+		}
+		txmlToVxml("a12b.txml", "a12b.vxml");
 		prompt = new Prompt();
 		prompt.tts = "pass";
-		File file = new File(new File(".").getCanonicalPath() + "/test/docVxml/w3c/");
-//		for (String name : file.list()) {
-//			if (name.endsWith(".txml")) {
-//				txmlToVxml(name, name.replace(".txml", ".vxml"));
-//				System.err.println(name);
-//			}
-//		}
 	}
 
 	@Test
@@ -75,7 +78,7 @@ public class InterpreterTestW3C {
 		Transformer transformer = tFactory.newTransformer(new StreamSource(url + "/irtest.xslt"));
 		
 		String outputFileName = (url + "/xslt_output/").replaceAll("file:/*", "/");
-
+		System.err.println(outputFileName+toFile);
 		transformer.transform(new StreamSource(url + fromFile), new StreamResult(new FileOutputStream(outputFileName + toFile)));
 
 	}
@@ -83,8 +86,11 @@ public class InterpreterTestW3C {
 	@AfterClass
 	public static void afterAllTest() {
 		File f = new File(url + "/xslt_output/");
-		f.deleteOnExit();
 		
+		for (String filename : f.list()) {
+			new File(f, filename).deleteOnExit();
+		}
+		System.err.println(f.delete());
 	}
 
 }

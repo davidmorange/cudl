@@ -649,6 +649,7 @@ public class W3cInterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void w3c218Test() throws IOException, ScriptException, ParserConfigurationException, SAXException {
 		// Assertion:
 		// "An enumerate element can be used inside prompts associated with a menu element."
