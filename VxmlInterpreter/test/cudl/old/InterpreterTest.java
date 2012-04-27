@@ -92,6 +92,8 @@ public class InterpreterTest extends TestCase {
 		interpreter.noInput();
 		interpreter.noMatch();
 
+		System.err.println(expectedLogs);
+		System.err.println(interpreter.getLogs());
 		assertEquals(expectedLogs, interpreter.getLogs());
 	}
 

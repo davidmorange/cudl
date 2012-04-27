@@ -36,7 +36,7 @@ class InterpreterEventHandler {
 		while (parent != null) {
 			List<VoiceXmlNode> childs = parent.getChilds();
 			for (VoiceXmlNode node : childs) {
-				if (eventType.equals(node.getNodeName()) || isHandlerForEventType(eventType, node)) {
+				if (isHandlerForEventType(eventType, node)) {
 					String count = node.getAttribute("count");
 					int nodeCount = (count == null) ? 1 : Integer.parseInt(count);
 					if (nodeCount == eventCounter) {
@@ -57,6 +57,6 @@ class InterpreterEventHandler {
 
 	private static boolean isCatchItemAndContainsEvent(VoiceXmlNode node, String eventName) {
 		String eventAttribute = node.getAttribute("event");
-		return node.getNodeName().equals("catch") && eventAttribute != null && eventAttribute.contains(eventName);
+		return node.getNodeName().equals("catch") && eventAttribute != null && ( eventAttribute.contains(eventName) || eventName.startsWith(eventAttribute));
 	}
 }

@@ -656,6 +656,7 @@ public class InterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void subdialog() throws IOException, ParserConfigurationException, SAXException {
 		Interpreter interpreter = new Interpreter(url + "subdialog.vxml");
 		interpreter.start();

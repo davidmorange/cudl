@@ -36,6 +36,18 @@ public class InterpreterTestW3C {
 			add("a12a.txml");// need file to add("a12b.txml");
 			add("a18.txml");
 			add("a19.txml");
+			
+			//goto test
+			add("526.txml");
+			add("527a1.txml");
+			add("528a1.txml");
+			add("529a1.txml");
+			add("530a1.txml");
+			add("531a1.txml");
+			add("532a1.txml");
+			add("533.txml");
+			add("534.txml");
+			
 		}
 	};
 
@@ -51,6 +63,11 @@ public class InterpreterTestW3C {
 			}
 		}
 		txmlToVxml("a12b.txml", "a12b.vxml");
+		txmlToVxml("526b.txml", "526b.vxml");
+		txmlToVxml("527a2.txml", "527a2.vxml");
+		txmlToVxml("529a2.txml", "529a2.vxml");
+		txmlToVxml("534App.txml", "534App.vxml");
+		txmlToVxml("534Doc.txml", "534Doc.vxml");
 		prompt = new Prompt();
 		prompt.tts = "pass";
 	}

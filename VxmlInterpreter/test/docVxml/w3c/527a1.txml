@@ -9,7 +9,7 @@
 			<conf:comment>
 			The interpreter must transit to the document by the relative URL and begin the execution of the first form.
 			</conf:comment>
-			<goto next="527a2.txml"/>
+			<goto next="527a2.vxml"/>
 		</block>
 	</form>
 </vxml>

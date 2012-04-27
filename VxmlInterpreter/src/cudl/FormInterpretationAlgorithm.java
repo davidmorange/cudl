@@ -1,5 +1,6 @@
 package cudl;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -283,11 +284,17 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	private void catchDocumentChangeException(DocumentChangeException documentChangeException)
-			throws IOException, SAXException {
+			throws IOException, SAXException, InterpreterException {
 		documentChangeException.getNextDocumentFileName();
 		String url = documentChangeException.getNextDocumentFileName();
 		Vxml vxml = new Vxml(documentAcces.get(url, null).getDocumentElement());
+		List<VoiceXmlNode> childs = vxml.getChilds();
 		scripting.exitScope();
+		for (VoiceXmlNode child : childs) {
+			if(child instanceof Var){
+				executor.execute(child);
+			}
+		}
 		if (!url.contains("#")) {
 			currentDialog = vxml.getFirstDialog();
 		} else {
@@ -434,7 +441,20 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				isHangup = true;
 				return;
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				if(e instanceof FileNotFoundException){
+					try {
+						System.err.println("lolo");
+						InterpreterEventHandler.doEvent(selectedFormItem, executor, "error.badfetch.http.404", 0);
+					} catch (ExitException e1) {
+						isHangup = true;
+						return;
+					} catch (InterpreterException e1) {
+						System.err.println("blah");
+						throw new RuntimeException(e1);
+					}
+				} else {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 

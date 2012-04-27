@@ -10,7 +10,7 @@
 
   <form>
     <block>
-      <goto next="http://localhost/vxml/526b.txml"/>
+      <goto next="http://localhost/vxml/526b.vxml"/>
     </block>
 
     <block>

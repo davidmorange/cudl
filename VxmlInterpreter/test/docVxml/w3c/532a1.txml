@@ -4,13 +4,15 @@
 	<catch>
 		<conf:fail expr="'catch-all caught ' + _event"/>
 	</catch>
-	<var name="urlToGo" expr="'http://localhost/vxml/526b.vxml'"/>
+	<var name="urlToGo" expr="'notExist.vxml'"/>
 	<form>
+		<catch event="error.badfetch">
+			<conf:pass/>
+		</catch>
 		<block>
+			<conf:comment>This is a test for element goto. We try to load a non-existent VXML document. An error badfetch is catched.
+			</conf:comment>
 			<goto expr="urlToGo"/>
 		</block>
-    <block>
-     <conf:fail reason="block after goto"/>
-    </block>
-</form>
+	</form>
 </vxml>
