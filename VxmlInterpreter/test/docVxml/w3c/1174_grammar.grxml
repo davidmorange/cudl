@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- @ Copyright 1998-2003 W3C (MIT, ERCIM, Keio), All Rights Reserved. See http://www.w3.org/Consortium/Legal/. @ -->
+<!-- This is the grammar that is supposed to be found and used by the link in root. -->
+<grammar xml:lang="en-US" xmlns="http://www.w3.org/2001/06/grammar" root="CityName" version="1.0" mode="voice">
+	<rule id="CityName" scope="public">
+		<one-of>
+			<item>Chicago</item>
+		</one-of>
+	</rule>
+</grammar>

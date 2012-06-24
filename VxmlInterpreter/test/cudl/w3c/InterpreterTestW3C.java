@@ -65,6 +65,7 @@ public class InterpreterTestW3C {
 		txmlToVxml("a12b.txml", "a12b.vxml");
 		txmlToVxml("526b.txml", "526b.vxml");
 		txmlToVxml("527a2.txml", "527a2.vxml");
+		txmlToVxml("528a2.txml", "528a2.vxml");
 		txmlToVxml("529a2.txml", "529a2.vxml");
 		txmlToVxml("534App.txml", "534App.vxml");
 		txmlToVxml("534Doc.txml", "534Doc.vxml");
@@ -82,7 +83,7 @@ public class InterpreterTestW3C {
 			if (fileName.equals("a18.txml")) {
 				interpreter.talk("Chicago");
 			}
-			System.err.println(interpreter.getLogs());
+			System.err.println(interpreter.getLogs()+fileName);
 			assertEquals(prompt, interpreter.getPrompts().get(interpreter.getPrompts().size() - 1));
 			System.err.println(fileName+"\ttest OK");
 		}

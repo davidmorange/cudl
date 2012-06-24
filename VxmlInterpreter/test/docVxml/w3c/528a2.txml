@@ -4,13 +4,14 @@
   <catch>
     <conf:fail expr="'catch-all caught ' + _event"/>
   </catch>
-  <form>
+  <form id="first">
     <block>
-      <goto next="http://localhost/vxml/528a2.vxml#second"/>
+      <conf:fail reason="interpreter must begin execution of the specified form"/>
     </block>
-
+  </form>
+  <form id="second">
     <block>
-      <conf:fail reason="block after goto"/>
+      <conf:pass/>
     </block>
   </form>
 </vxml>

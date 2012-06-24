@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<vxml version="2.0" xmlns="http://www.w3.org/2001/vxml" xmlns:conf="http://www.w3.org/2002/vxml-conformance">
+<!--
+  Verify that this document can be loaded properly when referenced via
+  an absolute URI
+-->
+  <form>
+    <catch>
+      <conf:fail expr="'document catch-all caught ' + _event"/>
+    </catch>
+
+    <block>
+      <conf:pass />
+    </block>
+  </form>
+</vxml>
+
