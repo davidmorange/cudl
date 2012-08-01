@@ -9,11 +9,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
-import test.Session;
 import cudl.node.Script;
 import cudl.node.Var;
 import cudl.node.VoiceXmlNode;
 import cudl.node.Vxml;
+import cudl.utils.Session;
 
 public class Interpreter {
 	protected InterpreterContext interpreterContext;
