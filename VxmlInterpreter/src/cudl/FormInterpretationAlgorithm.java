@@ -287,7 +287,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			throws IOException, SAXException, InterpreterException {
 		documentChangeException.getNextDocumentFileName();
 		String url = documentChangeException.getNextDocumentFileName();
-		System.err.println(url);
 		Vxml vxml = new Vxml(documentAcces.get(url, null).getDocumentElement());
 		List<VoiceXmlNode> childs = vxml.getChilds();
 		scripting.exitScope();
@@ -305,11 +304,15 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		initialize();
 	}
 
-	private void catchDialogChangeException(DialogChangeException dialogChangeException) {
+	private void catchDialogChangeException(DialogChangeException dialogChangeException) throws InterpreterException {
 		Vxml vxml = (Vxml) currentDialog.getParent();
+		VoiceXmlNode tmp = currentDialog;
 		scripting.exitScope();
 		scripting.exitScope();
 		currentDialog = vxml.getDialogById(dialogChangeException.getNextDialogId());
+		if(currentDialog == null){
+			InterpreterEventHandler.doEvent(selectedFormItem, executor, "error.badfetch", 1);
+		}
 		selectedFormItem = null;
 		initialize();
 	}
@@ -385,7 +388,9 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				catchDocumentChangeException(e);
 				run();
 			} catch (Exception e1) {
+				System.err.println("debu");
 				e1.printStackTrace();
+				System.err.println("fin");
 			}
 		}catch (Exception e) {
 			scripting.exitScope();

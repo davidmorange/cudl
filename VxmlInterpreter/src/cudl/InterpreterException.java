@@ -144,4 +144,14 @@ class SemanticException extends InterpreterException {
 		this.node = node;
 	}
 
+	
+}
+
+class BadfetchException extends InterpreterException {
+	private VoiceXmlNode node;
+	
+	public BadfetchException(VoiceXmlNode node, String message) {
+		super(message);
+		this.node = node;
+	}
 }

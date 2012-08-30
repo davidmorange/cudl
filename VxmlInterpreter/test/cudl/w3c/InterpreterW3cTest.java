@@ -50,6 +50,9 @@ public class InterpreterW3cTest {
 			add("1002.txml");
 			add("1003a1.txml");
 			add("1004.txml");
+			add("1005.txml");
+			add("1006.txml");
+			add("assertion-1007.txml");
 		}
 	};
 
