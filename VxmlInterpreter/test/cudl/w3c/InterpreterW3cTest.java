@@ -49,6 +49,7 @@ public class InterpreterW3cTest {
 			add("534.txml");
 			add("1002.txml");
 			add("1003a1.txml");
+			add("1004.txml");
 		}
 	};
 
@@ -72,6 +73,7 @@ public class InterpreterW3cTest {
 		txmlToVxml("534Doc.txml", "534Doc.vxml");
 		txmlToVxml("1002-2.txml", "1002-2.vxml");
 		txmlToVxml("1003a2.txml", "1003a2.vxml");
+		txmlToVxml("1004-2.txml", "1004-2.vxml");
 		
 		prompt = new Prompt();
 		prompt.tts = "pass";
