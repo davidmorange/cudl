@@ -53,6 +53,7 @@ public class InterpreterW3cTest {
 			add("1005.txml");
 			add("1006.txml");
 			add("assertion-1007.txml");
+			add("1008.txml");
 		}
 	};
 

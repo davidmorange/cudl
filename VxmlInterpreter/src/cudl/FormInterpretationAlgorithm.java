@@ -441,21 +441,24 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 		while (true) {
 			try {
+				VoiceXmlNode tmp =selectedFormItem;
 				selectedFormItem = select();
-				collect();
+				if(selectedFormItem == null){
+					InterpreterEventHandler.doEvent(tmp, executor, "error.badfetch", 0);
+				} else{
+					collect();
+				}
 			} catch (ExitException e) {
 				isHangup = true;
 				return;
 			} catch (Exception e) {
 				if(e instanceof FileNotFoundException){
 					try {
-						System.err.println("lolo");
 						InterpreterEventHandler.doEvent(selectedFormItem, executor, "error.badfetch.http.404", 0);
 					} catch (ExitException e1) {
 						isHangup = true;
 						return;
 					} catch (InterpreterException e1) {
-						System.err.println("blah");
 						throw new RuntimeException(e1);
 					}
 				} else {
