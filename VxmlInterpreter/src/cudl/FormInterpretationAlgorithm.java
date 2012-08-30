@@ -287,6 +287,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			throws IOException, SAXException, InterpreterException {
 		documentChangeException.getNextDocumentFileName();
 		String url = documentChangeException.getNextDocumentFileName();
+		System.err.println(url);
 		Vxml vxml = new Vxml(documentAcces.get(url, null).getDocumentElement());
 		List<VoiceXmlNode> childs = vxml.getChilds();
 		scripting.exitScope();

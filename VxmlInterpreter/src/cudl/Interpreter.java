@@ -99,7 +99,7 @@ public class Interpreter {
 			throw new RuntimeException(exceptionTothrow);
 		}
 		try {
-			Thread.sleep(300);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -108,7 +108,7 @@ public class Interpreter {
 	public void noInput() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("noinput", "event$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -117,7 +117,7 @@ public class Interpreter {
 	public void noMatch() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("nomatch", "event$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -126,7 +126,7 @@ public class Interpreter {
 	public void disconnect() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("connection.disconnect.hangup", "event$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -136,7 +136,7 @@ public class Interpreter {
 		try {
 			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '0'");
 			enterInput("connection.disconnect.transfer", "event$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -146,7 +146,7 @@ public class Interpreter {
 		try {
 			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '2'");
 			enterInput("'noanswer'", "transfer$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -155,7 +155,7 @@ public class Interpreter {
 	public void callerHangupDuringTransfer() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("'near_end_disconnect'", "transfer$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -165,7 +165,7 @@ public class Interpreter {
 		try {
 			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '5'");
 			enterInput("'network_busy'", "transfer$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -174,7 +174,7 @@ public class Interpreter {
 	public void destinationBusy() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("'busy'", "transfer$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -183,7 +183,7 @@ public class Interpreter {
 	public void transferTimeout() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("'maxtime_disconnect'", "transfer$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -192,7 +192,7 @@ public class Interpreter {
 	public void talk(String sentence) {
 		try {
 			enterInput(sentence, "voice$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
@@ -208,7 +208,7 @@ public class Interpreter {
 	public void submitDtmf(String dtmf) throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput(dtmf, "dtmf$");
-			this.fia.join(300);
+			this.fia.join(500);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}

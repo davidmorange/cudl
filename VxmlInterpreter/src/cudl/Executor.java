@@ -71,6 +71,7 @@ public class Executor {
 			if (goto1.getNext().startsWith("#")) {
 				throw new DialogChangeException(goto1.getNext().split("#")[1]);
 			} else {
+				System.err.println("gototototot ="+goto1.getNext());
 				throw new DocumentChangeException(goto1.getNext(), null);
 			}
 		} else if (goto1.getExpr() != null) {
