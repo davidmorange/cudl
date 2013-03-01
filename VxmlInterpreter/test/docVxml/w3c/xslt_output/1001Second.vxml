@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><vxml xmlns="http://www.w3.org/2001/vxml" xmlns:conf="http://www.w3.org/2002/vxml-conformance" version="2.0">
+  <catch><prompt>fail</prompt><log>failure expression: <value expr="'catch-all caught ' + _event"/></log><prompt><value expr="'catch-all caught ' + _event"/></prompt><exit/></catch>
+  <form id="first">
+    <catch event="error.badfetch"><log> FIRST </log><goto next="#second"/></catch>
+    <block>
+      <log>first</log>
+      <goto next="1001NextAndExpr.vxml"/>
+      <prompt>fail</prompt><log>failure expression: <value expr="'did not goto next'"/></log><prompt><value expr="'did not goto next'"/></prompt><exit/>
+    </block>
+  </form>
+  <form id="second">
+    <catch event="error.badfetch"><log> SECOND </log><goto next="#third"/></catch>
+    <block>
+	  <log>second</log>
+      <goto next="1001NextAndNextItem.vxml"/>
+      <prompt>fail</prompt><log>failure expression: <value expr="'did not goto next'"/></log><prompt><value expr="'did not goto next'"/></prompt><exit/>
+    </block>
+  </form>
+  <form id="third">
+    <block>
+      <goto nextitem="third"/>
+      <prompt>fail</prompt><log>failure expression: <value expr="'did not goto nextitem'"/></log><prompt><value expr="'did not goto nextitem'"/></prompt><exit/>
+    </block>
+    <block name="second">
+      <prompt>pass</prompt><exit/>
+    </block>
+    <block name="third">
+      <goto expritem="'second'"/>
+      <prompt>fail</prompt><log>failure expression: <value expr="'did not do the expritem'"/></log><prompt><value expr="'did not do the expritem'"/></prompt><exit/>
+    </block>
+  </form>
+</vxml>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><vxml xmlns="http://www.w3.org/2001/vxml" xmlns:conf="http://www.w3.org/2002/vxml-conformance" version="2.0" application="534App.vxml">
+  <catch><prompt>fail</prompt><log>failure expression: <value expr="'Second document failed with ' + _event"/></log><prompt><value expr="'Second document failed with ' + _event"/></prompt><exit/></catch>
+  <var name="count" expr="1"/>
+  <form id="first">
+    <block>
+      <log> visit <value expr="visit"/></log>
+      <log> count <value expr="count"/></log>
+
+      <if cond="(count==1.0)&amp;&amp;(visit==1)">
+        <prompt>pass</prompt><exit/>
+      </if>
+      <prompt>fail</prompt><log>failure expression: <value expr="'Did not get the right count value (' + count + ') or maybe not the right visit value (' + visit + ')"/></log><prompt><value expr="'Did not get the right count value (' + count + ') or maybe not the right visit value (' + visit + ')"/></prompt><exit/>
+    </block>
+  </form>
+  <form id="second">
+    <block>
+      <assign name="visit" expr="1"/>
+      <assign name="count" expr="2"/>
+      <goto next="534Doc.vxml"/>
+    </block>
+  </form>
+</vxml>

@@ -1,5 +1,6 @@
 package cudl;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -44,7 +45,7 @@ public class DocumentAcces {
 	 * 
 	 */
 	public Document post(String uri, Map<String, String> namelist) throws IOException, SAXException {
-		URL url = ((lastBaseUrl == null) ? new URL(uri) : new URL(lastBaseUrl, uri));
+		URL url = ((getLastBaseUrl() == null) ? new URL(uri) : new URL(getLastBaseUrl(), uri));
 		URLConnection connection = url.openConnection();
 		connection.setDoOutput(true);
 		connection.setRequestProperty("User-agent", userAgent);
@@ -54,7 +55,7 @@ public class DocumentAcces {
 			flushParams(namelist, httpConnection);
 			setCookies(httpConnection);
 		}
-		return documentBuilder.parse(connection.getInputStream());
+		return documentBuilder.parse(new BufferedInputStream(connection.getInputStream()));
 	}
 
 	/**
@@ -68,11 +69,11 @@ public class DocumentAcces {
 	 */
 	public Document get(String uri, Map<String, String> namelist) throws IOException, SAXException {
 		//URL url = new URL(uri + ((namelist == null) ? "" : getParams(namelist)));
-		URL url = ((lastBaseUrl == null) ? new URL(uri) : new URL(lastBaseUrl, uri));
+		URL url = ((getLastBaseUrl() == null) ? new URL(uri) : new URL(getLastBaseUrl(), uri));
 		URLConnection connection = (URLConnection) url.openConnection();
 		connection.setRequestProperty("User-agent", userAgent);
 		//		 setCookies(connection);
-		lastBaseUrl = url;
+		setLastBaseUrl(url);
 		return documentBuilder.parse(connection.getInputStream());
 	}
 
@@ -105,5 +106,13 @@ public class DocumentAcces {
 			params += params + "=" + namelist.get(param) + "&";
 		}
 		return params;
+	}
+
+	public URL getLastBaseUrl() {
+		return lastBaseUrl;
+	}
+
+	public void setLastBaseUrl(URL lastBaseUrl) {
+		this.lastBaseUrl = lastBaseUrl;
 	}
 }

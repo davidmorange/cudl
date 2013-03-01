@@ -1,12 +1,16 @@
 package cudl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import org.mozilla.javascript.EcmaError;
-
 
 import cudl.node.Assign;
 import cudl.node.Audio;
@@ -30,16 +34,19 @@ import cudl.node.Submit;
 import cudl.node.Text;
 import cudl.node.Value;
 import cudl.node.Var;
+import cudl.node.Voice;
 import cudl.node.VoiceXmlNode;
 import cudl.script.Scripting;
 
 public class Executor {
 	private final Scripting scripting;
 	private final SystemOutput voiceXTTOutPut;
-
-	public Executor(Scripting scripting, SystemOutput voiceXTTOutPut) {
+	private DocumentAcces documentAcces;
+	
+	public Executor(Scripting scripting, SystemOutput voiceXTTOutPut, DocumentAcces documentAcces) {
 		this.scripting = scripting;
 		this.voiceXTTOutPut = voiceXTTOutPut;
+		this.documentAcces = documentAcces;
 	}
 
 	public Object execute(VoiceXmlNode child) throws InterpreterException {
@@ -143,12 +150,24 @@ public class Executor {
 		return p;
 	}
 
+	public Object execute(Voice voice) {
+		cudl.Prompt p = new cudl.Prompt();
+
+		p.tts = voice.getTextContent();
+
+		if (!(voice.getParent() instanceof Prompt)) {
+			voiceXTTOutPut.addPrompt(p);
+		}
+
+		return p;
+	}
 	public Object execute(Var var) throws InterpreterException {
 		String name = var.getAttribute("name");
 		if (!validateName(name)) {
 			throw new SemanticException(var, "ne doi pas ");
 		}
 		String expr = var.getAttribute("expr");
+		//System.err.println(""+name+ " = " +expr);
 		scripting.put(name, expr == null ? "undefined" : expr);
 		return null;
 	}
@@ -160,17 +179,39 @@ public class Executor {
 	public Object execute(Assign assign) {
 		String name = assign.getAttribute("name");
 		String expr = assign.getAttribute("expr");
+		//System.err.println("assign "+name+ " = " +expr);
 		scripting.set(name, expr);
 		return null;
 	}
 
 	public Object execute(Script script) throws InterpreterException {
 		try {
-			Object eval = scripting.eval(script.getTextContent());
-			return eval;
-		} catch (EcmaError e) {
+			if(script.getAttribute("src") != null){
+				String scriptFileName = script.getAttribute("src");
+				return scripting.eval(getFileTextContent(scriptFileName));
+			}else{
+				return scripting.eval(script.getTextContent());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 			throw new SemanticException(script, e.getMessage());
 		}
+	}
+
+	protected String getFileTextContent(String fileName) throws MalformedURLException, IOException {
+		URL url = new URL(documentAcces.getLastBaseUrl(), fileName);
+        BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+        StringBuffer stringBuffer = new StringBuffer();
+
+        String inputLine;
+        while ((inputLine = in.readLine()) != null){
+        	stringBuffer.append(inputLine).append("\n");
+        }
+        in.close();
+        //System.err.println(stringBuffer.toString());
+        
+        return stringBuffer.toString();
 	}
 
 	public Object execute(Clear clear) throws SemanticException {
@@ -272,8 +313,9 @@ public class Executor {
 
 	public void execute(If if1) throws InterpreterException {
 		String cond = if1.getCond();
-
+		
 		String string = scripting.eval(cond).toString();
+		//System.err.println("cond = "+cond+"cond value ="+ string);
 
 		if (Boolean.parseBoolean(string)) {
 			execute(getInTrueChilds(if1));

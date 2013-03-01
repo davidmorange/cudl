@@ -59,7 +59,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		this.outPut = outPut;
 		this.scripting = scripting;
 		this.userInput = userInput;
-		this.executor = new Executor(scripting, this.outPut);
+		this.executor = new Executor(scripting, this.outPut, documentAcces);
 		this.promptQueue = new LinkedList<VoiceXmlNode>();
 	}
 
@@ -165,6 +165,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		if (subdialog.getSrc() == null) {
 			src = scripting.eval(subdialog.getSrcexpr()).toString();
 		}
+		////System.err.println(src);
 		try {
 			Interpreter interpreter = new Interpreter(src, "", outPut, userInput);
 			interpreter.interpreterContext.getScripting().enterScope();
@@ -209,21 +210,21 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	@Override
 	public void visit(Record record) {
 		scripting.set(record.getName(), "true");
-		System.err.println("record");
+		////System.err.println("record");
 		//throw new RuntimeException("implement Record visit");
 	}
 
 	@Override
 	public void visit(Initial initial) {
 		scripting.set(initial.getName(), "true");
-		System.err.println("initial");
+		////System.err.println("initial");
 		//throw new RuntimeException("implement Initial visit");
 	}
 
 	@Override
 	public void visit(cudl.node.Object object) {
 		scripting.set(object.getName(), "true");	
-		System.err.println("object");
+		////System.err.println("object");
 //		throw new RuntimeException("implement object visit");
 	}
 
@@ -274,9 +275,11 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		} catch (SemanticException e) {
 			InterpreterEventHandler.doEvent(e.node, executor, "error.semantic", getEventCount("error.semanic"));
 		} catch (DialogChangeException dialogChangeException) {
+			////System.err.println("GOTO "+dialogChangeException.getNextDialogId());
 			catchDialogChangeException(dialogChangeException);
 			return;
 		} catch (DocumentChangeException documentChangeException) {
+			//System.err.println("GOTO "+documentChangeException.getNextDocumentFileName());
 			catchDocumentChangeException(documentChangeException);
 			return;
 		}
@@ -339,6 +342,15 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private VoiceXmlNode getFirstUndefinedFormItem() {
 		for (VoiceXmlNode formItem : getCurrentDialog().getChilds()) {
 			if (formItem instanceof FormItem) {
+				if(formItem  instanceof Subdialog){
+					String cond = formItem.getAttribute("cond");
+					//System.err.println(cond);
+					String string = scripting.eval(cond).toString();
+					//System.err.println(cond+" "+string);
+					if(!Boolean.parseBoolean(string)){
+						continue;
+					}
+				}
 				if (Undefined.instance.equals(scripting.get(((FormItem) formItem).getName()))) {
 					return formItem;
 				}
@@ -388,9 +400,9 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				catchDocumentChangeException(e);
 				run();
 			} catch (Exception e1) {
-				System.err.println("debu");
+				//System.err.println("debu");
 				e1.printStackTrace();
-				System.err.println("fin");
+				//System.err.println("fin");
 			}
 		}catch (Exception e) {
 			scripting.exitScope();
@@ -499,7 +511,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 					scripting.eval(((FormItem) selectedFormItem).getName() + "= new Object();");
 					if(namelist != null){
 						StringTokenizer tokenizer = new StringTokenizer(namelist);
-						System.err.println("filled");
+						//System.err.println("filled");
 						while (tokenizer.hasMoreElements()) {
 							String nextToken = tokenizer.nextToken();
 							scripting.eval(((FormItem) selectedFormItem).getName() + "." + nextToken + "="

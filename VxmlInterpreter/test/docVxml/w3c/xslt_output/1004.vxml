@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><vxml xmlns="http://www.w3.org/2001/vxml" xmlns:conf="http://www.w3.org/2002/vxml-conformance" version="2.0">
+    <catch><prompt>fail</prompt><log>failure expression: <value expr="'catch-all caught ' + _event"/></log><prompt><value expr="'catch-all caught ' + _event"/></prompt><exit/></catch>
+    <form>
+        <block>
+            <goto expr="'1004-2.vxml'"/>
+        </block>
+    </form>
+</vxml>

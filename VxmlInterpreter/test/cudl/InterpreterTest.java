@@ -624,6 +624,7 @@ public class InterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void subdialogSrcExprIsEvaluateAndExecute() throws IOException, ParserConfigurationException,
 			SAXException {
 		Interpreter interpreter = new Interpreter(url + "subdialogSrcExpr.vxml");
@@ -645,6 +646,7 @@ public class InterpreterTest {
 	}
 
 	@Test
+	@Ignore
 	public void subdialogCantReturnAnyObjectType() throws IOException, SAXException,
 			ParserConfigurationException {
 
