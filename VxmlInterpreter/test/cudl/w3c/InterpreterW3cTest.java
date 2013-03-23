@@ -17,7 +17,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,8 +35,8 @@ public class InterpreterW3cTest {
 			add("a12a.txml");// need file to add("a12b.txml");
 			add("a18.txml");
 			add("a19.txml");
-			
-			//goto test
+
+			// goto test
 			add("526.txml");
 			add("527a1.txml");
 			add("528a1.txml");
@@ -59,14 +58,16 @@ public class InterpreterW3cTest {
 	};
 
 	@BeforeClass
-	public static void setUp() throws IOException, TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException {
-		url =  new File(".").getCanonicalPath() + "/test/docVxml/w3c/";
-		new File(url+ "xslt_output/").mkdirs();
-		
+	public static void setUp() throws IOException,
+			TransformerConfigurationException,
+			TransformerFactoryConfigurationError, TransformerException {
+		url = new File(".").getCanonicalPath() + "/test/docVxml/w3c/";
+		new File(url + "xslt_output/").mkdirs();
+
 		for (String name : filenames) {
 			if (name.endsWith(".txml")) {
 				txmlToVxml(name, name.replace(".txml", ".vxml"));
-				//System.err.println(name);
+				// System.err.println(name);
 			}
 		}
 		txmlToVxml("a12b.txml", "a12b.vxml");
@@ -82,44 +83,56 @@ public class InterpreterW3cTest {
 		txmlToVxml("1001First.txml", "1001First.vxml");
 		txmlToVxml("1001Second.txml", "1001Second.vxml");
 		txmlToVxml("1001NextAndExpr.txml", "1001NextAndExpr.vxml");
-		
+
 		prompt = new Prompt();
 		prompt.tts = "pass";
 	}
 
 	@Test
 	@Ignore
-	public void testSimpleTxmlToVxml() throws IOException, ParserConfigurationException, SAXException,
-			TransformerConfigurationException, TransformerFactoryConfigurationError, TransformerException {
+	public void testSimpleTxmlToVxml() throws IOException,
+			ParserConfigurationException, SAXException,
+			TransformerConfigurationException,
+			TransformerFactoryConfigurationError, TransformerException {
 		for (String fileName : filenames) {
 			System.err.println();
-			interpreter = new Interpreter("file://" + url + "xslt_output/" + fileName.replace(".txml", ".vxml"));
+			interpreter = new Interpreter("file://" + url + "xslt_output/"
+					+ fileName.replace(".txml", ".vxml"));
 			interpreter.start();
 			if (fileName.equals("a18.txml")) {
 				interpreter.talk("Chicago");
 			}
-			System.err.println(interpreter.getLogs()+fileName);
-			assertEquals(prompt, interpreter.getPrompts().get(interpreter.getPrompts().size() - 1));
-			System.err.println(fileName+"\ttest OK");
+			System.err.println(interpreter.getLogs() + fileName);
+			assertEquals(
+					prompt,
+					interpreter.getPrompts().get(
+							interpreter.getPrompts().size() - 1));
+			System.err.println(fileName + "\ttest OK");
 		}
 
 	}
 
-	private static void txmlToVxml(String fromFile, String toFile) throws TransformerFactoryConfigurationError,
-			TransformerConfigurationException, TransformerException, FileNotFoundException {
+	private static void txmlToVxml(String fromFile, String toFile)
+			throws TransformerFactoryConfigurationError,
+			TransformerConfigurationException, TransformerException,
+			FileNotFoundException {
 		TransformerFactory tFactory = TransformerFactory.newInstance();
-		Transformer transformer = tFactory.newTransformer(new StreamSource(url + "/irtest.xslt"));
-		
-		String outputFileName = (url + "/xslt_output/").replaceAll("file:/*", "/");
-		System.err.println(outputFileName+toFile);
-		transformer.transform(new StreamSource(url + fromFile), new StreamResult(new FileOutputStream(outputFileName + toFile)));
+		Transformer transformer = tFactory.newTransformer(new StreamSource(url
+				+ "/irtest.xslt"));
+
+		String outputFileName = (url + "/xslt_output/").replaceAll("file:/*",
+				"/");
+		System.err.println(outputFileName + toFile);
+		transformer
+				.transform(new StreamSource(url + fromFile), new StreamResult(
+						new FileOutputStream(outputFileName + toFile)));
 
 	}
-	
-	//@AfterClass
+
+	// @AfterClass
 	public static void afterAllTest() {
 		File f = new File(url + "/xslt_output/");
-		
+
 		for (String filename : f.list()) {
 			new File(f, filename).deleteOnExit();
 		}

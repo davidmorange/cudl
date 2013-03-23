@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -70,23 +69,25 @@ public class ExecutorTest {
 	}
 
 	@Test
-	public void scriptFile() throws InterpreterException, ParserConfigurationException {
+	public void scriptFile() throws InterpreterException,
+			ParserConfigurationException {
 		Script script = mock(Script.class);
 		when(script.getAttribute("src")).thenReturn("file:script.js");
 		Scripting scripting = new Scripting();
 		scripting.put("x", "1");
-		Executor executor = new Executor(scripting, null, null){
+		Executor executor = new Executor(scripting, null, null) {
 			@Override
-			protected String getFileTextContent(String fileName) throws MalformedURLException, IOException {
+			protected String getFileTextContent(String fileName)
+					throws MalformedURLException, IOException {
 				return "x++";
 			}
 		};
-		
+
 		executor.execute(script);
 
 		assertEquals(2.0, scripting.get("x"));
 	}
-	
+
 	@Test(expected = DocumentChangeException.class)
 	public void gotoNext() throws InterpreterException {
 		Goto goto1 = mock(Goto.class);
@@ -142,16 +143,16 @@ public class ExecutorTest {
 
 		new Executor(new Scripting(), null, null).execute(submit);
 	}
-	
+
 	@Test
-	public void voice() throws InterpreterException{
+	public void voice() throws InterpreterException {
 		Voice voice = mock(Voice.class);
 		when(voice.getTextContent()).thenReturn("hello voice");
-		
+
 		SystemOutput voiceXTTOutPut = new SystemOutput();
-		
+
 		new Executor(new Scripting(), voiceXTTOutPut, null).execute(voice);
-		
+
 		assertEquals("hello voice", voiceXTTOutPut.getPrompts().get(0).tts);
 	}
 }
