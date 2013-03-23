@@ -558,7 +558,7 @@ public class W3cInterpreterTest {
 
 	@Before
 	public void setUp() throws IOException {
-		url = "file://" + new File(".").getCanonicalPath() + "/test/docVxml/";
+		url = "file:" + new File(".").getCanonicalPath() + "/test/docVxml/";
 		prompt = new Prompt();
 		prompt.tts = "pass";
 	}

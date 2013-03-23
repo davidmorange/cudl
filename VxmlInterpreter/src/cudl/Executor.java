@@ -167,7 +167,6 @@ public class Executor {
 			throw new SemanticException(var, "ne doi pas ");
 		}
 		String expr = var.getAttribute("expr");
-		//System.err.println(""+name+ " = " +expr);
 		scripting.put(name, expr == null ? "undefined" : expr);
 		return null;
 	}
@@ -179,7 +178,6 @@ public class Executor {
 	public Object execute(Assign assign) {
 		String name = assign.getAttribute("name");
 		String expr = assign.getAttribute("expr");
-		//System.err.println("assign "+name+ " = " +expr);
 		scripting.set(name, expr);
 		return null;
 	}
@@ -209,7 +207,6 @@ public class Executor {
         	stringBuffer.append(inputLine).append("\n");
         }
         in.close();
-        //System.err.println(stringBuffer.toString());
         
         return stringBuffer.toString();
 	}
@@ -315,7 +312,6 @@ public class Executor {
 		String cond = if1.getCond();
 		
 		String string = scripting.eval(cond).toString();
-		//System.err.println("cond = "+cond+"cond value ="+ string);
 
 		if (Boolean.parseBoolean(string)) {
 			execute(getInTrueChilds(if1));

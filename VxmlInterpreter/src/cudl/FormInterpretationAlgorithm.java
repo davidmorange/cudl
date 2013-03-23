@@ -64,7 +64,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	public void initialize() {
-		// scripting.enterScope(); // enter scope dialog
+		scripting.enterScope("dialog"); // enter scope dialog
 		for (VoiceXmlNode formChild : getCurrentDialog().getChilds()) {
 			if (formChild instanceof FormItem) {
 				String name = ((FormItem) formChild).getName();
@@ -165,12 +165,9 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		if (subdialog.getSrc() == null) {
 			src = scripting.eval(subdialog.getSrcexpr()).toString();
 		}
-		////System.err.println(src);
 		try {
 			Interpreter interpreter = new Interpreter(src, "", outPut, userInput);
-			interpreter.interpreterContext.getScripting().enterScope();
 			declareParam(interpreter.interpreterContext.getScripting());
-			interpreter.interpreterContext.getScripting().exitScope();
 			interpreter.fia.setUncaughtExceptionHandler(new SubdialogUncaughtExceptionHandler(subdialog,
 					interpreter.interpreterContext.getScripting(), this));
 			interpreter.start();
@@ -210,22 +207,16 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	@Override
 	public void visit(Record record) {
 		scripting.set(record.getName(), "true");
-		////System.err.println("record");
-		//throw new RuntimeException("implement Record visit");
 	}
 
 	@Override
 	public void visit(Initial initial) {
 		scripting.set(initial.getName(), "true");
-		////System.err.println("initial");
-		//throw new RuntimeException("implement Initial visit");
 	}
 
 	@Override
 	public void visit(cudl.node.Object object) {
 		scripting.set(object.getName(), "true");	
-		////System.err.println("object");
-//		throw new RuntimeException("implement object visit");
 	}
 
 	public VoiceXmlNode select() throws ExitException {
@@ -266,20 +257,16 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		// Execute the form item.
 		try {
 			setNextItem(null);
-			scripting.enterScope();
+			scripting.enterScope(null);
 			((FormItem) selectedFormItem).accept(this);
-			scripting.exitScope();
 		} catch (FormItemChangeException e) {
-			scripting.exitScope();
 			setNextItem(e.getNextFormItemName());
 		} catch (SemanticException e) {
 			InterpreterEventHandler.doEvent(e.node, executor, "error.semantic", getEventCount("error.semanic"));
 		} catch (DialogChangeException dialogChangeException) {
-			////System.err.println("GOTO "+dialogChangeException.getNextDialogId());
 			catchDialogChangeException(dialogChangeException);
 			return;
 		} catch (DocumentChangeException documentChangeException) {
-			//System.err.println("GOTO "+documentChangeException.getNextDocumentFileName());
 			catchDocumentChangeException(documentChangeException);
 			return;
 		}
@@ -292,7 +279,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		String url = documentChangeException.getNextDocumentFileName();
 		Vxml vxml = new Vxml(documentAcces.get(url, null).getDocumentElement());
 		List<VoiceXmlNode> childs = vxml.getChilds();
-		scripting.exitScope();
 		for (VoiceXmlNode child : childs) {
 			if(child instanceof Var){
 				executor.execute(child);
@@ -310,8 +296,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private void catchDialogChangeException(DialogChangeException dialogChangeException) throws InterpreterException {
 		Vxml vxml = (Vxml) currentDialog.getParent();
 		VoiceXmlNode tmp = currentDialog;
-		scripting.exitScope();
-		scripting.exitScope();
 		currentDialog = vxml.getDialogById(dialogChangeException.getNextDialogId());
 		if(currentDialog == null){
 			InterpreterEventHandler.doEvent(selectedFormItem, executor, "error.badfetch", 1);
@@ -344,9 +328,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			if (formItem instanceof FormItem) {
 				if(formItem  instanceof Subdialog){
 					String cond = formItem.getAttribute("cond");
-					//System.err.println(cond);
 					String string = scripting.eval(cond).toString();
-					//System.err.println(cond+" "+string);
 					if(!Boolean.parseBoolean(string)){
 						continue;
 					}
@@ -369,7 +351,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	@Override
 	public void run() {
-		scripting.enterScope(); // in scope dialog
 		if (currentDialog instanceof Form) {
 			executeForm();
 		} else {
@@ -400,12 +381,9 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				catchDocumentChangeException(e);
 				run();
 			} catch (Exception e1) {
-				//System.err.println("debu");
 				e1.printStackTrace();
-				//System.err.println("fin");
 			}
 		}catch (Exception e) {
-			scripting.exitScope();
 			throw new RuntimeException(e);
 		}
 	}
@@ -511,7 +489,6 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 					scripting.eval(((FormItem) selectedFormItem).getName() + "= new Object();");
 					if(namelist != null){
 						StringTokenizer tokenizer = new StringTokenizer(namelist);
-						//System.err.println("filled");
 						while (tokenizer.hasMoreElements()) {
 							String nextToken = tokenizer.nextToken();
 							scripting.eval(((FormItem) selectedFormItem).getName() + "." + nextToken + "="

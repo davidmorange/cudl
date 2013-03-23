@@ -66,7 +66,7 @@ public class InterpreterW3cTest {
 		for (String name : filenames) {
 			if (name.endsWith(".txml")) {
 				txmlToVxml(name, name.replace(".txml", ".vxml"));
-				System.err.println(name);
+				//System.err.println(name);
 			}
 		}
 		txmlToVxml("a12b.txml", "a12b.vxml");

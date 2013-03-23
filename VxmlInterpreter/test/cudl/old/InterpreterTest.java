@@ -24,7 +24,7 @@ public class InterpreterTest extends TestCase {
 
 	@Before
 	public void setUp() throws IOException {
-		url = "file://" + new File(".").getCanonicalPath() + "/test/docVxml/oldtestfile/";
+		url = "file:" + new File(".").getCanonicalPath() + "/test/docVxml/oldtestfile/";
 	}
 
 	@Test

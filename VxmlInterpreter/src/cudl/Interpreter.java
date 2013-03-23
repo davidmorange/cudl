@@ -53,13 +53,13 @@ public class Interpreter {
 		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut,
 				userInput, documentAcces);
 		interpreterContext.getScripting().eval(sessionVariables);
-		interpreterContext.getScripting().enterScope(); // in scope application
+		interpreterContext.getScripting().enterScope("application"); // in scope application
 		try {
 			initializeApplicationVariables();
 		} catch (InterpreterException e) {
 			throw new RuntimeException(e);
 		}
-		interpreterContext.getScripting().enterScope(); // in scope document
+		interpreterContext.getScripting().enterScope("document"); // in scope document
 		try {
 			initializeDocumentVariables();
 		} catch (InterpreterException e) {
@@ -84,13 +84,13 @@ public class Interpreter {
 				userInput, null);
 		this.fia.setUncaughtExceptionHandler(getUncaughtExceptionHandler());
 		interpreterContext.getScripting().eval(sessionVariables);
-		interpreterContext.getScripting().enterScope(); // in scope application
+		interpreterContext.getScripting().enterScope("application"); // in scope application
 		try {
 			initializeApplicationVariables();
 		} catch (InterpreterException e) {
 			throw new RuntimeException(e);
 		}
-		interpreterContext.getScripting().enterScope(); // in scope document
+		interpreterContext.getScripting().enterScope("document"); // in scope document
 		try {
 			initializeDocumentVariables();
 		} catch (InterpreterException e) {
@@ -268,13 +268,10 @@ public class Interpreter {
 						fia.start();
 						fia.join();
 					} else if (exception instanceof DocumentChangeException) {
-						interpreterContext.getScripting().exitScope();
-						interpreterContext.getScripting().exitScope();
 						currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/"))
 								+ "/" + ((DocumentChangeException) exception).getNextDocumentFileName();
 						vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null)
 								.getDocumentElement());
-						//System.err.println(currentFileName);
 						if (currentFileName.contains("#")) {
 							fia = new FormInterpretationAlgorithm(
 									vxml.getDialogById(currentFileName.split("#")[1]),

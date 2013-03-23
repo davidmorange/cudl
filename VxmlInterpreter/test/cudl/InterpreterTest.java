@@ -169,6 +169,8 @@ public class InterpreterTest {
 		interpreter = new Interpreter(url + "prompt.vxml");
 		interpreter.start();
 
+		System.err.println(prompts);
+		System.err.println(interpreter.getPrompts());
 		assertEquals(prompts, interpreter.getPrompts());
 	}
 
@@ -236,7 +238,7 @@ public class InterpreterTest {
 		interpreter.start();
 
 		assertFalse(interpreter.getPrompts().isEmpty());
-		assertEquals("variable de formulaire 2", interpreter.getPrompts().get(0).tts);
+		assertEquals("document variable ok", interpreter.getPrompts().get(0).tts);
 	}
 
 	@Test

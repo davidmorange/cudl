@@ -75,23 +75,27 @@ public class ScriptingTest {
 
 	@Test
 	public void applicationScope() {
-		scripting.enterScope();
+		scripting.enterScope("application");
 		scripting.put("variableName", "[]");
 		
 		assertEquals(0.0, scripting.eval("application.variableName.length"));
 		
-		scripting.enterScope();
-		scripting.exitScope();
+		scripting.enterScope("session");
 		scripting.put("variableName1", "[1, 2]");
 		
-		assertEquals(1.0, scripting.eval("application.variableName1[0]"));
+		assertEquals(1.0, scripting.eval("session.variableName1[0]"));
+		
+		scripting.enterScope("application");
+		assertEquals(1.0, scripting.eval("variableName1[0]"));
+		
+		scripting.put("variableName1", "[1, 2]");
 		assertEquals(2, scripting.eval("var le= variableName1.length-1; application.variableName1[application.le]"));
 	}
 
 	@Test
 	public void documentScope() {
-		scripting.enterScope();
-		scripting.enterScope();
+		scripting.enterScope("document");
+		
 		scripting.put("variableName", "[]");
 		scripting.put("variableName1", "[1, 2]");
 		assertEquals(0.0, scripting.eval("document.variableName.length"));
@@ -101,11 +105,11 @@ public class ScriptingTest {
 
 	@Test
 	public void dialogScope() {
-		scripting.enterScope();
-		scripting.enterScope();
-		scripting.enterScope();
+		scripting.enterScope("dialog");
+		
 		scripting.put("variableName", "[]");
 		scripting.put("variableName1", "[1, 2]");
+		
 		assertEquals(0.0, scripting.eval("dialog.variableName.length"));
 		assertEquals(1.0, scripting.get("dialog.variableName1[0]"));
 		assertEquals(2, scripting.eval("var le= variableName1.length-1;variableName1[dialog.le]"));
@@ -114,22 +118,22 @@ public class ScriptingTest {
 	@Test
 	public void variableIsAlwaysVisibleInEnclosingScope() {
 		scripting.put("variableName", "[]");
-		scripting.enterScope();
+		scripting.enterScope("application");
 		assertEquals(0.0, scripting.eval("variableName.length"));
 		assertEquals(0.0, scripting.eval("session.variableName.length"));
 		scripting.put("variableName", "[1]");
-		scripting.enterScope();
+		scripting.enterScope("document");
 		assertEquals(0.0, scripting.eval("session.variableName.length"));
 		assertEquals(1.0, scripting.eval("variableName.length"));
 		assertEquals(1.0, scripting.eval("application.variableName.length"));
 		scripting.put("variableName", "[1,2]");
-		scripting.enterScope();
+		scripting.enterScope("dialog");
 		assertEquals(0.0, scripting.eval("session.variableName.length"));
 		assertEquals(1.0, scripting.eval("application.variableName.length"));
 		assertEquals(2.0, scripting.eval("document.variableName.length"));
 		assertEquals(2.0, scripting.eval("variableName.length"));
 		scripting.put("variableName", "[1,2,3]");
-		scripting.enterScope();
+		scripting.enterScope(null);
 		assertEquals(0.0, scripting.eval("session.variableName.length"));
 		assertEquals(1.0, scripting.eval("application.variableName.length"));
 		assertEquals(2.0, scripting.eval("document.variableName.length"));
@@ -137,7 +141,7 @@ public class ScriptingTest {
 		scripting.put("variableName", "[1,2,3,4]");
 		assertEquals(3.0, scripting.eval("dialog.variableName.length"));
 		assertEquals(4.0, scripting.eval("variableName.length"));
-		scripting.enterScope();
+		scripting.enterScope(null);
 		scripting.put("variableName", "'anonyme'");
 		assertEquals("anonyme", scripting.eval("variableName"));
 	}
@@ -145,7 +149,7 @@ public class ScriptingTest {
 	@Test
 	public void enclosingScopeCanChangeVariableInItOwnerScope() {
 		scripting.put("variableName", "[]");
-		scripting.enterScope();
+		scripting.enterScope("application");
 		scripting.set("variableName", "[1,2]");
 		assertEquals(2.0, scripting.eval("variableName.length"));
 		assertEquals(2.0, scripting.eval("session.variableName.length"));
@@ -154,26 +158,35 @@ public class ScriptingTest {
 	
 	@Test
 	public void exitScopeAssumeItVariableItNotVisible() {
-		scripting.enterScope();
+		scripting.enterScope("application");
 		scripting.put("applicationVariable", "'appli'");
-		scripting.enterScope();
+		scripting.enterScope("document");
 		scripting.put("documentVariable", "'doc'");
-		scripting.enterScope();
+		scripting.enterScope("dialog");
 		scripting.put("dialogVariable", "'dial'");
 
 		assertEquals("dial", scripting.eval("dialogVariable"));
-		scripting.exitScope();
+		scripting.enterScope("document");
 		try {
 			assertEquals("dial", scripting.eval("dialogVariable"));
 			fail("Not clean scope Exited dialog");
 		} catch (EcmaError e) {
 		}
-		assertEquals("doc", scripting.eval("documentVariable"));
-		scripting.exitScope();
+		try {
+			assertEquals("doc", scripting.eval("documentVariable"));
+		} catch (EcmaError e){
+		}
+		scripting.enterScope("application");
 		try {
 			assertEquals("dial", scripting.eval("documentVariable"));
 			fail("Not clean scope Exited document");
 		} catch (EcmaError e) {
+		}
+		try {
+			assertEquals("dial", scripting.eval("applicationVariable"));
+			fail("Not clean scope Exited document");
+		} catch (EcmaError e){
+			
 		}
 	}
 }
