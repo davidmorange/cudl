@@ -32,6 +32,7 @@ import cudl.node.Return;
 import cudl.node.Script;
 import cudl.node.Submit;
 import cudl.node.Text;
+import cudl.node.Throw;
 import cudl.node.Value;
 import cudl.node.Var;
 import cudl.node.Voice;
@@ -43,8 +44,7 @@ public class Executor {
 	private final SystemOutput voiceXTTOutPut;
 	private DocumentAcces documentAcces;
 
-	public Executor(Scripting scripting, SystemOutput voiceXTTOutPut,
-			DocumentAcces documentAcces) {
+	public Executor(Scripting scripting, SystemOutput voiceXTTOutPut, DocumentAcces documentAcces) {
 		this.scripting = scripting;
 		this.voiceXTTOutPut = voiceXTTOutPut;
 		this.documentAcces = documentAcces;
@@ -52,8 +52,7 @@ public class Executor {
 
 	public Object execute(VoiceXmlNode child) throws InterpreterException {
 		try {
-			return Executor.class.getMethod("execute", child.getClass())
-					.invoke(this, child);
+			return Executor.class.getMethod("execute", child.getClass()).invoke(this, child);
 		} catch (IllegalArgumentException e) {
 		} catch (SecurityException e) {
 		} catch (IllegalAccessException e) {
@@ -63,10 +62,8 @@ public class Executor {
 			}
 		} catch (NoSuchMethodException e) {
 			if (!(child instanceof Else || child instanceof Elseif)) {
-				throw new RuntimeException(
-						"No implementation for Executor.execute("
-								+ child.getClass().getSimpleName() + " "
-								+ child.getNodeName() + ")");
+				throw new RuntimeException("No implementation for Executor.execute(" + child.getClass().getSimpleName() + " "
+						+ child.getNodeName() + ")");
 			}
 		}
 		return null;
@@ -76,8 +73,7 @@ public class Executor {
 		if (goto1.getNextItem() != null) {
 			throw new FormItemChangeException(goto1.getNextItem());
 		} else if (goto1.getExpritem() != null) {
-			throw new FormItemChangeException(scripting.eval(
-					goto1.getExpritem()).toString());
+			throw new FormItemChangeException(scripting.eval(goto1.getExpritem()).toString());
 		}
 		if (goto1.getNext() != null) {
 			if (goto1.getNext().startsWith("#")) {
@@ -126,8 +122,7 @@ public class Executor {
 
 	public Object execute(Choice choice) throws InterpreterException {
 		if (choice.getAttribute("event") != null) {
-			InterpreterEventHandler.doEvent(choice, this,
-					choice.getAttribute("event"), 1);
+			InterpreterEventHandler.doEvent(choice, this, choice.getAttribute("event"), 1);
 			return null;
 		}
 		throw new DocumentChangeException(choice.getAttribute("next"), null);
@@ -138,8 +133,7 @@ public class Executor {
 	}
 
 	public Object execute(Submit submit) throws InterpreterException {
-		throw new DocumentChangeException(submit.getAttribute("next"),
-				submit.getAttribute("method"));
+		throw new DocumentChangeException(submit.getAttribute("next"), submit.getAttribute("method"));
 	}
 
 	public Object execute(Audio audio) {
@@ -205,11 +199,9 @@ public class Executor {
 		}
 	}
 
-	protected String getFileTextContent(String fileName)
-			throws MalformedURLException, IOException {
+	protected String getFileTextContent(String fileName) throws MalformedURLException, IOException {
 		URL url = new URL(documentAcces.getLastBaseUrl(), fileName);
-		BufferedReader in = new BufferedReader(new InputStreamReader(
-				url.openStream()));
+		BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		StringBuffer stringBuffer = new StringBuffer();
 
 		String inputLine;
@@ -225,11 +217,9 @@ public class Executor {
 		String nameList = clear.getAttribute("namelist");
 		try {
 			if (nameList == null) {
-				for (VoiceXmlNode voiceXmlNode : getEnclosingDialog(clear)
-						.getChilds()) {
+				for (VoiceXmlNode voiceXmlNode : getEnclosingDialog(clear).getChilds()) {
 					if (voiceXmlNode instanceof FormItem) {
-						scripting.set(((FormItem) voiceXmlNode).getName(),
-								"undefined");
+						scripting.set(((FormItem) voiceXmlNode).getName(), "undefined");
 					}
 				}
 			} else {
@@ -270,6 +260,13 @@ public class Executor {
 
 	public Object execute(Catch catch1) throws InterpreterException {
 		execute(catch1.getChilds());
+		return null;
+	}
+
+	public Object execute(Throw throw1) throws InterpreterException {
+		if (throw1.getAttribute("event") != null && throw1.getAttribute("eventexpr") != null) {
+			InterpreterEventHandler.doEvent(throw1, this, "error.badfetch", 1);
+		}
 		return null;
 	}
 
@@ -339,16 +336,13 @@ public class Executor {
 		for (VoiceXmlNode voiceXmlNode : if1.getChilds()) {
 			if (voiceXmlNode instanceof Else || voiceXmlNode instanceof Elseif) {
 				inElse = !inElse;
-				cond = voiceXmlNode instanceof Elseif ? voiceXmlNode
-						.getAttribute("cond") : null;
+				cond = voiceXmlNode instanceof Elseif ? voiceXmlNode.getAttribute("cond") : null;
 				if (!inElse) {
 					return childsFalse;
 				}
 			}
 			if (inElse) {
-				if (cond == null
-						|| Boolean
-								.parseBoolean(scripting.eval(cond).toString())) {
+				if (cond == null || Boolean.parseBoolean(scripting.eval(cond).toString())) {
 					childsFalse.add(voiceXmlNode);
 				}
 			}
@@ -371,8 +365,7 @@ public class Executor {
 		return childsTrue;
 	}
 
-	private void execute(List<VoiceXmlNode> voiceXmlNodes)
-			throws InterpreterException {
+	private void execute(List<VoiceXmlNode> voiceXmlNodes) throws InterpreterException {
 		for (VoiceXmlNode voiceXmlNode : voiceXmlNodes) {
 			execute(voiceXmlNode);
 		}
