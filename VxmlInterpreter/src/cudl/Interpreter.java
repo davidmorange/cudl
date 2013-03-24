@@ -50,17 +50,15 @@ public class Interpreter {
 		}
 		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut, userInput, documentAcces);
 		interpreterContext.getScripting().eval(sessionVariables);
-		interpreterContext.getScripting().enterScope(Scope.APPLICATION); // in
-																			// scope
-																			// application
+		interpreterContext.getScripting().enterScope(Scope.APPLICATION);
+
 		try {
 			initializeApplicationVariables();
 		} catch (InterpreterException e) {
 			throw new RuntimeException(e);
 		}
-		interpreterContext.getScripting().enterScope(Scope.DOCUMENT); // in
-																		// scope
-																		// document
+		interpreterContext.getScripting().enterScope(Scope.DOCUMENT);
+
 		try {
 			initializeDocumentVariables();
 		} catch (InterpreterException e) {
