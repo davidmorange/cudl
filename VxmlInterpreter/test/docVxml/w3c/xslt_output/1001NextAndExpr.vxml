@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><vxml xmlns="http://www.w3.org/2001/vxml" xmlns:conf="http://www.w3.org/2002/vxml-conformance" version="2.0">
-  <catch><prompt>fail</prompt><log>failure expression: <value expr="'catch-all in bad document caught ' + _event"/></log><prompt><value expr="'catch-all in bad document caught ' + _event"/></prompt><exit/></catch>
-  <form id="first">
-    <block name="third">
-      <goto next="1001Second.vxml" expr="'1001Second.vxml'"/>
-    </block>
-  </form>
-</vxml>

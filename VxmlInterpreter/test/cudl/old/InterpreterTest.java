@@ -28,8 +28,8 @@ public class InterpreterTest extends TestCase {
 	}
 
 	@Test
-	public void testCallServiceNavigateUntilNextInteractionAndCollectsNavigationTraces() throws IOException,
-			ScriptException, ParserConfigurationException, SAXException {
+	public void testCallServiceNavigateUntilNextInteractionAndCollectsNavigationTraces() throws IOException, ScriptException,
+			ParserConfigurationException, SAXException {
 		List<String> expectedLogs = new ArrayList<String>();
 		expectedLogs.add("LOG PHASE init");
 		expectedLogs.add("new call");
@@ -65,10 +65,13 @@ public class InterpreterTest extends TestCase {
 		interpreter = new Interpreter(url + "VxmlGlobalServletService");
 		interpreter.start();
 
-
+		System.err.println(expectedLogs);
+		System.err.println(interpreter.getLogs());
 		assertEquals(expectedLogs, interpreter.getLogs());
 		assertEquals(expectedStats, interpreter.getLogsWithLabel("stats"));
 
+		System.err.println(expectedPrompts);
+		System.err.println(interpreter.getPrompts());
 		assertEquals(expectedPrompts, interpreter.getPrompts());
 		assertFalse(interpreter.hungup());
 	}
@@ -98,8 +101,8 @@ public class InterpreterTest extends TestCase {
 	}
 
 	@Test
-	public void testNavigationCollectsTransfertInformationButDoNotTransfer() throws IOException,
-			ScriptException, ParserConfigurationException, SAXException {
+	public void testNavigationCollectsTransfertInformationButDoNotTransfer() throws IOException, ScriptException,
+			ParserConfigurationException, SAXException {
 
 		List<String> expectedLogs = new ArrayList<String>();
 		expectedLogs.add("LOG PHASE init");
@@ -109,15 +112,15 @@ public class InterpreterTest extends TestCase {
 		interpreter.start();
 
 		assertEquals("sup:4700810C810106830783105506911808", interpreter.getTranferDestination());
-		
+
 		assertFalse(interpreter.getLogs().isEmpty());
 		assertEquals(expectedLogs, interpreter.getLogs());
 		assertFalse(interpreter.hungup());
 	}
 
 	@Test
-	public void testTransferOKSimulatesTransferOnTransferPage() throws IOException, ScriptException,
-			ParserConfigurationException, SAXException {
+	public void testTransferOKSimulatesTransferOnTransferPage() throws IOException, ScriptException, ParserConfigurationException,
+			SAXException {
 
 		List<String> expectedLogs = new ArrayList<String>();
 		expectedLogs.add("LOG PHASE init");
@@ -140,8 +143,8 @@ public class InterpreterTest extends TestCase {
 	}
 
 	@Test
-	public void testTransferKOSimulatesBadTransferOnTransferPage() throws IOException, ScriptException,
-			ParserConfigurationException, SAXException {
+	public void testTransferKOSimulatesBadTransferOnTransferPage() throws IOException, ScriptException, ParserConfigurationException,
+			SAXException {
 		List<String> expectedLogs = new ArrayList<String>();
 		expectedLogs.add("LOG PHASE init");
 		expectedLogs.add("LOG PHASE transfert");

@@ -13,6 +13,7 @@ import cudl.node.Script;
 import cudl.node.Var;
 import cudl.node.VoiceXmlNode;
 import cudl.node.Vxml;
+import cudl.script.Scripting.Scope;
 import cudl.utils.Session;
 
 public class Interpreter {
@@ -27,44 +28,39 @@ public class Interpreter {
 	private DocumentAcces documentAcces;
 	private boolean inSubdialog = false;
 
-	private static final String APPLICATION_VARIABLES = "lastresult$[0].confidence = 1; "
-			+ "lastresult$[0].utterance = undefined;"
-			+ "lastresult$[0].inputmode = undefined;"
-			+ "lastresult$[0].interpretation = undefined;";
+	private static final String APPLICATION_VARIABLES = "lastresult$[0].confidence = 1; " + "lastresult$[0].utterance = undefined;"
+			+ "lastresult$[0].inputmode = undefined;" + "lastresult$[0].interpretation = undefined;";
 
-	public Interpreter(String url) throws IOException,
-			ParserConfigurationException, SAXException {
+	public Interpreter(String url) throws IOException, ParserConfigurationException, SAXException {
 		this(url, Session.getSessionScript());
 	}
 
-	public Interpreter(String url, String sessionVariables) throws IOException,
-			ParserConfigurationException, SAXException {
+	public Interpreter(String url, String sessionVariables) throws IOException, ParserConfigurationException, SAXException {
 		this.outPut = new SystemOutput();
 		this.userInput = new UserInput();
 		this.currentFileName = url;
 		this.interpreterContext = new InterpreterContext(url);
 		this.documentAcces = interpreterContext.getDocumentAcces();
-		this.vxml = new Vxml(interpreterContext.getDocumentAcces()
-				.get(this.currentFileName, null).getDocumentElement());
+		this.vxml = new Vxml(interpreterContext.getDocumentAcces().get(this.currentFileName, null).getDocumentElement());
 		VoiceXmlNode dialog;
 		if (!url.contains("#")) {
 			dialog = vxml.getFirstDialog();
 		} else {
 			dialog = vxml.getDialogById(url.split("#")[1]);
 		}
-		this.fia = new FormInterpretationAlgorithm(dialog,
-				interpreterContext.getScripting(), outPut, userInput,
-				documentAcces);
+		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut, userInput, documentAcces);
 		interpreterContext.getScripting().eval(sessionVariables);
-		interpreterContext.getScripting().enterScope("application"); // in scope
-																		// application
+		interpreterContext.getScripting().enterScope(Scope.APPLICATION); // in
+																			// scope
+																			// application
 		try {
 			initializeApplicationVariables();
 		} catch (InterpreterException e) {
 			throw new RuntimeException(e);
 		}
-		interpreterContext.getScripting().enterScope("document"); // in scope
-																	// document
+		interpreterContext.getScripting().enterScope(Scope.DOCUMENT); // in
+																		// scope
+																		// document
 		try {
 			initializeDocumentVariables();
 		} catch (InterpreterException e) {
@@ -72,34 +68,33 @@ public class Interpreter {
 		}
 	}
 
-	Interpreter(String url, String sessionVariables, SystemOutput output,
-			UserInput userInput) throws IOException,
+	Interpreter(String url, String sessionVariables, SystemOutput output, UserInput userInput) throws IOException,
 			ParserConfigurationException, SAXException {
 		this.currentFileName = url;
 		this.outPut = output;
 		this.userInput = userInput;
 		this.interpreterContext = new InterpreterContext(url);
-		this.vxml = new Vxml(documentAcces.get(this.currentFileName, null)
-				.getDocumentElement());
+		this.vxml = new Vxml(documentAcces.get(this.currentFileName, null).getDocumentElement());
 		VoiceXmlNode dialog;
 		if (!url.contains("#")) {
 			dialog = vxml.getFirstDialog();
 		} else {
 			dialog = vxml.getDialogById(url.split("#")[1]);
 		}
-		this.fia = new FormInterpretationAlgorithm(dialog,
-				interpreterContext.getScripting(), outPut, userInput, null);
+		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut, userInput, null);
 		this.fia.setUncaughtExceptionHandler(getUncaughtExceptionHandler());
 		interpreterContext.getScripting().eval(sessionVariables);
-		interpreterContext.getScripting().enterScope("application"); // in scope
-																		// application
+		interpreterContext.getScripting().enterScope(Scope.APPLICATION); // in
+																			// scope
+																			// application
 		try {
 			initializeApplicationVariables();
 		} catch (InterpreterException e) {
 			throw new RuntimeException(e);
 		}
-		interpreterContext.getScripting().enterScope("document"); // in scope
-																	// document
+		interpreterContext.getScripting().enterScope(Scope.DOCUMENT); // in
+																		// scope
+																		// document
 		try {
 			initializeDocumentVariables();
 		} catch (InterpreterException e) {
@@ -119,8 +114,7 @@ public class Interpreter {
 		}
 	}
 
-	public void noInput() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void noInput() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("noinput", "event$");
 			this.fia.join(500);
@@ -129,8 +123,7 @@ public class Interpreter {
 		}
 	}
 
-	public void noMatch() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void noMatch() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("nomatch", "event$");
 			this.fia.join(500);
@@ -139,8 +132,7 @@ public class Interpreter {
 		}
 	}
 
-	public void disconnect() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void disconnect() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("connection.disconnect.hangup", "event$");
 			this.fia.join(500);
@@ -149,11 +141,9 @@ public class Interpreter {
 		}
 	}
 
-	public void blindTransferSuccess() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void blindTransferSuccess() throws IOException, SAXException, ParserConfigurationException {
 		try {
-			interpreterContext.getScripting().eval(
-					"connection.protocol.isdnvn6.transferresult= '0'");
+			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '0'");
 			enterInput("connection.disconnect.transfer", "event$");
 			this.fia.join(500);
 		} catch (InterruptedException e) {
@@ -161,11 +151,9 @@ public class Interpreter {
 		}
 	}
 
-	public void noAnswer() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void noAnswer() throws IOException, SAXException, ParserConfigurationException {
 		try {
-			interpreterContext.getScripting().eval(
-					"connection.protocol.isdnvn6.transferresult= '2'");
+			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '2'");
 			enterInput("'noanswer'", "transfer$");
 			this.fia.join(500);
 		} catch (InterruptedException e) {
@@ -173,8 +161,7 @@ public class Interpreter {
 		}
 	}
 
-	public void callerHangupDuringTransfer() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void callerHangupDuringTransfer() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("'near_end_disconnect'", "transfer$");
 			this.fia.join(500);
@@ -183,11 +170,9 @@ public class Interpreter {
 		}
 	}
 
-	public void networkBusy() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void networkBusy() throws IOException, SAXException, ParserConfigurationException {
 		try {
-			interpreterContext.getScripting().eval(
-					"connection.protocol.isdnvn6.transferresult= '5'");
+			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '5'");
 			enterInput("'network_busy'", "transfer$");
 			this.fia.join(500);
 		} catch (InterruptedException e) {
@@ -195,8 +180,7 @@ public class Interpreter {
 		}
 	}
 
-	public void destinationBusy() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void destinationBusy() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("'busy'", "transfer$");
 			this.fia.join(500);
@@ -205,8 +189,7 @@ public class Interpreter {
 		}
 	}
 
-	public void transferTimeout() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void transferTimeout() throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput("'maxtime_disconnect'", "transfer$");
 			this.fia.join(500);
@@ -224,16 +207,14 @@ public class Interpreter {
 		}
 	}
 
-	private void enterInput(String sentence, String inputType)
-			throws InterruptedException {
+	private void enterInput(String sentence, String inputType) throws InterruptedException {
 		Speaker speaker = new Speaker(userInput);
 		speaker.setUtterance(inputType + sentence);
 		speaker.start();
 		speaker.join();
 	}
 
-	public void submitDtmf(String dtmf) throws IOException, SAXException,
-			ParserConfigurationException {
+	public void submitDtmf(String dtmf) throws IOException, SAXException, ParserConfigurationException {
 		try {
 			enterInput(dtmf, "dtmf$");
 			this.fia.join(500);
@@ -271,8 +252,7 @@ public class Interpreter {
 		return null;// internalInterpreter.getCurrentDialogProperties();
 	}
 
-	public void destinationHangup() throws IOException, SAXException,
-			ParserConfigurationException {
+	public void destinationHangup() throws IOException, SAXException, ParserConfigurationException {
 		throw new RuntimeException("destinationHangup not implemented");
 		// internalInterpreter.interpret(DESTINATION_HANGUP, null);
 	}
@@ -286,60 +266,35 @@ public class Interpreter {
 
 				try {
 					if (exception instanceof DialogChangeException) {
-						String id = ((DialogChangeException) exception)
-								.getNextDialogId();
-						fia = new FormInterpretationAlgorithm(
-								vxml.getDialogById(id),
-								interpreterContext.getScripting(), outPut,
+						String id = ((DialogChangeException) exception).getNextDialogId();
+						fia = new FormInterpretationAlgorithm(vxml.getDialogById(id), interpreterContext.getScripting(), outPut,
 								userInput, null);
 						fia.start();
 						fia.join();
 					} else if (exception instanceof DocumentChangeException) {
-						currentFileName = currentFileName.subSequence(0,
-								currentFileName.lastIndexOf("/"))
-								+ "/"
-								+ ((DocumentChangeException) exception)
-										.getNextDocumentFileName();
-						vxml = new Vxml(interpreterContext.getDocumentAcces()
-								.get(currentFileName, null)
-								.getDocumentElement());
+						currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/")) + "/"
+								+ ((DocumentChangeException) exception).getNextDocumentFileName();
+						vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null).getDocumentElement());
 						if (currentFileName.contains("#")) {
-							fia = new FormInterpretationAlgorithm(
-									vxml.getDialogById(currentFileName
-											.split("#")[1]),
-									interpreterContext.getScripting(), outPut,
-									userInput, null);
+							fia = new FormInterpretationAlgorithm(vxml.getDialogById(currentFileName.split("#")[1]),
+									interpreterContext.getScripting(), outPut, userInput, null);
 						} else {
-							fia = new FormInterpretationAlgorithm(
-									vxml.getFirstDialog(),
-									interpreterContext.getScripting(), outPut,
+							fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(), outPut,
 									userInput, null);
 						}
 						fia.start();
 						fia.join();
 					} else if (exception instanceof ChoiceException) {
-						String next = ((ChoiceException) exception).getChoice()
-								.getAttribute("next");
+						String next = ((ChoiceException) exception).getChoice().getAttribute("next");
 						if (next != null) {
-							currentFileName = currentFileName.subSequence(0,
-									currentFileName.lastIndexOf("/"))
-									+ "/"
-									+ next;
-							vxml = new Vxml(interpreterContext
-									.getDocumentAcces()
-									.get(currentFileName, null)
-									.getDocumentElement());
+							currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/")) + "/" + next;
+							vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null).getDocumentElement());
 							if (next.contains("#")) {
-								next = next
-										.substring(next.lastIndexOf("#") + 1);
-								fia = new FormInterpretationAlgorithm(
-										vxml.getDialogById(next),
-										interpreterContext.getScripting(),
+								next = next.substring(next.lastIndexOf("#") + 1);
+								fia = new FormInterpretationAlgorithm(vxml.getDialogById(next), interpreterContext.getScripting(),
 										outPut, userInput, null);
 							} else {
-								fia = new FormInterpretationAlgorithm(
-										vxml.getFirstDialog(),
-										interpreterContext.getScripting(),
+								fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(),
 										outPut, userInput, null);
 							}
 							fia.start();
@@ -358,21 +313,17 @@ public class Interpreter {
 		};
 	}
 
-	protected void initializeApplicationVariables() throws IOException,
-			SAXException, InterpreterException {
+	protected void initializeApplicationVariables() throws IOException, SAXException, InterpreterException {
 		interpreterContext.getScripting().put("lastresult$", "new Array()");
 		interpreterContext.getScripting().eval("lastresult$[0] = new Object()");
 		interpreterContext.getScripting().eval(APPLICATION_VARIABLES);
 		String rootName = vxml.getApplication();
 
 		if (rootName != null) {
-			Vxml root = new Vxml(interpreterContext.getDocumentAcces()
-					.get(rootName, null).getDocumentElement());
+			Vxml root = new Vxml(interpreterContext.getDocumentAcces().get(rootName, null).getDocumentElement());
 			for (VoiceXmlNode voiceXmlNode : root.getChilds()) {
-				if (voiceXmlNode instanceof Var
-						|| voiceXmlNode instanceof Script) {
-					new Executor(interpreterContext.getScripting(), null,
-							documentAcces).execute(voiceXmlNode);
+				if (voiceXmlNode instanceof Var || voiceXmlNode instanceof Script) {
+					new Executor(interpreterContext.getScripting(), null, documentAcces).execute(voiceXmlNode);
 				}
 			}
 		}
@@ -381,8 +332,7 @@ public class Interpreter {
 	protected void initializeDocumentVariables() throws InterpreterException {
 		for (VoiceXmlNode voiceXmlNode : vxml.getChilds()) {
 			if (voiceXmlNode instanceof Var || voiceXmlNode instanceof Script) {
-				new Executor(interpreterContext.getScripting(), null,
-						documentAcces).execute(voiceXmlNode);
+				new Executor(interpreterContext.getScripting(), null, documentAcces).execute(voiceXmlNode);
 			}
 		}
 	}

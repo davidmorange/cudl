@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><vxml xmlns="http://www.w3.org/2001/vxml" xmlns:conf="http://www.w3.org/2002/vxml-conformance" version="2.0">
-  <catch><prompt>fail</prompt><log>failure expression: <value expr="'Application root document failed with ' + _event"/></log><prompt><value expr="'Application root document failed with ' + _event"/></prompt><exit/></catch>
-  <var name="visit" expr="0"/>
-</vxml>

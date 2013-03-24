@@ -1,9 +1,9 @@
 package cudl.script;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
@@ -12,13 +12,13 @@ import org.mozilla.javascript.ScriptableObject;
 
 public class Scripting {
 	private Context context;
-	private final String[] scopesName = { "session", "application", "document", "dialog" };
-	private Map<String, ScriptableObject> newScopes = new HashMap<String, ScriptableObject>();
+	private Map<Scope, ScriptableObject> newScopes = new HashMap<Scope, ScriptableObject>();
 	private ScriptableObject currentScope;
-	
+	private Logger LOGGER = Logger.getLogger(this.getClass().getName());
+
 	public Scripting() {
 		context = ContextFactory.getGlobal().enterContext();
-		enterScope("session");
+		enterScope(Scope.SESSION);
 	}
 
 	public void put(String name, String value) {
@@ -43,25 +43,15 @@ public class Scripting {
 		return evaluateString;
 	}
 
-	public void enterScope(String scopeName) {
-		if (scopeName != null) {
-			System.err.println(scopeName);
-			currentScope =  createScope(getParentScope(scopeName));
-			currentScope.put(scopeName, currentScope, currentScope);
-			newScopes.put(scopeName, currentScope);
-		} else {
-			ScriptableObject lastScope = newScopes.get("dialog");
-			currentScope = createScope(lastScope);
-			System.err.println("anonyme");
-		}
+	public void enterScope(Scope scope) {
+		LOGGER.log(Level.INFO, "entering scope " + scope);
+		currentScope = createScope(getParentScope(scope));
+		currentScope.put(scope.toString(), currentScope, currentScope);
+		newScopes.put(scope, currentScope);
 	}
 
-	private ScriptableObject getParentScope(String scopeName) {
-		int i = Arrays.asList(scopesName).indexOf(scopeName);
-		if ((i - 1 ) >= 0) {
-			 return newScopes.get(scopesName[i - 1]);
-		}
-		return null;
+	private ScriptableObject getParentScope(Scope scope) {
+		return newScopes.get(scope.parent());
 	}
 
 	private ScriptableObject createScope(ScriptableObject parentScope) {
@@ -78,21 +68,43 @@ public class Scripting {
 		return declarationScope;
 	}
 
-//	private void initializeScopes() {
-//		ScriptableObject scope;
-//		for (String name : scopesName) {
-//			scope = context.initStandardObjects();
-//			scope.put(name, scope, scope);
-//			scopes.push(scope);
-//			if (lastScopeCreate != null) {
-//				scope.setParentScope(lastScopeCreate);
-//			}
-//			lastScopeCreate = scope;
-//			newScopes.put(name, scope);
-//		}
-//		scope = context.initStandardObjects();
-//		scopes.push(scope);
-//		scope.setParentScope(lastScopeCreate);
-//
-//	}
+	public enum Scope {
+		SESSION {
+			@Override
+			Scope parent() {
+				return null;
+			}
+		},
+		APPLICATION {
+			@Override
+			Scope parent() {
+				return SESSION;
+			}
+		},
+		DOCUMENT {
+			@Override
+			Scope parent() {
+				return APPLICATION;
+			}
+		},
+		DIALOG {
+			@Override
+			Scope parent() {
+				return DOCUMENT;
+			}
+		},
+		ANONYME {
+			@Override
+			Scope parent() {
+				return DIALOG;
+			}
+		};
+
+		abstract Scope parent();
+
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase();
+		}
+	};
 }
