@@ -280,6 +280,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		String url = documentChangeException.getNextDocumentFileName();
 		Vxml vxml = new Vxml(documentAcces.get(url, null).getDocumentElement());
 		List<VoiceXmlNode> childs = vxml.getChilds();
+		scripting.enterScope(Scope.DOCUMENT);
 		for (VoiceXmlNode child : childs) {
 			if (child instanceof Var) {
 				executor.execute(child);
