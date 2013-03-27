@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 import org.mozilla.javascript.EcmaError;
 
@@ -43,7 +44,8 @@ public class Executor {
 	private final Scripting scripting;
 	private final SystemOutput voiceXTTOutPut;
 	private DocumentAcces documentAcces;
-
+	private Logger logger = Logger.getLogger("Executor");
+	
 	public Executor(Scripting scripting, SystemOutput voiceXTTOutPut, DocumentAcces documentAcces) {
 		this.scripting = scripting;
 		this.voiceXTTOutPut = voiceXTTOutPut;
@@ -54,38 +56,54 @@ public class Executor {
 		try {
 			return Executor.class.getMethod("execute", child.getClass()).invoke(this, child);
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		} catch (SecurityException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		} catch (InvocationTargetException e) {
 			if (e.getCause() instanceof InterpreterException) {
 				throw (InterpreterException) e.getCause();
 			}
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		} catch (NoSuchMethodException e) {
 			if (!(child instanceof Else || child instanceof Elseif)) {
 				throw new RuntimeException("No implementation for Executor.execute(" + child.getClass().getSimpleName() + " "
 						+ child.getNodeName() + ")");
 			}
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return null;
 	}
 
 	public Object execute(Goto goto1) throws InterpreterException {
 		if (goto1.getNextItem() != null) {
+			logger.info("goto " + goto1.getNextItem());
 			throw new FormItemChangeException(goto1.getNextItem());
 		} else if (goto1.getExpritem() != null) {
-			throw new FormItemChangeException(scripting.eval(goto1.getExpritem()).toString());
+			String nextItem = scripting.eval(goto1.getExpritem()).toString();
+			logger.info("goto " + nextItem);
+			throw new FormItemChangeException(nextItem);
 		}
 		if (goto1.getNext() != null) {
 			if (goto1.getNext().startsWith("#")) {
+				logger.info("goto " + goto1.getNext().split("#")[1]);
 				throw new DialogChangeException(goto1.getNext().split("#")[1]);
 			} else {
+				logger.info("goto " + goto1.getNext());
 				throw new DocumentChangeException(goto1.getNext(), null);
 			}
 		} else if (goto1.getExpr() != null) {
 			String next = scripting.eval(goto1.getExpr()).toString();
 			if (next.startsWith("#")) {
+				logger.info("goto " + next.split("#")[1]);
 				throw new DialogChangeException(next.split("#")[1]);
 			} else {
+				logger.info("goto " + next);
 				throw new DocumentChangeException(next, null);
 			}
 		}
@@ -169,7 +187,9 @@ public class Executor {
 			throw new SemanticException(var, "ne doi pas ");
 		}
 		String expr = var.getAttribute("expr");
-		scripting.put(name, expr == null ? "undefined" : expr);
+		String value = expr == null ? "undefined" : expr;
+		scripting.put(name, value);
+		logger.info("declaration " + name + " = " + value);
 		return null;
 	}
 
@@ -230,6 +250,7 @@ public class Executor {
 				}
 			}
 		} catch (EcmaError e) {
+			e.printStackTrace();
 			throw new SemanticException(clear, e.getMessage());
 		}
 		return null;
