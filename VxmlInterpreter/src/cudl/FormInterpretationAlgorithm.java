@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
+import org.apache.log4j.Logger;
 import org.mozilla.javascript.Undefined;
 import org.xml.sax.SAXException;
 
@@ -48,7 +49,8 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private final DocumentAcces documentAcces;
 	boolean isHangup;
 	boolean init = true;
-
+	Logger LOGGER = Logger.getRootLogger();
+	
 	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting) {
 		this(dialog, scripting, null, null, null);
 	}
@@ -66,6 +68,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	public void initialize() {
 		scripting.enterScope(Scope.DIALOG); // enter scope dialog
+		LOGGER.debug("debut initialisation des variables");
 		for (VoiceXmlNode formChild : getCurrentDialog().getChilds()) {
 			if (formChild instanceof FormItem) {
 				String name = ((FormItem) formChild).getName();
@@ -89,6 +92,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				scripting.eval(((Script) formChild).getTextContent());
 			}
 		}
+		LOGGER.debug("fin initialisation des variables");
 	}
 
 	@Override
@@ -161,6 +165,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	@Override
 	public void visit(Subdialog subdialog) {
+		LOGGER.debug("debut subdialog");
 		scripting.set(subdialog.getName(), "true");
 		String src = subdialog.getSrc();
 		if (subdialog.getSrc() == null) {

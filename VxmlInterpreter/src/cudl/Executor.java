@@ -9,8 +9,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.mozilla.javascript.EcmaError;
 
 import cudl.node.Assign;
@@ -44,7 +44,7 @@ public class Executor {
 	private final Scripting scripting;
 	private final SystemOutput voiceXTTOutPut;
 	private DocumentAcces documentAcces;
-	private Logger logger = Logger.getLogger("Executor");
+	private Logger LOGGER = Logger.getRootLogger();
 	
 	public Executor(Scripting scripting, SystemOutput voiceXTTOutPut, DocumentAcces documentAcces) {
 		this.scripting = scripting;
@@ -81,28 +81,28 @@ public class Executor {
 
 	public Object execute(Goto goto1) throws InterpreterException {
 		if (goto1.getNextItem() != null) {
-			logger.info("goto " + goto1.getNextItem());
+			LOGGER.debug("goto " + goto1.getNextItem());
 			throw new FormItemChangeException(goto1.getNextItem());
 		} else if (goto1.getExpritem() != null) {
 			String nextItem = scripting.eval(goto1.getExpritem()).toString();
-			logger.info("goto " + nextItem);
+			LOGGER.debug("goto " + nextItem);
 			throw new FormItemChangeException(nextItem);
 		}
 		if (goto1.getNext() != null) {
 			if (goto1.getNext().startsWith("#")) {
-				logger.info("goto " + goto1.getNext().split("#")[1]);
+				LOGGER.debug("goto " + goto1.getNext().split("#")[1]);
 				throw new DialogChangeException(goto1.getNext().split("#")[1]);
 			} else {
-				logger.info("goto " + goto1.getNext());
+				LOGGER.debug("goto " + goto1.getNext());
 				throw new DocumentChangeException(goto1.getNext(), null);
 			}
 		} else if (goto1.getExpr() != null) {
 			String next = scripting.eval(goto1.getExpr()).toString();
 			if (next.startsWith("#")) {
-				logger.info("goto " + next.split("#")[1]);
+				LOGGER.debug("goto " + next.split("#")[1]);
 				throw new DialogChangeException(next.split("#")[1]);
 			} else {
-				logger.info("goto " + next);
+				LOGGER.debug("goto " + next);
 				throw new DocumentChangeException(next, null);
 			}
 		}
@@ -188,7 +188,7 @@ public class Executor {
 		String expr = var.getAttribute("expr");
 		String value = expr == null ? "undefined" : expr;
 		scripting.put(name, value);
-		logger.info("declaration " + name + " = " + value);
+		LOGGER.debug("declaration " + name + " = " + value);
 		return null;
 	}
 
@@ -249,7 +249,6 @@ public class Executor {
 				}
 			}
 		} catch (EcmaError e) {
-			e.printStackTrace();
 			throw new SemanticException(clear, e.getMessage());
 		}
 		return null;
@@ -319,11 +318,14 @@ public class Executor {
 				cudl.Prompt pa = (cudl.Prompt) execute(voiceXmlNode);
 				p.tts += pa.tts + " ";
 				p.audio += pa.audio + " ";
-			} else {
+			} else if(voiceXmlNode instanceof Value){
 				p.tts += execute(voiceXmlNode) + "";
+			} else {
+				p.tts += voiceXmlNode.getTextContent();
 			}
 		}
 
+		LOGGER.debug("TTS == "+ p.tts.trim());
 		p.tts = p.tts.trim();
 		p.audio = p.audio.trim();
 		voiceXTTOutPut.addPrompt(p);
@@ -340,9 +342,10 @@ public class Executor {
 	public void execute(If if1) throws InterpreterException {
 		String cond = if1.getCond();
 
-		String string = scripting.eval(cond).toString();
+		String condValue = scripting.eval(cond).toString();
+		LOGGER.debug("(if cond == "+ cond+" ) (cond value =="+condValue +")");
 
-		if (Boolean.parseBoolean(string)) {
+		if (Boolean.parseBoolean(condValue)) {
 			execute(getInTrueChilds(if1));
 		} else {
 			execute(getInFalseChilds(if1));

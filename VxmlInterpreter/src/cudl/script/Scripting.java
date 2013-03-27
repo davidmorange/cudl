@@ -2,9 +2,8 @@ package cudl.script;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.Scriptable;
@@ -14,7 +13,7 @@ public class Scripting {
 	private Context context;
 	private Map<Scope, ScriptableObject> newScopes = new HashMap<Scope, ScriptableObject>();
 	private ScriptableObject currentScope;
-	private Logger LOGGER = Logger.getLogger(this.getClass().getName());
+	private Logger LOGGER = Logger.getRootLogger();
 
 	public Scripting() {
 		context = ContextFactory.getGlobal().enterContext();
@@ -44,7 +43,7 @@ public class Scripting {
 	}
 
 	public void enterScope(Scope scope) {
-		LOGGER.log(Level.INFO, "entering scope " + scope);
+		LOGGER.debug("entering scope " + scope);
 		currentScope = createScope(getParentScope(scope));
 		currentScope.put(scope.toString(), currentScope, currentScope);
 		newScopes.put(scope, currentScope);
