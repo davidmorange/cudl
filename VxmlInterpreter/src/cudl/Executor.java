@@ -75,9 +75,8 @@ public class Executor {
 				throw new RuntimeException("No implementation for Executor.execute(" + child.getClass().getSimpleName() + " "
 						+ child.getNodeName() + ")");
 			}
-			e.printStackTrace();
-			throw new RuntimeException(e);
 		}
+		return null;
 	}
 
 	public Object execute(Goto goto1) throws InterpreterException {
