@@ -32,7 +32,15 @@ public class DocumentAcces {
 
 	public DocumentAcces(final String userAgent) throws ParserConfigurationException {
 		this.userAgent = userAgent;
-		documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
+		fac.setNamespaceAware(false);
+		fac.setValidating(false);
+		fac.setFeature("http://xml.org/sax/features/namespaces", false);
+		fac.setFeature("http://xml.org/sax/features/validation", false);
+		fac.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+		fac.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+		
+		documentBuilder = fac.newDocumentBuilder();
 	}
 
 	/**
