@@ -70,4 +70,8 @@ public abstract class VoiceXmlNode {
 	protected void setParent(VoiceXmlNode parent) {
 		this.parent = parent;
 	}
+	
+	public String getTextContent() {
+		return node.getTextContent();
+	}
 }
