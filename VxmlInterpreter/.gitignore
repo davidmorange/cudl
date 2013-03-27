@@ -2,3 +2,4 @@ bin
 target
 tempremotefile
 /.settings
+/.classpath
