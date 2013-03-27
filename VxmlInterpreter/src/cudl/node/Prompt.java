@@ -18,16 +18,17 @@ public class Prompt extends VoiceXmlNode {
 		CHILDS = new ArrayList<String>();
 		CHILDS.add("audio");
 		CHILDS.add("value");
+		CHILDS.add("voice");
 		CHILDS.add("#text");
-		// CHILDS.add("break");
-		// CHILDS.add("emphasis");
-		// CHILDS.add("enumerate");
-		// CHILDS.add("mark");
-		// CHILDS.add("paragraph");
-		// CHILDS.add("phoneme");
-		// CHILDS.add("prosody");
-		// CHILDS.add("say-as");
-		// CHILDS.add("sentence");
+		CHILDS.add("break");
+		CHILDS.add("emphasis");
+		CHILDS.add("enumerate");
+		CHILDS.add("mark");
+		CHILDS.add("paragraph");
+		CHILDS.add("phoneme");
+		CHILDS.add("prosody");
+		CHILDS.add("say-as");
+		CHILDS.add("sentence");
 	}
 
 	public Prompt(Node node) {

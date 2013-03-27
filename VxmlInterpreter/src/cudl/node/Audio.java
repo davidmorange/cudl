@@ -19,14 +19,14 @@ public class Audio extends VoiceXmlNode {
 		CHILDS = new ArrayList<String>();
 		CHILDS.add("audio");
 		CHILDS.add("value");
-		// CHILDS.add("break");
-		// CHILDS.add("emphasis");
-		// CHILDS.add("enumerate");
-		// CHILDS.add("foreach");
-		// CHILDS.add("mark");
-		// CHILDS.add("phoneme");
-		// CHILDS.add("prosody");
-		// CHILDS.add("say-as");
+		CHILDS.add("break");
+		CHILDS.add("emphasis");
+		CHILDS.add("enumerate");
+		CHILDS.add("foreach");
+		CHILDS.add("mark");
+		CHILDS.add("phoneme");
+		CHILDS.add("prosody");
+		CHILDS.add("say-as");
 	}
 
 	public Audio(Node node) {
