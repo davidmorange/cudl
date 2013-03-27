@@ -5,15 +5,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
 import org.mozilla.javascript.Undefined;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import cudl.node.Clear;
 import cudl.node.Goto;
+import cudl.node.If;
 import cudl.node.Script;
 import cudl.node.Submit;
 import cudl.node.Var;
@@ -154,5 +162,45 @@ public class ExecutorTest {
 		new Executor(new Scripting(), voiceXTTOutPut, null).execute(voice);
 
 		assertEquals("hello voice", voiceXTTOutPut.getPrompts().get(0).tts);
+	}
+	
+	@Test
+	public void voiceWithProsodychild() throws InterpreterException, ParserConfigurationException, SAXException, IOException {
+		String voiceFragment = "<voice name='Lise'><prosody  rate='1'  volume='50' >Bienvenue sur le service vocal</prosody></voice>";
+		Voice voice = new Voice(buildDomNode(voiceFragment));
+		
+		SystemOutput voiceXTTOutPut = new SystemOutput();
+
+		new Executor(new Scripting(), voiceXTTOutPut, null).execute(voice);
+
+		assertEquals("Bienvenue sur le service vocal", voiceXTTOutPut.getPrompts().get(0).tts);
+	}
+	
+	@Test
+	public void ifWithPrompt() throws InterpreterException, ParserConfigurationException, SAXException, IOException {
+		String ifFragment = "<if cond='!(false || c2IsV)'>" +
+						  "			<prompt xml:lang='fr-FR'   >" +
+						  "				<voice name='Lise'>Il n'y a pas d'information disponible dans ce menu.</voice>" +
+						  "			</prompt>" +
+						  "			<goto next='#menu_principal_EXIT_CHOICE'/>" +
+						  "</if>";
+		SystemOutput voiceXTTOutPut = new SystemOutput();
+		Scripting scripting = new Scripting();
+		scripting.put("c2IsV", "true");
+		If if1 = new If(buildDomNode(ifFragment));
+		
+		try{
+			new Executor(scripting, voiceXTTOutPut, null).execute(if1);
+		} catch (DialogChangeException dialogChangeException){
+			assertEquals("Il n'y a pas d'information disponible dans ce menu.  ", voiceXTTOutPut.getPrompts().get(0).tts);
+		}
+	
+	}
+	
+	private Node buildDomNode(String xmlFragment) throws ParserConfigurationException, SAXException,
+			IOException {
+		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document document = documentBuilder.parse(new InputSource(new StringReader(xmlFragment)));
+		return document.getDocumentElement();
 	}
 }
