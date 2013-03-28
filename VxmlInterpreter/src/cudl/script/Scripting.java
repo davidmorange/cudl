@@ -28,7 +28,11 @@ public class Scripting {
 		context = ContextFactory.getGlobal().enterContext();
 		context.evaluateString(currentScope, name, name, 1, null);
 		Scriptable declarationScope = searchDeclarationScope(name);
-		declarationScope.put(name, declarationScope, eval(value));
+		if(declarationScope != null){
+			declarationScope.put(name, declarationScope, eval(value));
+		} else {
+			context.evaluateString(currentScope, name + " = " + value, name + " = " + value, 1, null);
+		}
 	}
 
 	public Object get(String name) {

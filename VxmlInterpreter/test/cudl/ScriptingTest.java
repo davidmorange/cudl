@@ -189,4 +189,14 @@ public class ScriptingTest {
 
 		}
 	}
+	
+	@Test
+	public void setObjectAttribute() {
+		scripting.enterScope(Scope.DOCUMENT);
+		scripting.put("o", "new Object()");
+		scripting.enterScope(Scope.DIALOG);
+		scripting.set("o.att", "'test'");
+		
+		assertEquals("test", scripting.get("o.att"));
+	}
 }
