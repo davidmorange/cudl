@@ -10,13 +10,12 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 public class Scripting {
-	private Context context;
+	private Context context  = ContextFactory.getGlobal().enterContext();
 	private Map<Scope, ScriptableObject> newScopes = new HashMap<Scope, ScriptableObject>();
 	private ScriptableObject currentScope;
 	private Logger LOGGER = Logger.getRootLogger();
 
 	public Scripting() {
-		context = ContextFactory.getGlobal().enterContext();
 		enterScope(Scope.SESSION);
 	}
 
@@ -42,6 +41,10 @@ public class Scripting {
 
 	public Object eval(String script) {
 		context = ContextFactory.getGlobal().enterContext();
+		if (script.startsWith("eval('")) { // une solution de contournement 
+			script = script.replaceAll("eval\\('", "'").replaceAll("'\\)", "'");
+			return eval(context.evaluateString(currentScope, script, script, 1, null) + "");
+		}
 		Object evaluateString = context.evaluateString(currentScope, script, script, 1, null);
 		return evaluateString;
 	}

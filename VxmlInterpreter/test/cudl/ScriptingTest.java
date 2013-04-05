@@ -24,7 +24,7 @@ public class ScriptingTest {
 	}
 
 	@Test
-	public void declarableVariableAssumeCantUseGetMethodeToAccessItValue() {
+	public void declarableVariableAssumeCantUseGetMethodeToAccessItValue(){
 		scripting.put("variableName", "'variableValue'");
 		scripting.put("variableName2", "2");
 
@@ -198,5 +198,17 @@ public class ScriptingTest {
 		scripting.set("o.att", "'test'");
 		
 		assertEquals("test", scripting.get("o.att"));
+	}
+	
+	@Test
+	public void test(){
+		scripting.enterScope(Scope.APPLICATION);
+		scripting.enterScope(Scope.DOCUMENT);
+		scripting.put("c1IsV", "true");
+		
+		String eval = scripting.eval("eval(c1IsV)").toString();
+		assertEquals("true", eval);
+		eval = scripting.eval("eval('c'+1+'IsV')").toString();
+		assertEquals("true", eval);
 	}
 }
