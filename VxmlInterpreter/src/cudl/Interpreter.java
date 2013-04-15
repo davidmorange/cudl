@@ -71,13 +71,14 @@ public class Interpreter {
 		}
 	}
 
-	Interpreter(String url, String sessionVariables, SystemOutput output, UserInput userInput) throws IOException,
+	Interpreter(String url, String sessionVariables, SystemOutput output, UserInput userInput, DocumentAcces documentAcces) throws IOException,
 			ParserConfigurationException, SAXException {
 		this.currentFileName = url;
 		this.outPut = output;
 		this.userInput = userInput;
 		this.interpreterContext = new InterpreterContext(url);
-		this.vxml = new Vxml(documentAcces.get(this.currentFileName, null).getDocumentElement());
+		this.documentAcces = documentAcces;
+		this.vxml = new Vxml(this.documentAcces.get(this.currentFileName, null).getDocumentElement());
 		VoiceXmlNode dialog;
 		if (!url.contains("#")) {
 			dialog = vxml.getFirstDialog();

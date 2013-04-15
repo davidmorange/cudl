@@ -83,10 +83,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				String name = formChild.getAttribute("name");
 				String expr = formChild.getAttribute("expr");
 				expr = ((expr == null) ? "undefined" : expr);
-				if (!"undefined".equals(expr)) {
-					scripting.put(name, expr);
-				}
-
+				scripting.put(name, expr);
 			}
 			if (formChild instanceof Script) {
 				scripting.eval(((Script) formChild).getTextContent());
@@ -172,7 +169,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			src = scripting.eval(subdialog.getSrcexpr()).toString();
 		}
 		try {
-			Interpreter interpreter = new Interpreter(src, "", outPut, userInput);
+			Interpreter interpreter = new Interpreter(src, "", outPut, userInput, documentAcces);
 			declareParam(interpreter.interpreterContext.getScripting());
 			interpreter.fia.setUncaughtExceptionHandler(new SubdialogUncaughtExceptionHandler(subdialog,
 					interpreter.interpreterContext.getScripting(), this));
@@ -334,7 +331,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			if (formItem instanceof FormItem) {
 				if (formItem instanceof Subdialog) {
 					String cond = formItem.getAttribute("cond");
-					String string = scripting.eval(cond).toString();
+					String string = scripting.eval(cond == null? "true": cond).toString();
 					if (!Boolean.parseBoolean(string)) {
 						continue;
 					}
