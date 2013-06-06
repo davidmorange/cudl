@@ -169,6 +169,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			src = scripting.eval(subdialog.getSrcexpr()).toString();
 		}
 		try {
+			LOGGER.info("subdialog "+src);
 			Interpreter interpreter = new Interpreter(src, "", outPut, userInput, documentAcces);
 			declareParam(interpreter.interpreterContext.getScripting());
 			interpreter.fia.setUncaughtExceptionHandler(new SubdialogUncaughtExceptionHandler(subdialog,
