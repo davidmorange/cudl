@@ -21,12 +21,11 @@ import cudl.utils.Session;
 public class Interpreter {
 	private static final int JOIN_TIME = 200;
 	protected InterpreterContext interpreterContext;
-	private UserInput userInput;
-	private SystemOutput outPut;
+	private UserInput userInput = new UserInput();
+	private SystemOutput outPut = new SystemOutput();
 	FormInterpretationAlgorithm fia;
 	private Vxml vxml;
 	private String currentFileName;
-	private Exception exceptionTothrow;
 	private boolean isHangup;
 	private DocumentAcces documentAcces;
 	private boolean inSubdialog = false;
@@ -41,8 +40,6 @@ public class Interpreter {
 
 	public Interpreter(String url, String sessionVariables) throws IOException, ParserConfigurationException, SAXException {
 		BasicConfigurator.configure();
-		this.outPut = new SystemOutput();
-		this.userInput = new UserInput();
 		this.currentFileName = url;
 		this.interpreterContext = new InterpreterContext(url);
 		this.documentAcces = interpreterContext.getDocumentAcces();
@@ -88,17 +85,13 @@ public class Interpreter {
 		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut, userInput, null);
 		this.fia.setUncaughtExceptionHandler(getUncaughtExceptionHandler());
 		interpreterContext.getScripting().eval(sessionVariables);
-		interpreterContext.getScripting().enterScope(Scope.APPLICATION); // in
-																			// scope
-																			// application
+		interpreterContext.getScripting().enterScope(Scope.APPLICATION); 
 		try {
 			initializeApplicationVariables();
 		} catch (InterpreterException e) {
 			throw new RuntimeException(e);
 		}
-		interpreterContext.getScripting().enterScope(Scope.DOCUMENT); // in
-																		// scope
-																		// document
+		interpreterContext.getScripting().enterScope(Scope.DOCUMENT); 
 		try {
 			initializeDocumentVariables();
 		} catch (InterpreterException e) {
@@ -108,9 +101,6 @@ public class Interpreter {
 
 	public void start() throws IOException, SAXException {
 		this.fia.start();
-		if (exceptionTothrow != null) {
-			throw new RuntimeException(exceptionTothrow);
-		}
 		try {
 			LOGGER.debug("wait for interpretation ...");
 			Thread.sleep(JOIN_TIME);
@@ -120,7 +110,7 @@ public class Interpreter {
 		}
 	}
 
-	public void noInput() throws IOException, SAXException, ParserConfigurationException {
+	public void noInput() {
 		try {
 			enterInput("noinput", "event$");
 			this.fia.join(JOIN_TIME);
@@ -129,7 +119,7 @@ public class Interpreter {
 		}
 	}
 
-	public void noMatch() throws IOException, SAXException, ParserConfigurationException {
+	public void noMatch()  {
 		try {
 			enterInput("nomatch", "event$");
 			this.fia.join(JOIN_TIME);
@@ -138,7 +128,7 @@ public class Interpreter {
 		}
 	}
 
-	public void disconnect() throws IOException, SAXException, ParserConfigurationException {
+	public void disconnect() {
 		try {
 			enterInput("connection.disconnect.hangup", "event$");
 			this.fia.join(JOIN_TIME);
@@ -147,7 +137,7 @@ public class Interpreter {
 		}
 	}
 
-	public void blindTransferSuccess() throws IOException, SAXException, ParserConfigurationException {
+	public void blindTransferSuccess() {
 		try {
 			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '0'");
 			enterInput("connection.disconnect.transfer", "event$");
@@ -157,7 +147,7 @@ public class Interpreter {
 		}
 	}
 
-	public void noAnswer() throws IOException, SAXException, ParserConfigurationException {
+	public void noAnswer() {
 		try {
 			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '2'");
 			enterInput("'noanswer'", "transfer$");
@@ -167,7 +157,7 @@ public class Interpreter {
 		}
 	}
 
-	public void callerHangupDuringTransfer() throws IOException, SAXException, ParserConfigurationException {
+	public void callerHangupDuringTransfer() {
 		try {
 			enterInput("'near_end_disconnect'", "transfer$");
 			this.fia.join(JOIN_TIME);
@@ -176,7 +166,7 @@ public class Interpreter {
 		}
 	}
 
-	public void networkBusy() throws IOException, SAXException, ParserConfigurationException {
+	public void networkBusy() {
 		try {
 			interpreterContext.getScripting().eval("connection.protocol.isdnvn6.transferresult= '5'");
 			enterInput("'network_busy'", "transfer$");
@@ -186,7 +176,7 @@ public class Interpreter {
 		}
 	}
 
-	public void destinationBusy() throws IOException, SAXException, ParserConfigurationException {
+	public void destinationBusy() {
 		try {
 			enterInput("'busy'", "transfer$");
 			this.fia.join(JOIN_TIME);
@@ -195,7 +185,7 @@ public class Interpreter {
 		}
 	}
 
-	public void transferTimeout() throws IOException, SAXException, ParserConfigurationException {
+	public void transferTimeout() {
 		try {
 			enterInput("'maxtime_disconnect'", "transfer$");
 			this.fia.join(JOIN_TIME);
@@ -220,7 +210,7 @@ public class Interpreter {
 		speaker.join();
 	}
 
-	public void submitDtmf(String dtmf) throws IOException, SAXException, ParserConfigurationException {
+	public void submitDtmf(String dtmf) {
 		try {
 			enterInput(dtmf, "dtmf$");
 			this.fia.join(JOIN_TIME);
@@ -258,7 +248,7 @@ public class Interpreter {
 		return null;// internalInterpreter.getCurrentDialogProperties();
 	}
 
-	public void destinationHangup() throws IOException, SAXException, ParserConfigurationException {
+	public void destinationHangup() {
 		throw new RuntimeException("destinationHangup not implemented");
 		// internalInterpreter.interpret(DESTINATION_HANGUP, null);
 	}
