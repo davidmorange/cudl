@@ -1,7 +1,6 @@
 package cudl;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 import java.util.Properties;
 
@@ -83,7 +82,6 @@ public class Interpreter {
 			dialog = vxml.getDialogById(url.split("#")[1]);
 		}
 		this.fia = new FormInterpretationAlgorithm(dialog, interpreterContext.getScripting(), outPut, userInput, null);
-		this.fia.setUncaughtExceptionHandler(getUncaughtExceptionHandler());
 		interpreterContext.getScripting().eval(sessionVariables);
 		interpreterContext.getScripting().enterScope(Scope.APPLICATION); 
 		try {
@@ -251,62 +249,6 @@ public class Interpreter {
 	public void destinationHangup() {
 		throw new RuntimeException("destinationHangup not implemented");
 		// internalInterpreter.interpret(DESTINATION_HANGUP, null);
-	}
-
-	private UncaughtExceptionHandler getUncaughtExceptionHandler() {
-		return new UncaughtExceptionHandler() {
-
-			@Override
-			public void uncaughtException(Thread t, Throwable e) {
-				Throwable exception = e.getCause();
-
-				try {
-					if (exception instanceof DialogChangeException) {
-						String id = ((DialogChangeException) exception).getNextDialogId();
-						fia = new FormInterpretationAlgorithm(vxml.getDialogById(id), interpreterContext.getScripting(), outPut,
-								userInput, null);
-						fia.start();
-						fia.join();
-					} else if (exception instanceof DocumentChangeException) {
-						currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/")) + "/"
-								+ ((DocumentChangeException) exception).getNextDocumentFileName();
-						vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null).getDocumentElement());
-						if (currentFileName.contains("#")) {
-							fia = new FormInterpretationAlgorithm(vxml.getDialogById(currentFileName.split("#")[1]),
-									interpreterContext.getScripting(), outPut, userInput, null);
-						} else {
-							fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(), outPut,
-									userInput, null);
-						}
-						fia.start();
-						fia.join();
-					} else if (exception instanceof ChoiceException) {
-						String next = ((ChoiceException) exception).getChoice().getAttribute("next");
-						if (next != null) {
-							currentFileName = currentFileName.subSequence(0, currentFileName.lastIndexOf("/")) + "/" + next;
-							vxml = new Vxml(interpreterContext.getDocumentAcces().get(currentFileName, null).getDocumentElement());
-							if (next.contains("#")) {
-								next = next.substring(next.lastIndexOf("#") + 1);
-								fia = new FormInterpretationAlgorithm(vxml.getDialogById(next), interpreterContext.getScripting(),
-										outPut, userInput, null);
-							} else {
-								fia = new FormInterpretationAlgorithm(vxml.getFirstDialog(), interpreterContext.getScripting(),
-										outPut, userInput, null);
-							}
-							fia.start();
-							fia.join();
-						}
-					} else if (exception instanceof ExitException) {
-						setHangup(true);
-					} else {
-						throw new RuntimeException(e);
-					}
-				} catch (Exception e1) {
-					throw new RuntimeException(e);
-				}
-			}
-
-		};
 	}
 
 	protected void initializeApplicationVariables() throws IOException, SAXException, InterpreterException {
