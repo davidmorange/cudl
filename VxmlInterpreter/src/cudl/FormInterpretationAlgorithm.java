@@ -35,6 +35,8 @@ import cudl.script.Scripting.Scope;
 import cudl.script.Utils;
 
 public class FormInterpretationAlgorithm extends Thread implements FormItemVisitor {
+	private static final String APPLICATION_VARIABLES = "lastresult$[0].confidence = 1; " + "lastresult$[0].utterance = undefined;"
+			+ "lastresult$[0].inputmode = undefined;" + "lastresult$[0].interpretation = undefined;";
 	private VoiceXmlNode currentDialog;
 	private final Scripting scripting;
 	private String nextItem;
@@ -43,18 +45,15 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private Queue<VoiceXmlNode> promptQueue;
 	private VoiceXmlNode selectedFormItem;
 	private final SystemOutput outPut;
-	private Executor executor;
+	private final Executor executor;
 	private final UserInput userInput;
 	private Map<String, Integer> eventCounterMap = new HashMap<String, Integer>();
 	private final DocumentAcces documentAcces;
 	boolean isHangup;
 	boolean init = true;
 	Logger LOGGER = Logger.getRootLogger();
+	private InterpreterContext interpreterContext;
 	
-	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting) {
-		this(dialog, scripting, null, null, null);
-	}
-
 	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut, UserInput userInput,
 			DocumentAcces documentAcces) {
 		this.documentAcces = documentAcces;
@@ -66,11 +65,53 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		this.promptQueue = new LinkedList<VoiceXmlNode>();
 	}
 
+	public FormInterpretationAlgorithm(InterpreterContext interpreterContext) {
+		this.interpreterContext = interpreterContext;
+		this.outPut = interpreterContext.getOutput();
+		this.scripting = interpreterContext.getScripting();
+		this.userInput = interpreterContext.getInput();
+		this.documentAcces = interpreterContext.getDocumentAcces();
+		this.executor = new Executor(scripting, this.outPut, documentAcces);
+		this.promptQueue = new LinkedList<VoiceXmlNode>();
+		this.setCurrentDialog(interpreterContext.getCurrentVxml().getFirstDialog());
+	}
+
+	public FormInterpretationAlgorithm with(String sessionVariables) throws IOException, SAXException {
+		this.scripting.eval(sessionVariables);
+		this.initializeApplicationVariables();
+		this.initializeDocumentVariables();
+		
+		return this;
+	}
+
+	private void initializeDocumentVariables() {
+		this.scripting.enterScope(Scope.DOCUMENT);
+		initialiseVariables(interpreterContext.getCurrentVxml(), false);
+	}
+
+	private void initializeApplicationVariables() throws IOException, SAXException {
+		this.scripting.enterScope(Scope.APPLICATION);
+		this.scripting.put("lastresult$", "new Array()");
+		this.scripting.eval("lastresult$[0] = new Object()");
+		this.scripting.eval(APPLICATION_VARIABLES);
+		String rootName = this.interpreterContext.getCurrentVxml().getApplication();
+
+		if (rootName != null) {
+			Vxml root = new Vxml(interpreterContext.getDocumentAcces().get(rootName, null).getDocumentElement());
+			initialiseVariables(root, false);
+		}
+	}
+
 	public void initialize() {
 		scripting.enterScope(Scope.DIALOG); // enter scope dialog
 		LOGGER.debug("debut initialisation des variables");
-		for (VoiceXmlNode formChild : getCurrentDialog().getChilds()) {
-			if (formChild instanceof FormItem) {
+		initialiseVariables(getCurrentDialog(),true);
+		LOGGER.debug("fin initialisation des variables");
+	}
+
+	private void initialiseVariables(VoiceXmlNode voiceXmlNode, Boolean isFormVariable) {
+		for (VoiceXmlNode formChild : voiceXmlNode.getChilds()) {
+			if (isFormVariable && formChild instanceof FormItem ) {
 				String name = ((FormItem) formChild).getName();
 				String expr = formChild.getAttribute("expr");
 				expr = ((expr == null) ? "undefined" : expr);
@@ -79,17 +120,14 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 					((InputFormItem) formChild).setPromptCounter(new PromptCounter());
 				}
 			}
-			if (formChild instanceof Var) {
-				String name = formChild.getAttribute("name");
-				String expr = formChild.getAttribute("expr");
-				expr = ((expr == null) ? "undefined" : expr);
-				scripting.put(name, expr);
-			}
-			if (formChild instanceof Script) {
-				scripting.eval(((Script) formChild).getTextContent());
+			if (formChild instanceof Var || formChild instanceof Script) {
+				try {
+					this.executor.execute(formChild);
+				} catch (InterpreterException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
-		LOGGER.debug("fin initialisation des variables");
 	}
 
 	@Override
@@ -170,9 +208,9 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 		try {
 			LOGGER.info("subdialog "+src);
-			Interpreter interpreter = new Interpreter(src, "", outPut, userInput, documentAcces);
+			Interpreter interpreter = new Interpreter(src);
 			declareParam(interpreter.interpreterContext.getScripting());
-			interpreter.fia.setUncaughtExceptionHandler(new SubdialogUncaughtExceptionHandler(subdialog,
+			interpreter.formInterpretationAlgorithm.setUncaughtExceptionHandler(new SubdialogUncaughtExceptionHandler(subdialog,
 					interpreter.interpreterContext.getScripting(), this));
 			interpreter.start();
 		} catch (Exception e) {
@@ -514,4 +552,5 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 
 	}
+
 }
