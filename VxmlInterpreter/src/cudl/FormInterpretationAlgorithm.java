@@ -38,46 +38,31 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private static final String APPLICATION_VARIABLES = "lastresult$[0].confidence = 1; " + "lastresult$[0].utterance = undefined;"
 			+ "lastresult$[0].inputmode = undefined;" + "lastresult$[0].interpretation = undefined;";
 	private VoiceXmlNode currentDialog;
-	private final Scripting scripting;
-	private final SystemOutput outPut;
 	private final Executor executor;
-	private final UserInput userInput;
 	private String nextItem;
 	private boolean lastIterationReprompt;
 	private boolean dialogChanged;
 	private Queue<VoiceXmlNode> promptQueue;
 	private VoiceXmlNode selectedFormItem;
 	private Map<String, Integer> eventCounterMap = new HashMap<String, Integer>();
-	private final DocumentAcces documentAcces;
 	boolean isHangup;
 	boolean init = true;
 	private Logger LOGGER = Logger.getRootLogger();
 	private InterpreterContext interpreterContext;
 	
-	public FormInterpretationAlgorithm(VoiceXmlNode dialog, Scripting scripting, SystemOutput outPut, UserInput userInput,
-			DocumentAcces documentAcces) {
-		this.documentAcces = documentAcces;
-		this.setCurrentDialog(dialog);
-		this.outPut = outPut;
-		this.scripting = scripting;
-		this.userInput = userInput;
-		this.executor = new Executor(scripting, this.outPut, documentAcces);
-		this.promptQueue = new LinkedList<VoiceXmlNode>();
-	}
-
 	public FormInterpretationAlgorithm(InterpreterContext interpreterContext) {
 		this.interpreterContext = interpreterContext;
-		this.outPut = interpreterContext.getOutput();
-		this.scripting = interpreterContext.getScripting();
-		this.userInput = interpreterContext.getInput();
-		this.documentAcces = interpreterContext.getDocumentAcces();
-		this.executor = new Executor(scripting, this.outPut, documentAcces);
+		this.executor = new Executor(getScription(), getOutput(),  getDocumentAccess());
 		this.promptQueue = new LinkedList<VoiceXmlNode>();
 		this.setCurrentDialog(interpreterContext.getCurrentVxml().getFirstDialog());
 	}
 
+	private DocumentAcces getDocumentAccess() {
+		return this.interpreterContext.getDocumentAcces();
+	}
+
 	public FormInterpretationAlgorithm with(String sessionVariables) throws IOException, SAXException {
-		this.scripting.eval(sessionVariables);
+		this.getScription().eval(sessionVariables);
 		this.initializeApplicationVariables();
 		this.initializeDocumentVariables();
 		
@@ -85,7 +70,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	public void initialize() {
-		scripting.enterScope(Scope.DIALOG); // enter scope dialog
+		getScription().enterScope(Scope.DIALOG); // enter scope dialog
 		LOGGER.debug("debut initialisation des variables");
 		initialiseVariables(getCurrentDialog(),true);
 		LOGGER.debug("fin initialisation des variables");
@@ -93,7 +78,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	
 	@Override
 	public void visit(Block block) throws InterpreterException {
-		scripting.set(block.getName(), "true");
+		getScription().set(block.getName(), "true");
 		List<VoiceXmlNode> childs = block.getChilds();
 		for (VoiceXmlNode voiceXmlNode : childs) {
 			executor.execute(voiceXmlNode);
@@ -103,14 +88,14 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	@Override
 	public void visit(Field field) throws InterpreterException {
 		this.playPrompt();
-		String input = userInput.readData();
+		String input = getUserInput().readData();
 		while (input == null || !"voice dtmf".contains(input.split("\\$")[0])) {
 			if (input != null) {
 				String eventType = input.split("\\$")[1];
 				InterpreterEventHandler.doEvent(field, executor, eventType, getEventCount(eventType));
 				updateEventCount(eventType);
 			}
-			input = userInput.readData();
+			input = getUserInput().readData();
 			Thread.yield();
 		}
 		if ("voice dtmf".contains(input.split("\\$")[0])) {
@@ -120,13 +105,17 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 
+	private UserInput getUserInput() {
+		return interpreterContext.getInput();
+	}
+
 	@Override
 	public void visit(Subdialog subdialog) {
 		LOGGER.debug("debut subdialog");
-		scripting.set(subdialog.getName(), "true");
+		getScription().set(subdialog.getName(), "true");
 		String src = subdialog.getSrc();
 		if (subdialog.getSrc() == null) {
-			src = scripting.eval(subdialog.getSrcexpr()).toString();
+			src = getScription().eval(subdialog.getSrcexpr()).toString();
 		}
 		try {
 			LOGGER.info("subdialog "+src);
@@ -143,12 +132,12 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	@Override
 	public void visit(Transfer transfer) throws InterpreterException {
 		String dest = transfer.getAttribute("dest");
-		outPut.setTransfertDestination(dest);
+		getOutput().setTransfertDestination(dest);
 
 		String input = getInput();
 
 		if (input.split("\\$")[0].equals("transfer")) {
-			scripting.set(transfer.getName(), input.split("\\$")[1]);
+			getScription().set(transfer.getName(), input.split("\\$")[1]);
 
 			for (VoiceXmlNode voiceXmlNode : transfer.getChilds()) {
 				if (voiceXmlNode instanceof Filled) {
@@ -158,19 +147,23 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		}
 	}
 
+	private SystemOutput getOutput() {
+		return interpreterContext.getOutput();
+	}
+
 	@Override
 	public void visit(Record record) {
-		scripting.set(record.getName(), "true");
+		getScription().set(record.getName(), "true");
 	}
 
 	@Override
 	public void visit(Initial initial) {
-		scripting.set(initial.getName(), "true");
+		getScription().set(initial.getName(), "true");
 	}
 
 	@Override
 	public void visit(cudl.node.Object object) {
-		scripting.set(object.getName(), "true");
+		getScription().set(object.getName(), "true");
 	}
 
 	public VoiceXmlNode select() throws ExitException {
@@ -211,7 +204,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		// Execute the form item.
 		try {
 			setNextItem(null);
-			scripting.enterScope(Scope.ANONYME);
+			getScription().enterScope(Scope.ANONYME);
 			((FormItem) selectedFormItem).accept(this);
 		} catch (FormItemChangeException e) {
 			setNextItem(e.getNextFormItemName());
@@ -246,9 +239,9 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			InterpreterException {
 		documentChangeException.getNextDocumentFileName();
 		String url = documentChangeException.getNextDocumentFileName();
-		Vxml vxml = new Vxml(documentAcces.get(url, null).getDocumentElement());
+		Vxml vxml = new Vxml(getDocumentAccess().get(url, null).getDocumentElement());
 		List<VoiceXmlNode> childs = vxml.getChilds();
-		scripting.enterScope(Scope.DOCUMENT);
+		getScription().enterScope(Scope.DOCUMENT);
 		for (VoiceXmlNode child : childs) {
 			if (child instanceof Var) {
 				executor.execute(child);
@@ -297,12 +290,12 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			if (formItem instanceof FormItem) {
 				if (formItem instanceof Subdialog) {
 					String cond = formItem.getAttribute("cond");
-					String string = scripting.eval(cond == null? "true": cond).toString();
+					String string = getScription().eval(cond == null? "true": cond).toString();
 					if (!Boolean.parseBoolean(string)) {
 						continue;
 					}
 				}
-				if (Undefined.instance.equals(scripting.get(((FormItem) formItem).getName()))) {
+				if (Undefined.instance.equals(getScription().get(((FormItem) formItem).getName()))) {
 					return formItem;
 				}
 			}
@@ -375,14 +368,14 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 
 	private String getInput() throws InterpreterException {
-		String input = userInput.readData();
+		String input = getUserInput().readData();
 		while (input == null || !"voice dtmf transfer".contains(input.split("\\$")[0])) {
 			if (input != null) {
 				String eventType = input.split("\\$")[1];
 				InterpreterEventHandler.doEvent(currentDialog, executor, eventType, getEventCount(eventType));
 				updateEventCount(eventType);
 			}
-			input = userInput.readData();
+			input = getUserInput().readData();
 
 			Thread.yield();
 		}
@@ -441,12 +434,12 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				if (cause instanceof ReturnException) {
 					ReturnException returnException = (ReturnException) cause;
 					String namelist = returnException.getReturn().getAttribute("namelist");
-					scripting.eval(((FormItem) selectedFormItem).getName() + "= new Object();");
+					interpreterContext.getScripting().eval(((FormItem) selectedFormItem).getName() + "= new Object();");
 					if (namelist != null) {
 						StringTokenizer tokenizer = new StringTokenizer(namelist);
 						while (tokenizer.hasMoreElements()) {
 							String nextToken = tokenizer.nextToken();
-							scripting.eval(((FormItem) selectedFormItem).getName() + "." + nextToken + "="
+							interpreterContext.getScripting().eval(((FormItem) selectedFormItem).getName() + "." + nextToken + "="
 									+ Utils.scriptableObjectToString(subScripting.eval(nextToken)));
 						}
 					}
@@ -468,15 +461,15 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	}
 	
 	private void initializeDocumentVariables() {
-		this.scripting.enterScope(Scope.DOCUMENT);
+		getScription().enterScope(Scope.DOCUMENT);
 		initialiseVariables(interpreterContext.getCurrentVxml(), false);
 	}
 	
 	private void initializeApplicationVariables() throws IOException, SAXException {
-		this.scripting.enterScope(Scope.APPLICATION);
-		this.scripting.put("lastresult$", "new Array()");
-		this.scripting.eval("lastresult$[0] = new Object()");
-		this.scripting.eval(APPLICATION_VARIABLES);
+		getScription().enterScope(Scope.APPLICATION);
+		getScription().put("lastresult$", "new Array()");
+		getScription().eval("lastresult$[0] = new Object()");
+		getScription().eval(APPLICATION_VARIABLES);
 		String rootName = this.interpreterContext.getCurrentVxml().getApplication();
 		
 		if (rootName != null) {
@@ -491,7 +484,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 				String name = ((FormItem) formChild).getName();
 				String expr = formChild.getAttribute("expr");
 				expr = ((expr == null) ? "undefined" : expr);
-				scripting.put(name, expr);
+				getScription().put(name, expr);
 				if (formChild instanceof InputFormItem) {
 					((InputFormItem) formChild).setPromptCounter(new PromptCounter());
 				}
@@ -532,11 +525,15 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		String[] split = input.split("\\$");
 		String utterance = "'" + split[1] + "'";
 		String inputmode = "'" + split[1] + "'";
-		scripting.set(field.getName(), utterance);
-		scripting.put(field.getName() + "$", "new Object()");
-		scripting.eval("application.lastresult$.utterance =" + field.getName() + "$.utterance=" + utterance);
-		scripting.eval("application.lastresult$.inputmode =" + field.getName() + "$.inputmode=" + inputmode);
-		scripting.eval(field.getName() + "$.confidence=" + 1);
+		getScription().set(field.getName(), utterance);
+		getScription().put(field.getName() + "$", "new Object()");
+		getScription().eval("application.lastresult$.utterance =" + field.getName() + "$.utterance=" + utterance);
+		getScription().eval("application.lastresult$.inputmode =" + field.getName() + "$.inputmode=" + inputmode);
+		getScription().eval(field.getName() + "$.confidence=" + 1);
+	}
+
+	private Scripting getScription() {
+		return interpreterContext.getScripting();
 	}
 	
 	private void playPrompt() throws InterpreterException {
