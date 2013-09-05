@@ -2,6 +2,7 @@ package cudl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.mozilla.javascript.Undefined;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import cudl.node.Audio;
@@ -33,6 +35,7 @@ import cudl.node.Vxml;
 import cudl.script.Scripting;
 import cudl.script.Scripting.Scope;
 import cudl.script.Utils;
+import cudl.utils.VxmlElementType;
 
 public class FormInterpretationAlgorithm extends Thread implements FormItemVisitor {
 	private static final String APPLICATION_VARIABLES = "lastresult$[0].confidence = 1; " + "lastresult$[0].utterance = undefined;"
@@ -200,7 +203,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		// grammars and any grammars scoped to the form,
 		// the current document, and the application root
 		// document.
-
+		activateGrammar(selectedFormItem);
 		// Execute the form item.
 		try {
 			setNextItem(null);
@@ -220,6 +223,24 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 
 	}
 
+	private void activateGrammar(VoiceXmlNode currentFormItem) {
+		List<VoiceXmlNode> activedGrammars = new ArrayList<VoiceXmlNode>();
+		if (currentFormItem instanceof InputFormItem)  {
+			if (VxmlElementType.isAModalItem(currentFormItem)){
+				activedGrammars.addAll(Utils.serachItems(currentFormItem, "grammar"));
+			} else {
+				VoiceXmlNode parent = currentFormItem;
+				while (null != parent) {
+					activedGrammars.addAll(Utils.serachItems(parent, "grammar"));
+					parent = parent.getParent();
+				}
+			}
+		}
+		
+		LOGGER.info("actived grammars : "+ activedGrammars.toString());
+		interpreterContext.getOutput().setActivedGrammars(activedGrammars);
+	}
+	
 	public void setSelectedFormItem(VoiceXmlNode select) {
 		this.selectedFormItem = select;
 	}

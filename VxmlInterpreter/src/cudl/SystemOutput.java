@@ -3,9 +3,12 @@ package cudl;
 import java.util.ArrayList;
 import java.util.List;
 
+import cudl.node.VoiceXmlNode;
+
 public class SystemOutput {
 	private List<String> logs = new ArrayList<String>();
 	private List<cudl.Prompt> prompts = new ArrayList<cudl.Prompt>();
+	private List<VoiceXmlNode> activedGrammars = new ArrayList<VoiceXmlNode>();
 	private String transfertDestination;
 
 	public void addLog(String log) {
@@ -56,8 +59,16 @@ public class SystemOutput {
 	public String getTranferDestination() {
 		return transfertDestination;
 	}
-
+	
 	public String getActiveGrammar() {
-		return null;
+		return getActivedGrammars().get(0).toString();
+	}
+
+	protected List<VoiceXmlNode> getActivedGrammars() {
+		return activedGrammars;
+	}
+
+	protected void setActivedGrammars(List<VoiceXmlNode> activedGrammars) {
+		this.activedGrammars = activedGrammars;
 	}
 }

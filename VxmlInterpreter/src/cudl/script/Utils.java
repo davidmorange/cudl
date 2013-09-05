@@ -1,11 +1,14 @@
 package cudl.script;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
+
+import cudl.node.VoiceXmlNode;
 
 public class Utils {
 
@@ -50,5 +53,9 @@ public class Utils {
 
 	private static String javascriptScring(String string) {
 		return "'" + string + "'";
+	}
+
+	public static List<VoiceXmlNode> serachItems(VoiceXmlNode currentFormItem, String itemName) {
+		return null;
 	}
 }

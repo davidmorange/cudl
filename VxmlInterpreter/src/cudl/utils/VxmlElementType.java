@@ -3,8 +3,9 @@ package cudl.utils;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+
+import cudl.node.VoiceXmlNode;
 
 public class VxmlElementType {
 
@@ -76,12 +77,11 @@ public class VxmlElementType {
 		return DIALOG.contains(item.getNodeName());
 	}
 
-	public static boolean isAModalItem(Node item) {
-		NamedNodeMap attributes = item.getAttributes();
-		Node namedItem = attributes.getNamedItem("modal");
-		return attributes != null && namedItem != null && namedItem.getNodeValue().equals("true");
+	public static boolean isAModalItem(VoiceXmlNode item) {
+		String modal = item.getAttribute("modal");
+		return Boolean.valueOf(modal);
 	}
-
+	
 	public static boolean isAnExecutableItem(Node item) {
 		return EXECUTABLE_ITEM.contains(item.getNodeName());
 	}

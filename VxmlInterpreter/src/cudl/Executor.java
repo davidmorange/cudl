@@ -129,6 +129,8 @@ public class Executor {
 		for (VoiceXmlNode node : log.getChilds()) {
 			debug += execute(node);
 		}
+		
+		LOGGER.info("VXML LOG : " + debug);
 		voiceXTTOutPut.addLog(debug.trim());
 		return null;
 	}

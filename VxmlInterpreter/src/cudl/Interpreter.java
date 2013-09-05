@@ -174,8 +174,7 @@ public class Interpreter {
 	}
 
 	public String getActiveGrammar() {
-		return this.interpreterContext.getOutput().getActiveGrammar();// Utils.getNodeAttributeValue(context.getGrammarActive().get(0),
-		// "src").trim();
+		return this.interpreterContext.getOutput().getActiveGrammar();
 	}
 
 	public Properties getCurrentDialogProperties() {
