@@ -150,7 +150,21 @@ public class Executor {
 	}
 
 	public Object execute(Submit submit) throws InterpreterException {
-		throw new DocumentChangeException(submit.getAttribute("next"), submit.getAttribute("method"));
+		String nextFilename = submit.getAttribute("next");
+		String params = getParameterList(submit.getAttribute("namelist"));
+		String url = nextFilename + params;
+		LOGGER.info("submit :"+url);
+		throw new DocumentChangeException(url, submit.getAttribute("method"));
+	}
+
+	private String getParameterList(String nameList) {
+		String params = "?";
+		StringTokenizer tokenizer = new StringTokenizer(nameList, " ");
+		while (tokenizer.hasMoreElements()) {
+			String name = (String) tokenizer.nextElement();
+			params += name + "=" + scripting.get(name) + "&";
+		}
+		return params;
 	}
 
 	public Object execute(Audio audio) {
