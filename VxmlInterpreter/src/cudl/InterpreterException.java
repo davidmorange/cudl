@@ -109,6 +109,10 @@ class SubmitException extends InterpreterException {
 	SubmitException(Submit submit) {
 		this.submit = submit;
 	}
+
+	public Submit getSubmit() {
+		return submit;
+	}
 }
 
 class ChoiceException extends InterpreterException {
@@ -152,6 +156,14 @@ class BadfetchException extends InterpreterException {
 	
 	public BadfetchException(VoiceXmlNode node, String message) {
 		super(message);
+		this.setNode(node);
+	}
+
+	public VoiceXmlNode getNode() {
+		return node;
+	}
+
+	public void setNode(VoiceXmlNode node) {
 		this.node = node;
 	}
 }

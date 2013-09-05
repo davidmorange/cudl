@@ -178,7 +178,7 @@ public class Interpreter {
 	}
 
 	public Properties getCurrentDialogProperties() {
-		return null;// internalInterpreter.getCurrentDialogProperties();
+		return this.formInterpretationAlgorithm.getProperties();
 	}
 
 	public void destinationHangup() throws IOException, SAXException, ParserConfigurationException {

@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.mozilla.javascript.Undefined;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import cudl.node.Audio;
@@ -24,6 +24,7 @@ import cudl.node.Form;
 import cudl.node.Initial;
 import cudl.node.Param;
 import cudl.node.Prompt;
+import cudl.node.Property;
 import cudl.node.Record;
 import cudl.node.Script;
 import cudl.node.Subdialog;
@@ -53,7 +54,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 	private Logger LOGGER = Logger.getRootLogger();
 	private InterpreterContext interpreterContext;
 	
-	public FormInterpretationAlgorithm(InterpreterContext interpreterContext) {
+	protected FormInterpretationAlgorithm(InterpreterContext interpreterContext) {
 		this.interpreterContext = interpreterContext;
 		this.executor = new Executor(getScription(), getOutput(),  getDocumentAccess());
 		this.promptQueue = new LinkedList<VoiceXmlNode>();
@@ -64,7 +65,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		return this.interpreterContext.getDocumentAcces();
 	}
 
-	public FormInterpretationAlgorithm with(String sessionVariables) throws IOException, SAXException {
+	protected FormInterpretationAlgorithm with(String sessionVariables) throws IOException, SAXException {
 		this.getScription().eval(sessionVariables);
 		this.initializeApplicationVariables();
 		this.initializeDocumentVariables();
@@ -72,7 +73,7 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 		return this;
 	}
 
-	public void initialize() {
+	protected void initialize() {
 		getScription().enterScope(Scope.DIALOG); // enter scope dialog
 		LOGGER.debug("debut initialisation des variables");
 		initialiseVariables(getCurrentDialog(),true);
@@ -572,6 +573,17 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 						+ ((Param) voiceXmlNode).getAttribute("expr"));
 			}
 		}
+	}
+
+	protected Properties getProperties() {
+		Properties properties = new Properties();
+		for (VoiceXmlNode node : selectedFormItem.getChilds()) {
+			if (node instanceof Property) {
+				properties.put(node.getAttribute("name"), node.getAttribute("value"));
+			}
+		}
+		LOGGER.info("properties : " + properties);
+		return properties;
 	}
 
 }

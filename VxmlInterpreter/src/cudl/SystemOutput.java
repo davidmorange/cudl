@@ -2,6 +2,7 @@ package cudl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import cudl.node.VoiceXmlNode;
 
@@ -70,5 +71,9 @@ public class SystemOutput {
 
 	protected void setActivedGrammars(List<VoiceXmlNode> activedGrammars) {
 		this.activedGrammars = activedGrammars;
+	}
+
+	public Properties getCurrentDialogProperties() {
+		return null;
 	}
 }
