@@ -86,7 +86,7 @@
 				<directory>src/test/resources</directory>
 			</testResource>
 			<testResource>
-				<directory>test</directory>
+				<directory>test/</directory>
 			</testResource>
 			<testResource>
 				<directory>src/test/java</directory>
