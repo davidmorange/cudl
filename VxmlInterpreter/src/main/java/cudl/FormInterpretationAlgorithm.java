@@ -232,7 +232,10 @@ public class FormInterpretationAlgorithm extends Thread implements FormItemVisit
 			} else {
 				VoiceXmlNode parent = currentFormItem;
 				while (null != parent) {
-					activedGrammars.addAll(Utils.serachItems(parent, "grammar"));
+					List<VoiceXmlNode> serachItems = Utils.serachItems(parent, "grammar");
+					if (serachItems!=null){
+						activedGrammars.addAll(serachItems);
+					}
 					parent = parent.getParent();
 				}
 			}

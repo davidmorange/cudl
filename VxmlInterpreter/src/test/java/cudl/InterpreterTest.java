@@ -26,11 +26,10 @@ public class InterpreterTest {
 	}
 
 	@Test
-	@Ignore
 	public void test5555() throws IOException, ParserConfigurationException, SAXException {
 		// http://sdiawara.dev33.cvf/gv/services/5555/index.vxml
 
-		interpreter = new Interpreter("http://sdiawara.dev33.cvf/gv/services/5555/index.vxml");
+		interpreter = new Interpreter("http://localhost:8000/gv/services/5555/index.vxml");
 		interpreter.start();
 	}
 
@@ -386,7 +385,7 @@ public class InterpreterTest {
 	}
 
 	@Test
-	public void testMenuChoiceDtmfAutoGenerateForChoice() throws IOException, ParserConfigurationException, SAXException {
+	public void testMenuChoiceDtmfAutoGenerateForChoice() throws IOException, ParserConfigurationException, SAXException, InterruptedException {
 		List<Prompt> exceptedPrompts = new ArrayList<Prompt>();
 		Prompt prompt = new Prompt();
 		prompt.tts = "Pour le français tapez 1, pour l'anglais tapez 2, Pour le chinois tapez 3";
